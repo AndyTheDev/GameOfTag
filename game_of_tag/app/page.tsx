@@ -28,13 +28,12 @@ export default function Home() {
             </h2>
             <p className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto">
               Je to závod? Je to Hra?
-              Ponoř se do akce, který posune tvé hranice. 
+              Ponoř se do akce, která posune tvé hranice. 
               Připravujeme pro tebe zážitek, na který jen tak nezapomeneš.
               <br />
-              První hra už <b>v Neděli 14.12.2025 od 9:30!</b>
+              První hra už v<b> Neděli 14.12.2025 od 9:30!</b>
             </p>
             
-            {/* Call to Action btn */}
             <Link 
             href="https://docs.google.com/forms/d/e/1FAIpQLSd3J5TL_2sHYoMdVdToPg98MQOcvexek6t2vMRwufwkwU-cKw/viewform" 
             className="inline-block bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-bold py-3 px-8 rounded-full transition-transform transform hover:scale-105"
@@ -77,13 +76,13 @@ export default function Home() {
             <div className="bg-slate-800 p-6 rounded-xl hover:bg-slate-700 transition-colors">
               <div className="text-emerald-400 text-4xl mb-4">🎲</div>
               <h4 className="text-xl font-bold mb-2">Dynamické herní role.</h4>
-              <p className="text-slate-400">Můžeš být lovec, který se snaží chytit běžce. Po chycení se ale role mění - ty se tak můžeš stát běžcem a pokusit se získat pro svůj tým vítězné body!</p>
+              <p className="text-slate-400">Můžeš být lovec, který se snaží chytit běžce. Po chycení se ale role mění - ty se tak můžeš stát běžcem a máš tak šanci získat pro svůj tým vítězné body!</p>
             </div>
 
             <div className="bg-slate-800 p-6 rounded-xl hover:bg-slate-700 transition-colors">
               <div className="text-emerald-400 text-4xl mb-4">🤝</div>
               <h4 className="text-xl font-bold mb-2">Multiplayer - ale trochu jinak!</h4>
-              <p className="text-slate-400">Hra probíhá ve skupince tří lidí, ve které ty jediný zastupuješ svůj tým. To ale neznamená, že se nevyplatí s nimi spolupracovat...</p>
+              <p className="text-slate-400">Hra probíhá ve trojicích, kde jsi jediným zástupcem svého týmu. I přesto se ti ale vyplatí s ostatními spolupracovat.</p>
             </div>
           </div>
         </section>
