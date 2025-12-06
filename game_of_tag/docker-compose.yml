@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: game_of_tag_db
+    restart: always
+    environment:
+      POSTGRES_USER: andy
+      POSTGRES_PASSWORD: KLe9s7rHfU*f5a
+      POSTGRES_DB: game_of_tag
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
