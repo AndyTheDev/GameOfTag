@@ -82,7 +82,7 @@ export default function Home() {
             <div className="bg-slate-800 p-6 rounded-xl hover:bg-slate-700 transition-colors">
               <div className="text-emerald-400 text-4xl mb-4">🤝</div>
               <h4 className="text-xl font-bold mb-2">Multiplayer - ale trochu jinak!</h4>
-              <p className="text-slate-400">Hra probíhá ve trojicích, kde jsi jediným zástupcem svého týmu. I přesto se ti ale vyplatí s ostatními spolupracovat.</p>
+              <p className="text-slate-400">Hra probíhá ve trojicích, kde jsi jediným zástupcem svého týmu. I přesto se ti ale vyplatí s druhým lovcem z trojice spolupracovat.</p>
             </div>
           </div>
         </section>
@@ -146,8 +146,8 @@ export default function Home() {
                 </div>
                 <h4 className="text-xl font-bold text-white mb-3">Chytni běžce</h4>
                 <p className="text-slate-400 leading-relaxed">
-                  Jako lovec body nezískáváš. Tvým  úkolem je co nejrychleji spolu s druhým lovcem
-                  třetího hráče skupiny, <b>běžce</b>, aby jeho tým nezískal body. Jen díky tomu se mohou role ve skupině měnit. 
+                  Jako lovec body nezískáváš. Tvým  úkolem je co nejrychleji spolu s druhým lovcem chytit
+                  třetího hráče skupiny, <b>běžce</b>, aby nezískal body pro jeho tým. Jen díky tomu se mohou role ve skupině měnit. 
                 </p>
               </div>
 
@@ -162,7 +162,7 @@ export default function Home() {
                 <h4 className="text-2xl font-bold text-amber-400 mb-3">Staň se běžcem a sbírej body</h4>
                 <p className="text-slate-300 leading-relaxed font-medium">
                   Tohle je tvá chvíle! Jakmile se staneš běžcem, máš možnost sbírat body pro svůj tým.
-                  Dostaň se na checkpoint, splň úkol a získej tak body a cestu k dalšímu checkpointu nebo cíli. Čím více checkpointů splníš, tím více bodů!
+                  Dostaň se na checkpoint, splň úkol a získej tak body pro tým, nové jízdenky na MHD a cestu k dalšímu checkpointu nebo cíli. Čím více checkpointů splníš, tím více bodů!
                 </p>
               </div>
 
