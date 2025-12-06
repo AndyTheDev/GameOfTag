@@ -24,17 +24,19 @@ export default function Home() {
           <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl max-w-4xl border border-slate-700">
             
             <h2 className="text-4xl md:text-6xl font-extrabold mb-6 bg-gradient-to-r from-emerald-400 to-cyan-500 text-transparent bg-clip-text">
-              Epické dobrodružství čeká
+              Proměň Prahu ve své hřiště.
             </h2>
             <p className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto">
               Je to závod? Je to Hra?
               Ponoř se do akce, který posune tvé hranice. 
               Připravujeme pro tebe zážitek, na který jen tak nezapomeneš.
+              <br />
+              První hra už <b>14.12.2025 od 10:00!</b>
             </p>
             
             {/* Call to Action btn */}
             <Link 
-            href="" 
+            href="https://docs.google.com/forms/d/e/1FAIpQLSd3J5TL_2sHYoMdVdToPg98MQOcvexek6t2vMRwufwkwU-cKw/viewform" 
             className="inline-block bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-bold py-3 px-8 rounded-full transition-transform transform hover:scale-105"
             >
             Chci se účastnit!
