@@ -1,6 +1,30 @@
 version: '3.8'
 
 services:
+  app:
+    build: .
+    container_name: qr_game_app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      # Tady na serveru použijeme vnitřní adresu kontejneru s databází
+      DATABASE_URL: postgres://myuser:mypassword@db:5432/qr_game_local
+    depends_on:
+      - postgres
+  
+  caddy:
+    image: caddy:latest
+    container_name: qr_game_caddy
+    restart: always
+    ports:
+      - "80:80"   # HTTP
+      - "443:443" # HTTPS
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    command: caddy reverse-proxy --from gameoftag.cz --to app:3000
+
   postgres:
     image: postgres:16
     container_name: game_of_tag_db
