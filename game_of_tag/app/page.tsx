@@ -31,7 +31,7 @@ export default function Home() {
               Ponoř se do akce, který posune tvé hranice. 
               Připravujeme pro tebe zážitek, na který jen tak nezapomeneš.
               <br />
-              První hra už <b>14.12.2025 od 10:00!</b>
+              První hra už <b>v Neděli 14.12.2025 od 9:30!</b>
             </p>
             
             {/* Call to Action btn */}
