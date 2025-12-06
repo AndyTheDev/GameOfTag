@@ -1,0 +1,7 @@
+www.gameoftag.cz {
+    redir https://gameoftag.cz{uri}
+}
+
+gameoftag.cz {
+    reverse_proxy app:3000
+}
