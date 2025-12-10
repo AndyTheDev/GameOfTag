@@ -1010,8 +1010,9 @@ const QUEST_LIMIT_SECONDS = 300; // 5 minut
 const LOCKOUT_SECONDS = 300;     // 5 minut
 
 const LOG_TYPE_START = 1;
-const LOG_TYPE_SUCCESS = 2;
-const LOG_TYPE_TIMEOUT = 3;
+const LOG_TYPE_TIMEOUT = 2;
+const LOG_TYPE_SUCCESS = 3;
+
 
 // --- POMOCNÉ FUNKCE ---
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { adminLogin, getFullLogs } from "../../src/actions/admin"; // Uprav cestu dle struktury
+import { adminLogin, getFullLogs } from "../../src/actions/admin";
 
 type LogItem = {
   id: number;
@@ -15,19 +15,13 @@ type LogItem = {
 };
 
 export default function AdminPage() {
-  // Stavy
   const [isAuth, setIsAuth] = useState(false);
   const [loading, setLoading] = useState(false);
-  
-  // Login form stavy
   const [name, setName] = useState("");
   const [pass, setPass] = useState("");
   const [error, setError] = useState("");
-
-  // Data stavy
   const [logs, setLogs] = useState<LogItem[]>([]);
 
-  // Funkce pro přihlášení
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -36,14 +30,13 @@ export default function AdminPage() {
     const res = await adminLogin(name, pass);
     if (res.success) {
       setIsAuth(true);
-      fetchData(); // Hned načteme data
+      fetchData();
     } else {
       setError(res.message || "Chyba");
     }
     setLoading(false);
   }
 
-  // Funkce pro načtení dat
   async function fetchData() {
     setLoading(true);
     const res = await getFullLogs();
@@ -56,7 +49,6 @@ export default function AdminPage() {
   // Formátování času (Oprava časové zóny)
   const formatDate = (dbString: string) => {
     if (!dbString) return "-";
-    // Pokud chybí 'Z' na konci, přidáme ho, aby to JS bral jako UTC
     const timeString = dbString.endsWith("Z") ? dbString : dbString + "Z";
     const date = new Date(timeString);
     
@@ -70,9 +62,9 @@ export default function AdminPage() {
   // Barvičky pro typy logů
   const getActionColor = (typeId: number) => {
     switch(typeId) {
-      case 1: return "text-blue-400"; // Start
-      case 2: return "text-green-400"; // Success
-      case 3: return "text-red-400";   // Timeout/Fail
+      case 1: return "text-blue-400"; // Puštění úkolu
+      case 2: return "text-red-400"; // Neúspěšný quest
+      case 3: return "text-green-400";   // Úspěšně splněný quest
       default: return "text-gray-400";
     }
   };
@@ -82,7 +74,7 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
         <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 shadow-2xl w-full max-w-sm">
-          <h1 className="text-2xl font-bold text-[#00D68F] mb-6 text-center">ADMIN TERMINAL</h1>
+          <h1 className="text-2xl font-bold text-[#00D68F] mb-6 text-center">Admin</h1>
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <input 
               className="bg-slate-950 border border-slate-700 text-white p-3 rounded"
@@ -122,7 +114,7 @@ export default function AdminPage() {
                onClick={fetchData} 
                className="px-4 py-2 bg-slate-800 rounded hover:bg-slate-700 border border-slate-600"
              >
-               {loading ? "Načítám..." : "Obnovit data"}
+               {loading ? "Načítám..." : "Aktualizovat"}
              </button>
              <button 
                onClick={() => setIsAuth(false)} 
@@ -150,20 +142,15 @@ export default function AdminPage() {
               {logs.map((log) => (
                 <tr key={log.id} className="hover:bg-slate-800/50 transition-colors">
                   <td className="p-4 text-slate-500">#{log.id}</td>
-                  
-                  {/* Čas - zde se aplikuje oprava zóny */}
                   <td className="p-4 text-slate-300 font-medium">
                     {formatDate(log.time)}
                   </td>
-                  
                   <td className="p-4 font-bold text-white">
                     {log.playerName || "Neznámý"}
                   </td>
-                  
                   <td className={`p-4 font-bold ${getActionColor(log.logTypeId)}`}>
                     {log.action || `Typ ${log.logTypeId}`}
                   </td>
-                  
                   <td className="p-4">
                     {log.locationName} <span className="text-slate-500 text-xs">({log.locationId})</span>
                   </td>
