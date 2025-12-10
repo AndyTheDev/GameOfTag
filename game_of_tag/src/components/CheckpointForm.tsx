@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { getLocationDetails, verifyAndLogQuest } from "../actions/loadLocation"; 
 
 type Props = {
-  initialCode: string; // Kód z URL je povinný
+  initialCode: string;
 };
 
 type QuestData = {
@@ -75,7 +75,7 @@ export default function CheckpointForm({ initialCode }: Props) {
       {status !== "success" && (
         <div className="text-center mb-6">
           <p className="text-slate-400 text-sm uppercase tracking-widest">Jsi na lokaci</p>
-          <h2 className="text-2xl font-bold text-[#00D68F] mt-1">{locationName}</h2>
+          <h2 className="text-2xl font-bold text-[#00D68F] mt-1">{locationName}{locationId}</h2>
         </div>
       )}
 
@@ -107,7 +107,7 @@ export default function CheckpointForm({ initialCode }: Props) {
             className="w-full bg-[#00D68F] hover:bg-[#00b87a] text-slate-900 font-bold py-4 rounded-full transition-transform transform active:scale-95 shadow-[0_0_15px_rgba(0,214,143,0.3)] disabled:opacity-50"
             disabled={status === "loading"}
           >
-            {status === "loading" ? "Ověřuji..." : "Potvrdit splnění"}
+            {status === "loading" ? "Ověřuji..." : "Potvrdit"}
           </button>
         </form>
       )}
