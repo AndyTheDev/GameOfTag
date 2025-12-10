@@ -1,0 +1,1314 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevId": "",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.Quest_status": {
+      "name": "Quest_status",
+      "schema": "",
+      "columns": {
+        "id_quest_status": {
+          "name": "id_quest_status",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "\"Quest_status_id_quest_status_seq\"",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.Log": {
+      "name": "Log",
+      "schema": "",
+      "columns": {
+        "id_log": {
+          "name": "id_log",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "\"Log_id_log_seq\"",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "game_id": {
+          "name": "game_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "log_time": {
+          "name": "log_time",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "log_type": {
+          "name": "log_type",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gameset_id": {
+          "name": "gameset_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location_id": {
+          "name": "location_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quest_id": {
+          "name": "quest_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quest_status": {
+          "name": "quest_status",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location_status": {
+          "name": "location_status",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "Log_quest_status_fkey": {
+          "name": "Log_quest_status_fkey",
+          "tableFrom": "Log",
+          "tableTo": "Quest_status",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "quest_status"
+          ],
+          "columnsTo": [
+            "id_quest_status"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Log_log_type_fkey": {
+          "name": "Log_log_type_fkey",
+          "tableFrom": "Log",
+          "tableTo": "Log_type",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "log_type"
+          ],
+          "columnsTo": [
+            "id_log_type"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Log_player_id_fkey": {
+          "name": "Log_player_id_fkey",
+          "tableFrom": "Log",
+          "tableTo": "Player",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "player_id"
+          ],
+          "columnsTo": [
+            "id_player"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Log_gameset_id_fkey": {
+          "name": "Log_gameset_id_fkey",
+          "tableFrom": "Log",
+          "tableTo": "Gameset",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "gameset_id"
+          ],
+          "columnsTo": [
+            "id_gameset"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Log_location_id_fkey": {
+          "name": "Log_location_id_fkey",
+          "tableFrom": "Log",
+          "tableTo": "Locations",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "location_id"
+          ],
+          "columnsTo": [
+            "id_location"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Log_quest_id_fkey": {
+          "name": "Log_quest_id_fkey",
+          "tableFrom": "Log",
+          "tableTo": "Quests",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "quest_id"
+          ],
+          "columnsTo": [
+            "id_quest"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Log_quest_status_fkey1": {
+          "name": "Log_quest_status_fkey1",
+          "tableFrom": "Log",
+          "tableTo": "Quest_status",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "quest_status"
+          ],
+          "columnsTo": [
+            "id_quest_status"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Log_location_status_fkey": {
+          "name": "Log_location_status_fkey",
+          "tableFrom": "Log",
+          "tableTo": "Location_status",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "location_status"
+          ],
+          "columnsTo": [
+            "id_quest_status"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Log_log_type_fkey1": {
+          "name": "Log_log_type_fkey1",
+          "tableFrom": "Log",
+          "tableTo": "Log_type",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "log_type"
+          ],
+          "columnsTo": [
+            "id_log_type"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Log_player_id_fkey1": {
+          "name": "Log_player_id_fkey1",
+          "tableFrom": "Log",
+          "tableTo": "Player",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "player_id"
+          ],
+          "columnsTo": [
+            "id_player"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Log_gameset_id_fkey1": {
+          "name": "Log_gameset_id_fkey1",
+          "tableFrom": "Log",
+          "tableTo": "Gameset",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "gameset_id"
+          ],
+          "columnsTo": [
+            "id_gameset"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Log_location_id_fkey1": {
+          "name": "Log_location_id_fkey1",
+          "tableFrom": "Log",
+          "tableTo": "Locations",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "location_id"
+          ],
+          "columnsTo": [
+            "id_location"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Log_quest_id_fkey1": {
+          "name": "Log_quest_id_fkey1",
+          "tableFrom": "Log",
+          "tableTo": "Quests",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "quest_id"
+          ],
+          "columnsTo": [
+            "id_quest"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Log_quest_status_fkey2": {
+          "name": "Log_quest_status_fkey2",
+          "tableFrom": "Log",
+          "tableTo": "Quest_status",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "quest_status"
+          ],
+          "columnsTo": [
+            "id_quest_status"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Log_location_status_fkey1": {
+          "name": "Log_location_status_fkey1",
+          "tableFrom": "Log",
+          "tableTo": "Location_status",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "location_status"
+          ],
+          "columnsTo": [
+            "id_quest_status"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.Player": {
+      "name": "Player",
+      "schema": "",
+      "columns": {
+        "id_player": {
+          "name": "id_player",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "\"Player_id_player_seq\"",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "play_name": {
+          "name": "play_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pass": {
+          "name": "pass",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quest_lock": {
+          "name": "quest_lock",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quest_lock_endtime": {
+          "name": "quest_lock_endtime",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "Player_pass_key": {
+          "columns": [
+            "pass"
+          ],
+          "nullsNotDistinct": false,
+          "name": "Player_pass_key"
+        }
+      },
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.Locations": {
+      "name": "Locations",
+      "schema": "",
+      "columns": {
+        "id_location": {
+          "name": "id_location",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "\"Locations_id_location_seq\"",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "gameset": {
+          "name": "gameset",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gps": {
+          "name": "gps",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "map": {
+          "name": "map",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.Log_type": {
+      "name": "Log_type",
+      "schema": "",
+      "columns": {
+        "id_log_type": {
+          "name": "id_log_type",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "\"Log_type_id_log_type_seq\"",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.Gameset": {
+      "name": "Gameset",
+      "schema": "",
+      "columns": {
+        "id_gameset": {
+          "name": "id_gameset",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "\"Gameset_id_gameset_seq\"",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.Quests": {
+      "name": "Quests",
+      "schema": "",
+      "columns": {
+        "id_quest": {
+          "name": "id_quest",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "\"Quests_id_quest_seq\"",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "time_limit": {
+          "name": "time_limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.Location_status": {
+      "name": "Location_status",
+      "schema": "",
+      "columns": {
+        "id_quest_status": {
+          "name": "id_quest_status",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "\"Location_status_id_quest_status_seq\"",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.log_type": {
+      "name": "log_type",
+      "schema": "",
+      "columns": {
+        "id_log_type": {
+          "name": "id_log_type",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "log_type_id_log_type_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.locations": {
+      "name": "locations",
+      "schema": "",
+      "columns": {
+        "id_location": {
+          "name": "id_location",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "locations_id_location_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "gameset_id": {
+          "name": "gameset_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gps": {
+          "name": "gps",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "map": {
+          "name": "map",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.player": {
+      "name": "player",
+      "schema": "",
+      "columns": {
+        "id_player": {
+          "name": "id_player",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "player_id_player_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "play_name": {
+          "name": "play_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pass": {
+          "name": "pass",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quest_lock": {
+          "name": "quest_lock",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "quest_lock_endtime": {
+          "name": "quest_lock_endtime",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "player_pass_key": {
+          "columns": [
+            "pass"
+          ],
+          "nullsNotDistinct": false,
+          "name": "player_pass_key"
+        }
+      },
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.gameset": {
+      "name": "gameset",
+      "schema": "",
+      "columns": {
+        "id_gameset": {
+          "name": "id_gameset",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "gameset_id_gameset_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.game_session": {
+      "name": "game_session",
+      "schema": "",
+      "columns": {
+        "id_game_session": {
+          "name": "id_game_session",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "game_session_id_game_session_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "duration": {
+          "name": "duration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.log": {
+      "name": "log",
+      "schema": "",
+      "columns": {
+        "id_log": {
+          "name": "id_log",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "log_id_log_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "game_id": {
+          "name": "game_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "log_time": {
+          "name": "log_time",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "log_type_id": {
+          "name": "log_type_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gameset_id": {
+          "name": "gameset_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location_id": {
+          "name": "location_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quest_id": {
+          "name": "quest_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quest_status_id": {
+          "name": "quest_status_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location_status_id": {
+          "name": "location_status_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "log_game_id_fkey": {
+          "name": "log_game_id_fkey",
+          "tableFrom": "log",
+          "tableTo": "game_session",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "game_id"
+          ],
+          "columnsTo": [
+            "id_game_session"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "log_log_type_id_fkey": {
+          "name": "log_log_type_id_fkey",
+          "tableFrom": "log",
+          "tableTo": "log_type",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "log_type_id"
+          ],
+          "columnsTo": [
+            "id_log_type"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "log_player_id_fkey": {
+          "name": "log_player_id_fkey",
+          "tableFrom": "log",
+          "tableTo": "player",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "player_id"
+          ],
+          "columnsTo": [
+            "id_player"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "log_gameset_id_fkey": {
+          "name": "log_gameset_id_fkey",
+          "tableFrom": "log",
+          "tableTo": "gameset",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "gameset_id"
+          ],
+          "columnsTo": [
+            "id_gameset"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "log_location_id_fkey": {
+          "name": "log_location_id_fkey",
+          "tableFrom": "log",
+          "tableTo": "locations",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "location_id"
+          ],
+          "columnsTo": [
+            "id_location"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "log_quest_id_fkey": {
+          "name": "log_quest_id_fkey",
+          "tableFrom": "log",
+          "tableTo": "quests",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "quest_id"
+          ],
+          "columnsTo": [
+            "id_quest"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "log_quest_status_id_fkey": {
+          "name": "log_quest_status_id_fkey",
+          "tableFrom": "log",
+          "tableTo": "quest_status",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "quest_status_id"
+          ],
+          "columnsTo": [
+            "id_quest_status"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "log_location_status_id_fkey": {
+          "name": "log_location_status_id_fkey",
+          "tableFrom": "log",
+          "tableTo": "location_status",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "location_status_id"
+          ],
+          "columnsTo": [
+            "id_location_status"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.quests": {
+      "name": "quests",
+      "schema": "",
+      "columns": {
+        "id_quest": {
+          "name": "id_quest",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "quests_id_quest_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "time_limit": {
+          "name": "time_limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.quest_status": {
+      "name": "quest_status",
+      "schema": "",
+      "columns": {
+        "id_quest_status": {
+          "name": "id_quest_status",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "quest_status_id_quest_status_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.location_status": {
+      "name": "location_status",
+      "schema": "",
+      "columns": {
+        "id_location_status": {
+          "name": "id_location_status",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "location_status_id_location_status_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.Gameset_Locations": {
+      "name": "Gameset_Locations",
+      "schema": "",
+      "columns": {
+        "Gameset_id_gameset": {
+          "name": "Gameset_id_gameset",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "Locations_gameset": {
+          "name": "Locations_gameset",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "Gameset_Locations_Gameset_id_gameset_fkey": {
+          "name": "Gameset_Locations_Gameset_id_gameset_fkey",
+          "tableFrom": "Gameset_Locations",
+          "tableTo": "Gameset",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "Gameset_id_gameset"
+          ],
+          "columnsTo": [
+            "id_gameset"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Gameset_Locations_Gameset_id_gameset_fkey1": {
+          "name": "Gameset_Locations_Gameset_id_gameset_fkey1",
+          "tableFrom": "Gameset_Locations",
+          "tableTo": "Gameset",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "Gameset_id_gameset"
+          ],
+          "columnsTo": [
+            "id_gameset"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "Gameset_Locations_pkey": {
+          "name": "Gameset_Locations_pkey",
+          "columns": [
+            "Gameset_id_gameset",
+            "Locations_gameset"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.gameset_locations": {
+      "name": "gameset_locations",
+      "schema": "",
+      "columns": {
+        "gameset_id": {
+          "name": "gameset_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location_id": {
+          "name": "location_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "gameset_locations_gameset_id_fkey": {
+          "name": "gameset_locations_gameset_id_fkey",
+          "tableFrom": "gameset_locations",
+          "tableTo": "gameset",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "gameset_id"
+          ],
+          "columnsTo": [
+            "id_gameset"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "gameset_locations_location_id_fkey": {
+          "name": "gameset_locations_location_id_fkey",
+          "tableFrom": "gameset_locations",
+          "tableTo": "locations",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "location_id"
+          ],
+          "columnsTo": [
+            "id_location"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "gameset_locations_pkey": {
+          "name": "gameset_locations_pkey",
+          "columns": [
+            "gameset_id",
+            "location_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "tables": {}
+  }
+}
