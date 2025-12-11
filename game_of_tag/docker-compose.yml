@@ -1,3 +1,47 @@
+# version: '3.8'
+
+# services:
+#   app:
+#     build: .
+#     container_name: qr_game_app
+#     restart: always
+#     ports:
+#       - "3000:3000"
+#     environment:
+#       DATABASE_URL: postgres://myuser:mypassword@db:5432/qr_game_local
+#     depends_on:
+#       - postgres
+  
+#   caddy:
+#     image: caddy:latest
+#     container_name: qr_game_caddy
+#     restart: always
+#     ports:
+#       - "80:80"   
+#       - "443:443" 
+#     volumes:
+#       - caddy_data:/data
+#       - caddy_config:/config
+#       - ./Caddyfile:/etc/caddy/Caddyfile
+
+#   postgres:
+#     image: postgres:16
+#     container_name: game_of_tag_db
+#     restart: always
+#     environment:
+#       POSTGRES_USER: andy
+#       POSTGRES_PASSWORD: KLe9s7rHfU*f5a
+#       POSTGRES_DB: game_of_tag
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - ./postgres_data:/var/lib/postgresql/data
+      
+# volumes:
+#   caddy_data:
+#   caddy_config:
+
+
 version: '3.8'
 
 services:
@@ -8,7 +52,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgres://myuser:mypassword@db:5432/qr_game_local
+      DATABASE_URL: postgres://andy:KLe9s7rHfU*f5a@postgres:5432/game_of_tag
     depends_on:
       - postgres
   
