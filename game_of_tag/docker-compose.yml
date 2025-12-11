@@ -77,7 +77,7 @@ services:
       POSTGRES_PASSWORD: KLe9s7rHfU*f5a
       POSTGRES_DB: game_of_tag
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
       
