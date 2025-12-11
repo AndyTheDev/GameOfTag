@@ -617,12 +617,12 @@ export default function CheckpointForm({ initialCode }: Props) {
          await finishQuest(locationId, password, 'timeout');
          setStatus("locked");
          setTimeLeft(300); 
-         setMessage("Čas vypršel! Lokace je uzamčena.");
+         setMessage("Čas na úkol vypršel! Lokace je uzamčena na 5 minut.");
      } 
      // Pokud vypršel trest (zámek)
      else if (status === "locked") {
          setStatus("ready");
-         setMessage("Trest vypršel. Můžeš hrát znovu.");
+         setMessage("Můžeš hrát znovu.");
          setPassword(""); 
      }
   }
@@ -648,7 +648,7 @@ export default function CheckpointForm({ initialCode }: Props) {
     else if (result.status === "locked") {
         setStatus("locked");
         setTimeLeft(result.remainingTime || 300);
-        setMessage(result.message || "Jsi uzamčen.");
+        setMessage(result.message || "Freeze!.");
     } 
     else if (result.status === "completed") {
         setStatus("completed");
@@ -735,15 +735,15 @@ export default function CheckpointForm({ initialCode }: Props) {
 
       {status === "locked" && (
           <div className="text-center text-slate-400 bg-slate-950/50 p-4 rounded-xl">
-              <p className="font-bold text-red-400">DOČASNÝ ZÁMEK</p>
-              <p className="text-sm mt-2">Musíš počkat, než vyprší trest.</p>
+              <p className="font-bold text-red-400">Freeze!</p>
+              <p className="text-sm mt-2">Jsi zmražen na místě a musíš zde zůstat. Po vypršení času se může š pokusit tento checkpoint znovu splnit.</p>
           </div>
       )}
 
       {status === "completed" && (
           <div className="text-center py-10 animate-in zoom-in">
               <h3 className="text-3xl font-bold text-[#00D68F] mb-4">Splněno!</h3>
-              <p className="text-slate-300">Tento checkpoint máš úspěšně za sebou.</p>
+              <p className="text-slate-300">Tento checkpoint máš úspěšně za sebou. Tvé kredity na dopravu jsou obnoveny a máš tak 3 krediyt k použití!</p>
           </div>
       )}
 

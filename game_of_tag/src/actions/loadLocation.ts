@@ -1006,8 +1006,9 @@ import { locations, player, log, quests } from "../db/schema";
 import { eq, and, desc } from "drizzle-orm";
 
 // KONFIGURACE ČASU
-const QUEST_LIMIT_SECONDS = 300; // 5 minut
-const LOCKOUT_SECONDS = 300;     // 5 minut
+const QUEST_LIMIT_SECONDS = 360; // 6 minut na splnění
+const LOCKOUT_SECONDS = 300;     // 5 minut timeout
+
 
 const LOG_TYPE_START = 1;
 const LOG_TYPE_TIMEOUT = 2;
@@ -1230,7 +1231,7 @@ export async function finishQuest(locationId: number, playerPass: string, result
             locationId, playerId: foundPlayer.idPlayer,
             logTypeId: resultStatus === 'success' ? LOG_TYPE_SUCCESS : LOG_TYPE_TIMEOUT,
             questId: lastLog?.questId || null,
-            logTime: new Date().toISOString() // Ukládáme jako UTC ISO string
+            logTime: new Date().toISOString() 
         });
 
         return { success: true };

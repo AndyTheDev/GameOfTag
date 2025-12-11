@@ -26,7 +26,7 @@ export default async function CheckpointPage({
           Checkpoint nalezen!
         </h1>
         <p className="text-slate-400 text-lg">
-          Nyní musíš zadat své heslo pro zobrazení úkolu v tomto checkpointu.
+          Po zadání hesla se ti zobrazí úkol ke splnění v tomto checkpointu. Pokud stránku zavřeš, můžeš se sem kdykoliv vrátit, úkol ti nikam nezmizí.
         </p>
       </div>
 

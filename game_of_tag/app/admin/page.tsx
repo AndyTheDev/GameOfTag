@@ -62,7 +62,7 @@ export default function AdminPage() {
   // Barvičky pro typy logů
   const getActionColor = (typeId: number) => {
     switch(typeId) {
-      case 1: return "text-blue-400"; // Puštění úkolu
+      case 1: return "text-blue-400"; // Spuštění
       case 2: return "text-red-400"; // Neúspěšný quest
       case 3: return "text-green-400";   // Úspěšně splněný quest
       default: return "text-gray-400";
