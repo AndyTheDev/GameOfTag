@@ -686,7 +686,8 @@ export default function CheckpointForm({ initialCode }: Props) {
       
       <div className="text-center mb-6">
           <p className="text-slate-400 text-sm uppercase">Lokace</p>
-          <h2 className="text-2xl font-bold text-[#00D68F]">{locationName}</h2>
+          <h2 className="text-2xl font-bold text-[#00D68F]">{locationName}{locationId}
+          </h2>
           {(status === "active" || status === "locked") && (
               <div className={`text-4xl font-mono mt-4 font-bold ${status === 'locked' ? 'text-red-500' : 'text-white'}`}>
                   {formatTime(timeLeft)}
