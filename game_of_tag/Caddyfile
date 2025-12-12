@@ -4,4 +4,9 @@ www.gameoftag.cz {
 
 gameoftag.cz {
     reverse_proxy app:3000
+
+    @admin {
+        path /admin*
+    }
+    rate_limit @admin 10r/m
 }
