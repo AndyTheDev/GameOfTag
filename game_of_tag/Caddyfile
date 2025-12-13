@@ -8,5 +8,5 @@ gameoftag.cz {
     @admin {
         path /admin*
     }
-    rate_limit @admin 10r/m
+    # rate_limit @admin 10r/m
 }
