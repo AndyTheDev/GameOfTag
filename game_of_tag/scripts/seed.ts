@@ -8,7 +8,8 @@ import * as path from "path";
 
 // 1. NEJDŘÍV NAČTEME .ENV (Oprava cesty)
 // Zjistíme cestu o složku výš
-const envPath = path.resolve(__dirname, "../.env.local");
+// const envPath = path.resolve(__dirname, "../.env.local");
+const envPath = path.resolve(__dirname, "../.env");
 const result = dotenv.config({ path: envPath });
 
 if (result.error) {
@@ -83,7 +84,7 @@ async function main() {
             "name": "VQ",
             "type": "quest",
             "gps": "50.0567061N, 14.4967833E",
-            "map": "https://mapy.com/cs/turisticka?dim=6937d0001a587fe01c1b5e0c&x=14.4967833&y=50.0567061&z=17"
+            "map": "https://mapy.com/cs/turisticka?dim=693bda0e694d79f477ae4114&x=14.5073695&y=50.0615247&z=18"
         },
         {
             "idLocation": 4,
@@ -342,10 +343,10 @@ async function main() {
 
   // 5. QUESTY
   const questsData = [
-        {
+    {
         "idQuest": 1,
         "name": "Schody šampióna",
-        "description": "Najdi schody, které mají alespoň 20 schodů. Vyskákej je 2x jen po levé noze, 2x jen po pravé noze, 2x snožmo (obě nohy u sebe) a nakonec je 5x celé rychle vyběhni nahoru a dolů.\nPolož mobil na zem a natoč celé cvičení na video.",
+        "description": "Najdi schody, které mají alespoň 20 schodů. Vyskákej je 2x jen po levé noze, 2x jen po pravé noze, 2x snožmo (obě nohy u sebe) a nakonec je 5x celé rychle vyběhni nahoru a dolů.\nPolož mobil na zem nebo ho drž v ruce a natoč celé cvičení na video .",
         "timeLimit": 360
     },
     {
@@ -357,13 +358,13 @@ async function main() {
     {
         "idQuest": 3,
         "name": "Průvodce",
-        "description": "Najdi někoho, kdo mluví cizím jazykem, ideálně turistu. Anglicky mu doporuč jednu restauraci nebo památku, která je blízko, a vysvětli mu cestu, kudy se tam dostane.\nNahraj zvuk nebo video, jak mu to vysvětluješ.",
+        "description": "Najdi turistu nebo cizince. Cizím jazykem mu doporuč jednu restauraci nebo památku, která je blízko, a vysvětli mu cestu, kudy se tam dostane.\nNahraj zvuk nebo video, jak mu to vysvětluješ.",
         "timeLimit": 360
     },
     {
         "idQuest": 4,
         "name": "Červená horečka",
-        "description": "Najdi a vyfoť 10 různých červených věcí. Každá věc musí být jiná (jedno červené auto, jedna značka, jedna bota, jedna kytka...). Nemůžeš vyfotit 20 aut.\nDůkazem je 10 fotek v galerii mobilu. Může se jednat o screenshot 10 čitelných fotek.",
+        "description": "Najdi a vyfoť 10 různých červených věcí. Každá věc musí být jiná (jedno červené auto, jedna značka, ...).\nDůkazem je 10 fotek v galerii mobilu. Může se jednat o screenshot 10 čitelných fotek.",
         "timeLimit": 360
     },
     {
@@ -392,7 +393,7 @@ async function main() {
     },
     {
         "idQuest": 9,
-        "name": "Lovec vody",
+        "name": "Lovec...vody?",
         "description": "Jdi do jakékoliv restaurace, kavárny nebo baru. Popros obsluhu o sklenici vody z kohoutku zadarmo. Musíš ji dostat zadarmo do skla, ne do vlastní lahve.\nDůkazem je selfie, jak si připíjíš tou vodou.",
         "timeLimit": 360
     },

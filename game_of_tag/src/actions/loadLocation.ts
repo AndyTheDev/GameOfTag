@@ -999,6 +999,715 @@ export async function finishQuest(locationId: number, playerPass: string, result
 
 
 
+// "use server";
+
+// import { db } from "../db/index";
+// import { locations, player, log, quests } from "../db/schema";
+// import { eq, and, desc } from "drizzle-orm";
+
+// // KONFIGURACE ČASU
+// const QUEST_LIMIT_SECONDS = 360; // 6 minut na splnění
+// const LOCKOUT_SECONDS = 300;     // 5 minut timeout
+
+
+// const LOG_TYPE_START = 1;
+// const LOG_TYPE_TIMEOUT = 2;
+// const LOG_TYPE_SUCCESS = 3;
+
+
+// // --- POMOCNÉ FUNKCE ---
+
+// function parseLocationId(rawInput: string) {
+//   const match = rawInput.match(/^([a-zA-Z]{2,3})(\d{1,3})$/);
+//   if (match && match[1] && match[2]) {
+//     return { codeName: match[1], id: parseInt(match[2], 10) };
+//   }
+//   return null;
+// }
+
+// /**
+//  * Vypočítá rozdíl mezi TEĎ a časem z DB v sekundách.
+//  * ŘEŠÍ PROBLÉM S ČASOVÝMI PÁSMY (UTC vs CET).
+//  */
+// function getDiffSeconds(dbLogTime: string | Date): number {
+//     const now = new Date();
+    
+//     // Převedeme čas z DB na objekt Date
+//     let logDate = new Date(dbLogTime);
+
+//     // FIX: Pokud DB vrací string bez 'Z' na konci (např. "2023-12-10 18:33:00"),
+//     // JavaScript to bere jako lokální čas (ČR). My ale víme, že ukládáme UTC.
+//     // Musíme tedy říct: "Tohle je UTC čas".
+//     if (typeof dbLogTime === 'string' && !dbLogTime.endsWith('Z')) {
+//         // Zkusíme přidat Z, aby to JS parsoval jako UTC
+//         logDate = new Date(dbLogTime + 'Z');
+//     }
+    
+//     // Pokud je formát v pořádku nebo už je to Date objekt, logDate je správně.
+//     // Výpočet rozdílu v sekundách:
+//     return (now.getTime() - logDate.getTime()) / 1000;
+// }
+
+
+// // 1. ZÍSKÁNÍ DETAILŮ O LOKACI
+// export async function getLocationDetails(rawCode: string) {
+//   const parsed = parseLocationId(rawCode);
+//   if (!parsed) return { success: false, message: "Neplatný formát kódu." };
+
+//   try {
+//     const location = await db.query.locations.findFirst({
+//       where: eq(locations.idLocation, parsed.id),
+//       columns: { idLocation: true, name: true }
+//     });
+
+//     if (!location) return { success: false, message: "Lokace neexistuje." };
+//     if (location.name !== parsed.codeName) return { success: false, message: "Nesprávný kód lokace." };
+
+//     return { success: true, name: location.name, id: location.idLocation };
+//   } catch (error) {
+//     console.error(error);
+//     return { success: false, message: "Chyba databáze." };
+//   }
+// }
+
+// // 2. HLAVNÍ LOGIKA HRY
+// export async function verifyAndLogQuest(locationId: number, playerPass: string) {
+//   try {
+//     const now = new Date(); // Aktuální čas (UTC timestamp uvnitř)
+
+//     // A) Ověření hráče
+//     const foundPlayer = await db.query.player.findFirst({ where: eq(player.pass, playerPass) });
+//     if (!foundPlayer) return { success: false, message: "Špatné heslo hráče." };
+
+//     // B) Ověření lokace
+//     const locationInfo = await db.query.locations.findFirst({ where: eq(locations.idLocation, locationId) });
+//     if (!locationInfo) return { success: false, message: "Chyba lokace." };
+
+//     // C) ZÍSKÁNÍ POSLEDNÍHO LOGU HRÁČE (KDEKOLI)
+//     const lastLogAnywhere = await db.query.log.findFirst({
+//         where: eq(log.playerId, foundPlayer.idPlayer),
+//         orderBy: [desc(log.logTime)], 
+//     });
+
+//     if (lastLogAnywhere) {
+//         // POUŽITÍ OPRAVENÉHO VÝPOČTU ČASU
+//         const diffSeconds = getDiffSeconds(lastLogAnywhere.logTime);
+
+//         // --- 1. KONTROLA: GLOBÁLNÍ TREST (TIMEOUT) ---
+//         if (lastLogAnywhere.logTypeId === LOG_TYPE_TIMEOUT) {
+//             if (diffSeconds < LOCKOUT_SECONDS) {
+//                 const remaining = Math.ceil(LOCKOUT_SECONDS - diffSeconds);
+//                 return { 
+//                     success: false, 
+//                     message: `Máš globální trest! Čekej.`, 
+//                     status: "locked",
+//                     remainingTime: remaining
+//                 };
+//             }
+//         }
+
+//         // --- 2. KONTROLA: GLOBÁLNÍ AKTIVNÍ ÚKOL (START) ---
+//         if (lastLogAnywhere.logTypeId === LOG_TYPE_START) {
+            
+//             // a) Čas na úkol VYPRŠEL
+//             if (diffSeconds > QUEST_LIMIT_SECONDS) {
+//                 // Zapíšeme TIMEOUT
+//                 await db.insert(log).values({
+//                     gameId: 1, 
+//                     gamesetId: locationInfo.gamesetId || 1, 
+//                     locationId: lastLogAnywhere.locationId, 
+//                     playerId: foundPlayer.idPlayer,
+//                     logTypeId: LOG_TYPE_TIMEOUT, 
+//                     questId: lastLogAnywhere.questId,
+//                     logTime: now.toISOString()
+//                 });
+                
+//                 return { 
+//                     success: false, 
+//                     message: "Čas na předchozí úkol vypršel. Jsi uzamčen.", 
+//                     status: "locked", 
+//                     remainingTime: LOCKOUT_SECONDS 
+//                 };
+//             }
+
+//             // b) Čas stále BĚŽÍ
+//             else {
+//                 // Resume na správné lokaci
+//                 if (lastLogAnywhere.locationId === locationId) {
+//                     const activeQuest = await db.query.quests.findFirst({ where: eq(quests.idQuest, lastLogAnywhere.questId!) });
+                    
+//                     return {
+//                         success: true,
+//                         status: "active",
+//                         playerName: foundPlayer.name,
+//                         questName: activeQuest?.name || "Neznámý úkol",
+//                         questDescription: activeQuest?.description || "",
+//                         remainingTime: Math.ceil(QUEST_LIMIT_SECONDS - diffSeconds),
+//                         questId: lastLogAnywhere.questId
+//                     };
+//                 } 
+//                 // Pokus o start jinde během aktivního úkolu
+//                 else {
+//                     const otherLoc = await db.query.locations.findFirst({
+//                         where: eq(locations.idLocation, lastLogAnywhere.locationId),
+//                         columns: { name: true, idLocation: true }
+//                     });
+//                     return {
+//                         success: false,
+//                         message: `Máš rozdělaný úkol jinde! (${otherLoc?.name}${otherLoc?.idLocation}).`,
+//                         status: "error"
+//                     };
+//                 }
+//             }
+//         }
+//     }
+
+//     // --- 3. KONTROLA: LOKÁLNÍ SPLNĚNÍ (SUCCESS) ---
+//     const localLog = await db.query.log.findFirst({
+//       where: and(
+//         eq(log.playerId, foundPlayer.idPlayer),
+//         eq(log.locationId, locationId),
+//         eq(log.logTypeId, LOG_TYPE_SUCCESS)
+//       ),
+//     });
+
+//     if (localLog) {
+//         return { 
+//             success: false, 
+//             message: "Tento checkpoint už máš splněný!", 
+//             status: "completed" 
+//         };
+//     }
+
+//     // --- 4. START NOVÉHO ÚKOLU ---
+//     const allQuestIds = await db.query.quests.findMany({ columns: { idQuest: true } });
+//     if (allQuestIds.length === 0) return { success: false, message: "Žádné úkoly v DB." };
+    
+//     const randomQuestId = allQuestIds[Math.floor(Math.random() * allQuestIds.length)].idQuest;
+//     const questInfo = await db.query.quests.findFirst({ where: eq(quests.idQuest, randomQuestId) });
+
+//     await db.insert(log).values({
+//         gameId: 1, 
+//         gamesetId: locationInfo.gamesetId || 1, 
+//         locationId, 
+//         playerId: foundPlayer.idPlayer,
+//         logTypeId: LOG_TYPE_START,
+//         questId: randomQuestId,
+//         logTime: now.toISOString() // Ukládáme jako UTC ISO string
+//     });
+
+//     return {
+//         success: true,
+//         status: "active",
+//         playerName: foundPlayer.name,
+//         questName: questInfo?.name || "",
+//         questDescription: questInfo?.description || "",
+//         remainingTime: QUEST_LIMIT_SECONDS,
+//         questId: randomQuestId
+//     };
+
+//   } catch (error) {
+//     console.error("Chyba:", error);
+//     return { success: false, message: "Chyba serveru." };
+//   }
+// }
+
+// // 3. UKONČENÍ ÚKOLU
+// export async function finishQuest(locationId: number, playerPass: string, resultStatus: 'success' | 'timeout') {
+//     try {
+//         const foundPlayer = await db.query.player.findFirst({ where: eq(player.pass, playerPass) });
+//         if (!foundPlayer) return { success: false, message: "Auth error" };
+
+//         const locationInfo = await db.query.locations.findFirst({ where: eq(locations.idLocation, locationId) });
+
+//         const lastLog = await db.query.log.findFirst({
+//             where: and(eq(log.playerId, foundPlayer.idPlayer), eq(log.locationId, locationId)),
+//             orderBy: [desc(log.logTime)],
+//         });
+
+//         await db.insert(log).values({
+//             gameId: 1,
+//             gamesetId: locationInfo?.gamesetId || 1,
+//             locationId, playerId: foundPlayer.idPlayer,
+//             logTypeId: resultStatus === 'success' ? LOG_TYPE_SUCCESS : LOG_TYPE_TIMEOUT,
+//             questId: lastLog?.questId || null,
+//             logTime: new Date().toISOString() 
+//         });
+
+//         return { success: true };
+//     } catch (e) {
+//         console.error(e);
+//         return { success: false, message: "Chyba při ukládání." };
+//     }
+// }
+
+// "use server";
+
+// import { db } from "../db/index";
+// import { locations, player, log, quests } from "../db/schema";
+// import { eq, and, desc } from "drizzle-orm";
+
+// // KONFIGURACE ČASU
+// const QUEST_LIMIT_SECONDS = 360; // 6 minut na splnění
+// const LOCKOUT_SECONDS = 300;     // 5 minut timeout
+
+// const LOG_TYPE_START = 1;
+// const LOG_TYPE_TIMEOUT = 2;
+// const LOG_TYPE_SUCCESS = 3;
+
+// // --- POMOCNÉ FUNKCE ---
+
+// function parseLocationId(rawInput: string) {
+//   const match = rawInput.match(/^([a-zA-Z]{2,3})(\d{1,3})$/);
+//   if (match && match[1] && match[2]) {
+//     return { codeName: match[1], id: parseInt(match[2], 10) };
+//   }
+//   return null;
+// }
+
+// function getDiffSeconds(dbLogTime: string | Date): number {
+//     const now = new Date();
+//     let logDate = new Date(dbLogTime);
+
+//     if (typeof dbLogTime === 'string' && !dbLogTime.endsWith('Z')) {
+//         logDate = new Date(dbLogTime + 'Z');
+//     }
+    
+//     return (now.getTime() - logDate.getTime()) / 1000;
+// }
+
+
+// // 1. ZÍSKÁNÍ DETAILŮ O LOKACI
+// export async function getLocationDetails(rawCode: string) {
+//   const parsed = parseLocationId(rawCode);
+//   if (!parsed) return { success: false, message: "Neplatný formát kódu." };
+
+//   try {
+//     const location = await db.query.locations.findFirst({
+//       where: eq(locations.idLocation, parsed.id),
+//       columns: { idLocation: true, name: true }
+//     });
+
+//     if (!location) return { success: false, message: "Lokace neexistuje." };
+//     if (location.name !== parsed.codeName) return { success: false, message: "Nesprávný kód lokace." };
+
+//     return { success: true, name: location.name, id: location.idLocation };
+//   } catch (error) {
+//     console.error(error);
+//     return { success: false, message: "Chyba databáze." };
+//   }
+// }
+
+// // 2. HLAVNÍ LOGIKA HRY
+// export async function verifyAndLogQuest(locationId: number, playerPass: string) {
+//   try {
+//     const now = new Date(); 
+
+//     // A) Ověření hráče
+//     const foundPlayer = await db.query.player.findFirst({ where: eq(player.pass, playerPass) });
+//     if (!foundPlayer) return { success: false, message: "Špatné heslo hráče." };
+
+//     // B) Ověření lokace
+//     const locationInfo = await db.query.locations.findFirst({ where: eq(locations.idLocation, locationId) });
+//     if (!locationInfo) return { success: false, message: "Chyba lokace." };
+
+//     // C) ZÍSKÁNÍ POSLEDNÍHO LOGU
+//     const lastLogAnywhere = await db.query.log.findFirst({
+//         where: eq(log.playerId, foundPlayer.idPlayer),
+//         orderBy: [desc(log.logTime)], 
+//     });
+
+//     if (lastLogAnywhere) {
+//         const diffSeconds = getDiffSeconds(lastLogAnywhere.logTime);
+
+//         // --- 1. KONTROLA: GLOBÁLNÍ TREST (TIMEOUT) ---
+//         if (lastLogAnywhere.logTypeId === LOG_TYPE_TIMEOUT) {
+//             if (diffSeconds < LOCKOUT_SECONDS) {
+//                 // Vrátíme čas kdy začal timeout log, aby klient mohl dopočítat konec
+//                 return { 
+//                     success: false, 
+//                     message: `Máš globální trest! Čekej.`, 
+//                     status: "locked",
+//                     startTime: lastLogAnywhere.logTime // DŮLEŽITÉ: Posíláme čas logu
+//                 };
+//             }
+//         }
+
+//         // --- 2. KONTROLA: GLOBÁLNÍ AKTIVNÍ ÚKOL (START) ---
+//         if (lastLogAnywhere.logTypeId === LOG_TYPE_START) {
+            
+//             // a) Čas na úkol VYPRŠEL
+//             if (diffSeconds > QUEST_LIMIT_SECONDS) {
+//                 // Zapíšeme TIMEOUT
+//                 await db.insert(log).values({
+//                     gameId: 1, 
+//                     gamesetId: locationInfo.gamesetId || 1, 
+//                     locationId: lastLogAnywhere.locationId, 
+//                     playerId: foundPlayer.idPlayer,
+//                     logTypeId: LOG_TYPE_TIMEOUT, 
+//                     questId: lastLogAnywhere.questId,
+//                     logTime: now.toISOString()
+//                 });
+                
+//                 // Vrátíme startTime nového timeout logu (právě teď)
+//                 return { 
+//                     success: false, 
+//                     message: "Čas na předchozí úkol vypršel. Jsi uzamčen.", 
+//                     status: "locked", 
+//                     startTime: now.toISOString() 
+//                 };
+//             }
+
+//             // b) Čas stále BĚŽÍ
+//             else {
+//                 if (lastLogAnywhere.locationId === locationId) {
+//                     const activeQuest = await db.query.quests.findFirst({ where: eq(quests.idQuest, lastLogAnywhere.questId!) });
+                    
+//                     return {
+//                         success: true,
+//                         status: "active",
+//                         playerName: foundPlayer.name,
+//                         questName: activeQuest?.name || "Neznámý úkol",
+//                         questDescription: activeQuest?.description || "",
+//                         questId: lastLogAnywhere.questId,
+//                         startTime: lastLogAnywhere.logTime // DŮLEŽITÉ: Posíláme start time
+//                     };
+//                 } 
+//                 else {
+//                     const otherLoc = await db.query.locations.findFirst({
+//                         where: eq(locations.idLocation, lastLogAnywhere.locationId),
+//                         columns: { name: true, idLocation: true }
+//                     });
+//                     return {
+//                         success: false,
+//                         message: `Máš rozdělaný úkol jinde! (${otherLoc?.name}${otherLoc?.idLocation}).`,
+//                         status: "error"
+//                     };
+//                 }
+//             }
+//         }
+//     }
+
+//     // --- 3. KONTROLA: LOKÁLNÍ SPLNĚNÍ ---
+//     const localLog = await db.query.log.findFirst({
+//       where: and(
+//         eq(log.playerId, foundPlayer.idPlayer),
+//         eq(log.locationId, locationId),
+//         eq(log.logTypeId, LOG_TYPE_SUCCESS)
+//       ),
+//     });
+
+//     if (localLog) {
+//         return { 
+//             success: false, 
+//             message: "Tento checkpoint už máš splněný!", 
+//             status: "completed" 
+//         };
+//     }
+
+//     // --- 4. START NOVÉHO ÚKOLU ---
+//     const allQuestIds = await db.query.quests.findMany({ columns: { idQuest: true } });
+//     if (allQuestIds.length === 0) return { success: false, message: "Žádné úkoly v DB." };
+    
+//     const randomQuestId = allQuestIds[Math.floor(Math.random() * allQuestIds.length)].idQuest;
+//     const questInfo = await db.query.quests.findFirst({ where: eq(quests.idQuest, randomQuestId) });
+//     const startTimeISO = now.toISOString();
+
+//     await db.insert(log).values({
+//         gameId: 1, 
+//         gamesetId: locationInfo.gamesetId || 1, 
+//         locationId, 
+//         playerId: foundPlayer.idPlayer,
+//         logTypeId: LOG_TYPE_START,
+//         questId: randomQuestId,
+//         logTime: startTimeISO 
+//     });
+
+//     return {
+//         success: true,
+//         status: "active",
+//         playerName: foundPlayer.name,
+//         questName: questInfo?.name || "",
+//         questDescription: questInfo?.description || "",
+//         questId: randomQuestId,
+//         startTime: startTimeISO // DŮLEŽITÉ: Posíláme start time
+//     };
+
+//   } catch (error) {
+//     console.error("Chyba:", error);
+//     return { success: false, message: "Chyba serveru." };
+//   }
+// }
+
+// // 3. UKONČENÍ ÚKOLU (zůstává stejné, jen oprava types)
+// export async function finishQuest(locationId: number, playerPass: string, resultStatus: 'success' | 'timeout') {
+//     try {
+//         const foundPlayer = await db.query.player.findFirst({ where: eq(player.pass, playerPass) });
+//         if (!foundPlayer) return { success: false, message: "Auth error" };
+
+//         const locationInfo = await db.query.locations.findFirst({ where: eq(locations.idLocation, locationId) });
+
+//         const lastLog = await db.query.log.findFirst({
+//             where: and(eq(log.playerId, foundPlayer.idPlayer), eq(log.locationId, locationId)),
+//             orderBy: [desc(log.logTime)],
+//         });
+
+//         await db.insert(log).values({
+//             gameId: 1,
+//             gamesetId: locationInfo?.gamesetId || 1,
+//             locationId, playerId: foundPlayer.idPlayer,
+//             logTypeId: resultStatus === 'success' ? LOG_TYPE_SUCCESS : LOG_TYPE_TIMEOUT,
+//             questId: lastLog?.questId || null,
+//             logTime: new Date().toISOString() 
+//         });
+
+//         return { success: true };
+//     } catch (e) {
+//         console.error(e);
+//         return { success: false, message: "Chyba při ukládání." };
+//     }
+// }
+
+// "use server";
+
+// import { db } from "../db/index";
+// import { locations, player, log, quests } from "../db/schema";
+// import { eq, and, desc } from "drizzle-orm";
+
+// // KONFIGURACE ČASU
+// const QUEST_LIMIT_SECONDS = 360; // 6 minut na splnění
+// const LOCKOUT_SECONDS = 300;     // 5 minut timeout
+
+// const LOG_TYPE_START = 1;
+// const LOG_TYPE_TIMEOUT = 2;
+// const LOG_TYPE_SUCCESS = 3;
+
+// // --- POMOCNÉ FUNKCE ---
+
+// function parseLocationId(rawInput: string) {
+//   const match = rawInput.match(/^([a-zA-Z]{2,3})(\d{1,3})$/);
+//   if (match && match[1] && match[2]) {
+//     return { codeName: match[1], id: parseInt(match[2], 10) };
+//   }
+//   return null;
+// }
+
+// /**
+//  * Převede DB string/Date na korektní ISO string s 'Z' (UTC).
+//  * Toto je klíčová oprava pro komunikaci s klientem.
+//  */
+// function normalizeLogTime(dbLogTime: string | Date): string {
+//     if (dbLogTime instanceof Date) {
+//         return dbLogTime.toISOString();
+//     }
+//     // Pokud je to string a chybí mu 'Z', přidáme ho
+//     if (typeof dbLogTime === 'string' && !dbLogTime.endsWith('Z')) {
+//         return new Date(dbLogTime + 'Z').toISOString();
+//     }
+//     // Pokud už Z má, nebo je to jiný formát, zkusíme to prohnat přes Date
+//     return new Date(dbLogTime).toISOString();
+// }
+
+// function getDiffSeconds(dbLogTime: string | Date): number {
+//     const now = new Date();
+//     // Použijeme naši normalizační funkci pro výpočet na serveru
+//     const logDate = new Date(normalizeLogTime(dbLogTime));
+//     return (now.getTime() - logDate.getTime()) / 1000;
+// }
+
+
+// // 1. ZÍSKÁNÍ DETAILŮ O LOKACI
+// export async function getLocationDetails(rawCode: string) {
+//   const parsed = parseLocationId(rawCode);
+//   if (!parsed) return { success: false, message: "Neplatný formát kódu." };
+
+//   try {
+//     const location = await db.query.locations.findFirst({
+//       where: eq(locations.idLocation, parsed.id),
+//       columns: { idLocation: true, name: true }
+//     });
+
+//     if (!location) return { success: false, message: "Lokace neexistuje." };
+//     if (location.name !== parsed.codeName) return { success: false, message: "Nesprávný kód lokace." };
+
+//     return { success: true, name: location.name, id: location.idLocation };
+//   } catch (error) {
+//     console.error(error);
+//     return { success: false, message: "Chyba databáze." };
+//   }
+// }
+
+// // 2. HLAVNÍ LOGIKA HRY
+// export async function verifyAndLogQuest(locationId: number, playerPass: string) {
+//   try {
+//     const now = new Date(); 
+
+//     // A) Ověření hráče
+//     const foundPlayer = await db.query.player.findFirst({ where: eq(player.pass, playerPass) });
+//     if (!foundPlayer) return { success: false, message: "Špatné heslo hráče." };
+
+//     // B) Ověření lokace
+//     const locationInfo = await db.query.locations.findFirst({ where: eq(locations.idLocation, locationId) });
+//     if (!locationInfo) return { success: false, message: "Chyba lokace." };
+
+//     // C) ZÍSKÁNÍ POSLEDNÍHO LOGU
+//     const lastLogAnywhere = await db.query.log.findFirst({
+//         where: eq(log.playerId, foundPlayer.idPlayer),
+//         orderBy: [desc(log.logTime)], 
+//     });
+
+//     if (lastLogAnywhere) {
+//         const diffSeconds = getDiffSeconds(lastLogAnywhere.logTime);
+
+//         // --- 1. KONTROLA: GLOBÁLNÍ TREST (TIMEOUT) ---
+//         if (lastLogAnywhere.logTypeId === LOG_TYPE_TIMEOUT) {
+//             if (diffSeconds < LOCKOUT_SECONDS) {
+//                 return { 
+//                     success: false, 
+//                     status: "locked",
+//                     // FIX: Normalizujeme čas pro klienta
+//                     startTime: normalizeLogTime(lastLogAnywhere.logTime)
+//                 };
+//             }
+//         }
+
+//         // --- 2. KONTROLA: GLOBÁLNÍ AKTIVNÍ ÚKOL (START) ---
+//         if (lastLogAnywhere.logTypeId === LOG_TYPE_START) {
+            
+//             // a) Čas na úkol VYPRŠEL
+//             if (diffSeconds > QUEST_LIMIT_SECONDS) {
+//                 const timeoutLogTime = now.toISOString();
+                
+//                 // Zapíšeme TIMEOUT
+//                 await db.insert(log).values({
+//                     gameId: 1, 
+//                     gamesetId: locationInfo.gamesetId || 1, 
+//                     locationId: lastLogAnywhere.locationId, 
+//                     playerId: foundPlayer.idPlayer,
+//                     logTypeId: LOG_TYPE_TIMEOUT, 
+//                     questId: lastLogAnywhere.questId,
+//                     logTime: timeoutLogTime
+//                 });
+                
+//                 return { 
+//                     success: false, 
+//                     message: "Čas na předchozí úkol vypršel, máš aktivní trest.", 
+//                     status: "locked", 
+//                     startTime: timeoutLogTime 
+//                 };
+//             }
+
+//             // b) Čas stále BĚŽÍ
+//             else {
+//                 if (lastLogAnywhere.locationId === locationId) {
+//                     const activeQuest = await db.query.quests.findFirst({ where: eq(quests.idQuest, lastLogAnywhere.questId!) });
+                    
+//                     return {
+//                         success: true,
+//                         status: "active",
+//                         playerName: foundPlayer.name,
+//                         questName: activeQuest?.name || "Neznámý úkol",
+//                         questDescription: activeQuest?.description || "",
+//                         questId: lastLogAnywhere.questId,
+//                         // FIX: Normalizujeme čas pro klienta
+//                         startTime: normalizeLogTime(lastLogAnywhere.logTime)
+//                     };
+//                 } 
+//                 else {
+//                     const otherLoc = await db.query.locations.findFirst({
+//                         where: eq(locations.idLocation, lastLogAnywhere.locationId),
+//                         columns: { name: true, idLocation: true }
+//                     });
+//                     return {
+//                         success: false,
+//                         message: `Máš rozdělaný úkol jinde! (${otherLoc?.name}${otherLoc?.idLocation}).`,
+//                         status: "error"
+//                     };
+//                 }
+//             }
+//         }
+//     }
+
+//     // --- 3. KONTROLA: LOKÁLNÍ SPLNĚNÍ ---
+//     const localLog = await db.query.log.findFirst({
+//       where: and(
+//         eq(log.playerId, foundPlayer.idPlayer),
+//         eq(log.locationId, locationId),
+//         eq(log.logTypeId, LOG_TYPE_SUCCESS)
+//       ),
+//     });
+
+//     if (localLog) {
+//         return { 
+//             success: false, 
+//             message: "Tento checkpoint už máš splněný!", 
+//             status: "completed" 
+//         };
+//     }
+
+//     // --- 4. START NOVÉHO ÚKOLU ---
+//     const allQuestIds = await db.query.quests.findMany({ columns: { idQuest: true } });
+//     if (allQuestIds.length === 0) return { success: false, message: "Žádné úkoly v DB." };
+    
+//     const randomQuestId = allQuestIds[Math.floor(Math.random() * allQuestIds.length)].idQuest;
+//     const questInfo = await db.query.quests.findFirst({ where: eq(quests.idQuest, randomQuestId) });
+//     const startTimeISO = now.toISOString();
+
+//     await db.insert(log).values({
+//         gameId: 1, 
+//         gamesetId: locationInfo.gamesetId || 1, 
+//         locationId, 
+//         playerId: foundPlayer.idPlayer,
+//         logTypeId: LOG_TYPE_START,
+//         questId: randomQuestId,
+//         logTime: startTimeISO 
+//     });
+
+//     return {
+//         success: true,
+//         status: "active",
+//         playerName: foundPlayer.name,
+//         questName: questInfo?.name || "",
+//         questDescription: questInfo?.description || "",
+//         questId: randomQuestId,
+//         startTime: startTimeISO
+//     };
+
+//   } catch (error) {
+//     console.error("Chyba:", error);
+//     return { success: false, message: "Chyba serveru." };
+//   }
+// }
+
+// // 3. UKONČENÍ ÚKOLU
+// export async function finishQuest(locationId: number, playerPass: string, resultStatus: 'success' | 'timeout') {
+//     try {
+//         const foundPlayer = await db.query.player.findFirst({ where: eq(player.pass, playerPass) });
+//         if (!foundPlayer) return { success: false, message: "Auth error" };
+
+//         const locationInfo = await db.query.locations.findFirst({ where: eq(locations.idLocation, locationId) });
+
+//         const lastLog = await db.query.log.findFirst({
+//             where: and(eq(log.playerId, foundPlayer.idPlayer), eq(log.locationId, locationId)),
+//             orderBy: [desc(log.logTime)],
+//         });
+
+//         await db.insert(log).values({
+//             gameId: 1,
+//             gamesetId: locationInfo?.gamesetId || 1,
+//             locationId, playerId: foundPlayer.idPlayer,
+//             logTypeId: resultStatus === 'success' ? LOG_TYPE_SUCCESS : LOG_TYPE_TIMEOUT,
+//             questId: lastLog?.questId || null,
+//             logTime: new Date().toISOString() 
+//         });
+
+//         return { success: true };
+//     } catch (e) {
+//         console.error(e);
+//         return { success: false, message: "Chyba při ukládání." };
+//     }
+// }
+
 "use server";
 
 import { db } from "../db/index";
@@ -1009,11 +1718,9 @@ import { eq, and, desc } from "drizzle-orm";
 const QUEST_LIMIT_SECONDS = 360; // 6 minut na splnění
 const LOCKOUT_SECONDS = 300;     // 5 minut timeout
 
-
 const LOG_TYPE_START = 1;
 const LOG_TYPE_TIMEOUT = 2;
 const LOG_TYPE_SUCCESS = 3;
-
 
 // --- POMOCNÉ FUNKCE ---
 
@@ -1025,26 +1732,19 @@ function parseLocationId(rawInput: string) {
   return null;
 }
 
-/**
- * Vypočítá rozdíl mezi TEĎ a časem z DB v sekundách.
- * ŘEŠÍ PROBLÉM S ČASOVÝMI PÁSMY (UTC vs CET).
- */
+function normalizeLogTime(dbLogTime: string | Date): string {
+    if (dbLogTime instanceof Date) {
+        return dbLogTime.toISOString();
+    }
+    if (typeof dbLogTime === 'string' && !dbLogTime.endsWith('Z')) {
+        return new Date(dbLogTime + 'Z').toISOString();
+    }
+    return new Date(dbLogTime).toISOString();
+}
+
 function getDiffSeconds(dbLogTime: string | Date): number {
     const now = new Date();
-    
-    // Převedeme čas z DB na objekt Date
-    let logDate = new Date(dbLogTime);
-
-    // FIX: Pokud DB vrací string bez 'Z' na konci (např. "2023-12-10 18:33:00"),
-    // JavaScript to bere jako lokální čas (ČR). My ale víme, že ukládáme UTC.
-    // Musíme tedy říct: "Tohle je UTC čas".
-    if (typeof dbLogTime === 'string' && !dbLogTime.endsWith('Z')) {
-        // Zkusíme přidat Z, aby to JS parsoval jako UTC
-        logDate = new Date(dbLogTime + 'Z');
-    }
-    
-    // Pokud je formát v pořádku nebo už je to Date objekt, logDate je správně.
-    // Výpočet rozdílu v sekundách:
+    const logDate = new Date(normalizeLogTime(dbLogTime));
     return (now.getTime() - logDate.getTime()) / 1000;
 }
 
@@ -1073,7 +1773,7 @@ export async function getLocationDetails(rawCode: string) {
 // 2. HLAVNÍ LOGIKA HRY
 export async function verifyAndLogQuest(locationId: number, playerPass: string) {
   try {
-    const now = new Date(); // Aktuální čas (UTC timestamp uvnitř)
+    const now = new Date(); 
 
     // A) Ověření hráče
     const foundPlayer = await db.query.player.findFirst({ where: eq(player.pass, playerPass) });
@@ -1083,25 +1783,40 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
     const locationInfo = await db.query.locations.findFirst({ where: eq(locations.idLocation, locationId) });
     if (!locationInfo) return { success: false, message: "Chyba lokace." };
 
-    // C) ZÍSKÁNÍ POSLEDNÍHO LOGU HRÁČE (KDEKOLI)
+    // C) ZÍSKÁNÍ POSLEDNÍHO LOGU (KDEKOLIV)
+    // Toto je klíčové - bereme poslední akci hráče bez ohledu na to, kde se stala.
     const lastLogAnywhere = await db.query.log.findFirst({
         where: eq(log.playerId, foundPlayer.idPlayer),
         orderBy: [desc(log.logTime)], 
     });
 
     if (lastLogAnywhere) {
-        // POUŽITÍ OPRAVENÉHO VÝPOČTU ČASU
         const diffSeconds = getDiffSeconds(lastLogAnywhere.logTime);
 
         // --- 1. KONTROLA: GLOBÁLNÍ TREST (TIMEOUT) ---
+        // Pokud je poslední log TIMEOUT, znamená to, že hráč je v trestu.
+        // Nezáleží na tom, na jaké lokaci se to stalo - trest je globální.
         if (lastLogAnywhere.logTypeId === LOG_TYPE_TIMEOUT) {
+            
             if (diffSeconds < LOCKOUT_SECONDS) {
-                const remaining = Math.ceil(LOCKOUT_SECONDS - diffSeconds);
+                // NOVÁ LOGIKA: Zjistíme, jestli je trest odsud, nebo odjinud
+                let msg = "Máš aktivní trest (Freeze)!";
+                
+                if (lastLogAnywhere.locationId !== locationId) {
+                    // Trest je z jiné lokace -> zjistíme její jméno pro lepší UX
+                    const punishmentLoc = await db.query.locations.findFirst({
+                        where: eq(locations.idLocation, lastLogAnywhere.locationId),
+                        columns: { name: true, idLocation: true }
+                    });
+                    const locName = punishmentLoc ? `${punishmentLoc.name}${punishmentLoc.idLocation}` : "jiné lokaci";
+                    msg = `Stále máš aktivní trest z lokace ${locName}! Nemůžeš plnit úkoly nikde.`;
+                }
+
                 return { 
                     success: false, 
-                    message: `Máš globální trest! Čekej.`, 
+                    message: msg, 
                     status: "locked",
-                    remainingTime: remaining
+                    startTime: normalizeLogTime(lastLogAnywhere.logTime)
                 };
             }
         }
@@ -1109,9 +1824,11 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
         // --- 2. KONTROLA: GLOBÁLNÍ AKTIVNÍ ÚKOL (START) ---
         if (lastLogAnywhere.logTypeId === LOG_TYPE_START) {
             
-            // a) Čas na úkol VYPRŠEL
+            // a) Čas na úkol VYPRŠEL (kdekoliv)
             if (diffSeconds > QUEST_LIMIT_SECONDS) {
-                // Zapíšeme TIMEOUT
+                const timeoutLogTime = now.toISOString();
+                
+                // Zapíšeme TIMEOUT (globálně platný)
                 await db.insert(log).values({
                     gameId: 1, 
                     gamesetId: locationInfo.gamesetId || 1, 
@@ -1119,20 +1836,20 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
                     playerId: foundPlayer.idPlayer,
                     logTypeId: LOG_TYPE_TIMEOUT, 
                     questId: lastLogAnywhere.questId,
-                    logTime: now.toISOString()
+                    logTime: timeoutLogTime
                 });
                 
                 return { 
                     success: false, 
-                    message: "Čas na předchozí úkol vypršel. Jsi uzamčen.", 
+                    message: "Čas na předchozí úkol vypršel. Nyní máš aktivní trest.", 
                     status: "locked", 
-                    remainingTime: LOCKOUT_SECONDS 
+                    startTime: timeoutLogTime 
                 };
             }
 
             // b) Čas stále BĚŽÍ
             else {
-                // Resume na správné lokaci
+                // Pokud je hráč na SPRÁVNÉM místě (resume)
                 if (lastLogAnywhere.locationId === locationId) {
                     const activeQuest = await db.query.quests.findFirst({ where: eq(quests.idQuest, lastLogAnywhere.questId!) });
                     
@@ -1142,11 +1859,11 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
                         playerName: foundPlayer.name,
                         questName: activeQuest?.name || "Neznámý úkol",
                         questDescription: activeQuest?.description || "",
-                        remainingTime: Math.ceil(QUEST_LIMIT_SECONDS - diffSeconds),
-                        questId: lastLogAnywhere.questId
+                        questId: lastLogAnywhere.questId,
+                        startTime: normalizeLogTime(lastLogAnywhere.logTime)
                     };
                 } 
-                // Pokus o start jinde během aktivního úkolu
+                // Pokud se snaží přihlásit JINDE, zatímco mu běží čas
                 else {
                     const otherLoc = await db.query.locations.findFirst({
                         where: eq(locations.idLocation, lastLogAnywhere.locationId),
@@ -1154,7 +1871,7 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
                     });
                     return {
                         success: false,
-                        message: `Máš rozdělaný úkol jinde! (${otherLoc?.name}${otherLoc?.idLocation}).`,
+                        message: `Sem nemůžeš! Máš rozdělaný úkol na lokaci ${otherLoc?.name}${otherLoc?.idLocation}.`,
                         status: "error"
                     };
                 }
@@ -1162,7 +1879,8 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
         }
     }
 
-    // --- 3. KONTROLA: LOKÁLNÍ SPLNĚNÍ (SUCCESS) ---
+    // --- 3. KONTROLA: LOKÁLNÍ SPLNĚNÍ ---
+    // (Tady kontrolujeme jen tuto lokaci, protože splněná lokace neblokuje ostatní)
     const localLog = await db.query.log.findFirst({
       where: and(
         eq(log.playerId, foundPlayer.idPlayer),
@@ -1180,11 +1898,13 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
     }
 
     // --- 4. START NOVÉHO ÚKOLU ---
+    // Pokud prošel všemi kontrolami (nemá trest, nemá aktivní úkol, nemá splněno zde)
     const allQuestIds = await db.query.quests.findMany({ columns: { idQuest: true } });
     if (allQuestIds.length === 0) return { success: false, message: "Žádné úkoly v DB." };
     
     const randomQuestId = allQuestIds[Math.floor(Math.random() * allQuestIds.length)].idQuest;
     const questInfo = await db.query.quests.findFirst({ where: eq(quests.idQuest, randomQuestId) });
+    const startTimeISO = now.toISOString();
 
     await db.insert(log).values({
         gameId: 1, 
@@ -1193,7 +1913,7 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
         playerId: foundPlayer.idPlayer,
         logTypeId: LOG_TYPE_START,
         questId: randomQuestId,
-        logTime: now.toISOString() // Ukládáme jako UTC ISO string
+        logTime: startTimeISO 
     });
 
     return {
@@ -1202,8 +1922,8 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
         playerName: foundPlayer.name,
         questName: questInfo?.name || "",
         questDescription: questInfo?.description || "",
-        remainingTime: QUEST_LIMIT_SECONDS,
-        questId: randomQuestId
+        questId: randomQuestId,
+        startTime: startTimeISO
     };
 
   } catch (error) {
@@ -1212,7 +1932,7 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
   }
 }
 
-// 3. UKONČENÍ ÚKOLU
+// 3. UKONČENÍ ÚKOLU (Beze změny)
 export async function finishQuest(locationId: number, playerPass: string, resultStatus: 'success' | 'timeout') {
     try {
         const foundPlayer = await db.query.player.findFirst({ where: eq(player.pass, playerPass) });
