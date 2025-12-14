@@ -328,10 +328,226 @@ async function main() {
             "questLockEndtime": null
         },
         {
-            "idPlayer": 3,
-            "name": "Radim",
-            "playName": "Radim",
-            "pass": "336198",
+        "idPlayer": 3,
+        "name": "Antonie L",
+        "playName": "green",
+        "pass": "824193",
+        "questLock": false,
+        "questLockEndtime": null
+        },
+        {
+            "idPlayer": 4,
+            "name": "Max D",
+            "playName": "red",
+            "pass": "173852",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 5,
+            "name": "Vladimír P",
+            "playName": "red",
+            "pass": "692584",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 6,
+            "name": "Jakub Š",
+            "playName": "red",
+            "pass": "305179",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 7,
+            "name": "Matteo B",
+            "playName": "blue",
+            "pass": "481627",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 8,
+            "name": "Jakub N",
+            "playName": "green",
+            "pass": "926341",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 9,
+            "name": "Laura B",
+            "playName": "green",
+            "pass": "573918",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 10,
+            "name": "Jan H",
+            "playName": "blue",
+            "pass": "148293",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 11,
+            "name": "Jakub K",
+            "playName": "green",
+            "pass": "639205",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 12,
+            "name": "Hana C",
+            "playName": "green",
+            "pass": "271849",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 13,
+            "name": "Jáchym B",
+            "playName": "green",
+            "pass": "504938",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 14,
+            "name": "Matěj B",
+            "playName": "blue",
+            "pass": "816274",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 15,
+            "name": "Dalibor Ť",
+            "playName": "green",
+            "pass": "392051",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 16,
+            "name": "Veronika Z",
+            "playName": "blue",
+            "pass": "647382",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 17,
+            "name": "Hana M",
+            "playName": "blue",
+            "pass": "159483",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 18,
+            "name": "Kateřina B",
+            "playName": "red",
+            "pass": "726159",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 19,
+            "name": "Klára T",
+            "playName": "blue",
+            "pass": "483920",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 20,
+            "name": "Alex W",
+            "playName": "red",
+            "pass": "915274",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 21,
+            "name": "Denis F",
+            "playName": "green",
+            "pass": "362815",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 22,
+            "name": "Tomáš D",
+            "playName": "blue",
+            "pass": "594713",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 23,
+            "name": "Martin G",
+            "playName": "blue",
+            "pass": "281946",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 24,
+            "name": "Denis R",
+            "playName": "red",
+            "pass": "736502",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 25,
+            "name": "Sebastian R",
+            "playName": "green",
+            "pass": "409281",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 26,
+            "name": "Jiří N",
+            "playName": "red",
+            "pass": "851639",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 27,
+            "name": "Simona K",
+            "playName": "blue",
+            "pass": "193847",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 28,
+            "name": "Timotej B",
+            "playName": "red",
+            "pass": "628405",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 29,
+            "name": "Mario A",
+            "playName": "red",
+            "pass": "374951",
+            "questLock": false,
+            "questLockEndtime": null
+        },
+        {
+            "idPlayer": 30,
+            "name": "Anna M",
+            "playName": "blue",
+            "pass": "647382",
             "questLock": false,
             "questLockEndtime": null
         }
@@ -346,100 +562,88 @@ async function main() {
     {
         "idQuest": 1,
         "name": "Schody šampióna",
-        "description": "Najdi schody, které mají alespoň 20 schodů. Vyskákej je 2x jen po levé noze, 2x jen po pravé noze, 2x snožmo (obě nohy u sebe) a nakonec je 5x celé rychle vyběhni nahoru a dolů.\nPolož mobil na zem nebo ho drž v ruce a natoč celé cvičení na video .",
+        "description": "Najdi schody, které mají alespoň 10 schodů. Vyskákej je schod po schodu 2x jen po levé noze, 2x jen po pravé noze, 2x snožmo (obě nohy u sebe) - můžeš si dávat pauzy, pokud všechny schody nedáš najednou. Nakonec je 5x celé vyběhni/vyjdi nahoru a dolů. Polož mobil na zem (nebo ho drž v ruce) a natoč celé cvičení na video.",
         "timeLimit": 360
     },
     {
         "idQuest": 2,
         "name": "Výdrž na jedné noze",
-        "description": "Stůj na jedné noze 2 minuty v kuse. Pokud se dotkneš druhou nohou země, musíš začít od nuly!\nPolož mobil na zem a natoč celý úkol na video.",
+        "description": "Stůj na jedné noze 2 minuty v kuse. Pokud se dotkneš druhou nohou země, musíš začít od nuly! Nesmíš se ničeho přidržovat rukama, ani se opírat. Prostě čistý balanc. Polož mobil na zem a natoč celý úkol na video.",
         "timeLimit": 360
     },
     {
         "idQuest": 3,
         "name": "Průvodce",
-        "description": "Najdi turistu nebo cizince. Cizím jazykem mu doporuč jednu restauraci nebo památku, která je blízko, a vysvětli mu cestu, kudy se tam dostane.\nNahraj zvuk nebo video, jak mu to vysvětluješ.",
+        "description": "Najdi turistu nebo cizince. Cizím jazykem mu doporuč jednu restauraci nebo památku, která je blízko, a vysvětli mu cestu, kudy se tam dostane. Nahraj zvuk nebo video, jak mu to vysvětluješ.",
         "timeLimit": 360
     },
     {
         "idQuest": 4,
         "name": "Červená horečka",
-        "description": "Najdi a vyfoť 10 různých červených věcí. Každá věc musí být jiná (jedno červené auto, jedna značka, ...).\nDůkazem je 10 fotek v galerii mobilu. Může se jednat o screenshot 10 čitelných fotek.",
+        "description": "Najdi a vyfoť 10 různých červených věcí. Každá věc musí být jiná (jedno červené auto, jedna značka, jedna bota, jedna kytka...). Nemůžeš vyfotit 10 aut. Důkazem je 10 fotek v galerii mobilu.",
         "timeLimit": 360
     },
     {
         "idQuest": 5,
         "name": "Abeceda naruby",
-        "description": "Nauč se celou abecedu pozpátku (od Ž do A). Až si budeš jistý/á, natoč se na video, jak ji celou říkáš zpaměti. Nesmíš udělat chybu.\nNatoč video tvého obličeje, jak recituješ (nesmíš nic číst!).",
+        "description": "Nauč se celou abecedu pozpátku (od Ž do A). Až si budeš aspoň trochu jistý/á, natoč se na video, jak ji celou říkáš zpaměti. Nesmíš udělat chybu. Natoč video tvého obličeje, jak recituješ (nesmíš nic číst!).",
         "timeLimit": 360
     },
     {
         "idQuest": 6,
         "name": "Lovec čísel",
-        "description": "Najdi a vyfoť tři tramvaje nebo autobusy, který má v čísle linky číslici \"2\" (třeba 2, 12, 22, 26...). Může se jednat o stejnou linku, ale jiný autobus / tramvaj.\nDůkazem jsou 3 fotky různých vozidel MHD.",
+        "description": "Najdi a vyfoť dvě tramvaje nebo autobusy, který má v čísle linky číslici \"2\" (třeba 2, 12, 22, 26...). Může se jednat o stejnou linku, ale jiný autobus / tramvaj. Důkazem jsou 2 fotky různých vozidel MHD.",
         "timeLimit": 360
     },
     {
         "idQuest": 7,
-        "name": "Selfie se sochou",
-        "description": "Najdi sochu, pomník nebo umění na ulici. Stoupni si vedle toho a udělej úplně stejnou pózu, jako zvárňuje toto umění.\nDůkazem je fotka (selfie) tebe a sochy ve stejné póze.",
+        "name": "Quick maths!",
+        "description": "Podívej se kolem sebe na auta. Najdi 5 aut, která mají v SPZce (značce) číslo 2. Sečti všechna čísla na té značce a výsledek řekni na video. Důkazem je video se záběrem na značku auta a tvůj výpočet nahlas.",
         "timeLimit": 360
     },
     {
         "idQuest": 8,
-        "name": "Quick maths!",
-        "description": "Podívej se kolem sebe na auta. Najdi 3 auta, která mají v SPZce (značce) číslo 2 nebo 5. Sečti všechna čísla na té značce a výsledek řekni na video.\nDůkazem je video se záběrem na značku auta a tvůj výpočet nahlas.",
+        "name": "Lovec vody",
+        "description": "Jdi do jakékoliv restaurace, kavárny nebo baru. Popros obsluhu o sklenici vody z kohoutku zadarmo. Musíš ji dostat zadarmo do skla, ne do vlastní lahve. Důkazem je selfie, jak si připíjíš tou vodou.",
         "timeLimit": 360
     },
     {
         "idQuest": 9,
-        "name": "Lovec...vody?",
-        "description": "Jdi do jakékoliv restaurace, kavárny nebo baru. Popros obsluhu o sklenici vody z kohoutku zadarmo. Musíš ji dostat zadarmo do skla, ne do vlastní lahve.\nDůkazem je selfie, jak si připíjíš tou vodou.",
+        "name": "Caretaker",
+        "description": "Oslov 3 různé lidi a řekni každému z nich hezký a upřímný kompliment navázaný otázkou (třeba: „Máte skvělý kabát. Kde jste ho koupil/a?“ nebo “Jde z vás pozitivní vibe, co vám pomáhá se tak cítit?“). Minimálně vyslechni jejich odpověď. Zapni nahrávání zvuku na mobilu (nebo kameru) a nahraj si rozhovory (mobil měj v kapse nebo ruce).",
         "timeLimit": 360
     },
     {
         "idQuest": 10,
-        "name": "Caretaker",
-        "description": "Oslov 3 různé lidi a řekni každému z nich hezký a upřímný kompliment (třeba: „Máte skvělý kabát“ nebo „Sluší vám to“).\nZapni nahrávání zvuku na mobilu (nebo kameru) a nahraj si rozhovory (mobil měj v kapse nebo ruce).",
+        "name": "Kámen, nůžky, papír",
+        "description": "Zastavuj cizí lidi a hraj s nimi Kámen, nůžky, papír. Musíš vyhrát 2x v řadě. Když prohraješ, tvoje řada se nuluje a musíš začít znova od prvního vítězství. S jedním člověkem můžeš hrát jen jednou. Natoč video, kde je vidět hra s cizími lidmi.",
         "timeLimit": 360
     },
     {
         "idQuest": 11,
-        "name": "Kámen, nůžky, papír",
-        "description": "Zastavuj cizí lidi a hraj s nimi Kámen, nůžky, papír. Musíš vyhrát 3x v řadě. Když prohraješ, tvoje řada se nuluje a musíš začít znova od prvního vítězství. S jedním člověkem můžeš hrát jen jednou.\nNatoč video, kde je vidět hra s cizími lidmi.",
+        "name": "Pes, přítel člověka",
+        "description": "Najdi někoho, kdo venčí psa. Zeptej se, jak se pes jmenuje, a popros, jestli si můžeš se psem udělat fotku. Důkazem je tvoje fotka se psem.",
         "timeLimit": 360
     },
     {
         "idQuest": 12,
-        "name": "Pes, přítel člověka",
-        "description": "Najdi někoho, kdo venčí psa. Zeptej se, jak se pes jmenuje, a popros, jestli si můžeš psa vyfotit (nebo se vyfotit s ním).\nDůkazem je tvoje fotka psa / se psem.",
+        "name": "Pán prstenů",
+        "description": "Najdi v okolí 6 od sebe různých kulatých věcí, které jsou větší než tvoje hlava (třeba kolo od auta, dopravní značka, poklop kanálu,...). Každou věc vyfoť. Důkazem je 6 fotek kulatých věcí.",
         "timeLimit": 360
     },
     {
         "idQuest": 13,
-        "name": "Pán prstenů",
-        "description": "Najdi v okolí 3 různé kulaté věci, které jsou větší než tvoje hlava (třeba kolo od auta, dopravní značka, poklop kanálu). Každou věc vyfoť.\nDůkazem jsou 3 fotky kulatých věcí.",
+        "name": "Zprávy o počasí",
+        "description": "Zahraj si na moderátora počasí. Náhodnému kolemjdoucímu dej mobil (nesmíš zmínit, že jde o výzvu/hru) a nech ho natočit minutové video, kde budeš popisovat, jaké je počasí, co mají lidé na sobě a jak fouká vítr. Snaž se, ať je to vtipné! Důkazem je minutové video.",
         "timeLimit": 360
     },
     {
         "idQuest": 14,
-        "name": "Zprávy o počasí",
-        "description": "Zahraj si na moderátora počasí. Natoč minutové video, kde budeš popisovat, jaké je počasí, co mají lidé na sobě a jak fouká vítr. Musí to být vtipné!\nDůkazem je minutové video.",
-        "timeLimit": 360
-    },
-    {
-        "idQuest": 15,
-        "name": "Módní dvojče",
-        "description": "Najdi cizího člověka, který má na sobě jeden kus oblečení stejné barvy, jako máš ty (tričko, bunda nebo kalhoty). Udělejte si s ním selfie.",
-        "timeLimit": 360
-    },
-    {
-        "idQuest": 16,
         "name": "Mistr kvízu",
-        "description": "Ptej se na názor různých lidí na zásadní otázku: „Pizza s ananasem – ano, nebo ne?“ Musíš získat alespoň 3 odpovědi „ANO“ (nebo naopak „NE“, to si musíš vybrat předem). Nahraj zvuk.",
+        "description": "Ptej se na názor různých lidí na zásadní otázku: „Pizza s ananasem – ano, nebo ne?“ Musíš získat alespoň 3 stejné odpovědi v řadě (předem si musíš stanovit, jestli se budeš snažit o tři “ANO” nebo “NE” v řadě). Nahraj zvuk/video.",
         "timeLimit": 360
     }
-  ];
+];
   if (questsData.length > 0) {
       console.log("... questy");
       await db.insert(quests).values(questsData).onConflictDoUpdate({
