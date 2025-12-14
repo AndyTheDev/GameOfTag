@@ -1185,6 +1185,7 @@ export default function CheckpointForm({ initialCode }: Props) {
 
       {status === "active" && questData && (
         <div className="flex flex-col gap-6 animate-in fade-in">
+          <h2>Přihlášený hráč: {questData.playerName}</h2>
            <div className="bg-slate-950 p-6 rounded-2xl border border-[#00D68F]/30 shadow-[0_0_15px_rgba(0,214,143,0.1)]">
               <h3 className="text-[#00D68F] font-bold text-lg mb-2 border-b border-slate-800 pb-2">{questData.title}</h3>
               <p className="text-slate-200 text-lg">{questData.description}</p>
@@ -1202,7 +1203,7 @@ export default function CheckpointForm({ initialCode }: Props) {
       {status === "locked" && (
           <div className="text-center text-slate-400 bg-slate-950/50 p-4 rounded-xl">
               <p className="font-bold text-red-400">Máš aktivní trest.</p>
-              <p className="text-sm mt-2">Jsi "zmražen na místě" a musíš zde zůstat, dokud nevyprší časomíra. Po vypršení času se můžeš pokusit tento checkpoint znovu splnit.</p>
+              <p className="text-sm mt-2">Jsi "zmražen na místě" a musíš zde zůstat, dokud nevyprší časomíra a poté se můžeš pokusit tento checkpoint znovu splnit.</p>
           </div>
       )}
 
