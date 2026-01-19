@@ -1,26 +1,89 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* --- pink --- */
+  --pink: rgb(199, 0, 255);
+  --pink-75: rgba(200, 0, 255, 0.75);
+  --pink-50: rgba(200, 0, 255, 0.5);
+  --pink-25: rgba(200, 0, 255, 0.25);
+
+  /* --- purple --- */
+  --purple: rgb(47, 45, 103);
+  --purple-75: rgb(47, 45, 103, 0.75);
+  --purple-50: rgb(47, 45, 103, 0.5);
+  --purple-25: rgb(47, 45, 103, 0.25);
+
+  /* --- ostatní barvičky --- */
+  --white: #ffffff;
+  --white-light: #ececec;
+  --black: #000000;
+  --gray-dark: #202020;
+  --gray-light: #5c5c5c;
+  --background: #FFF5FF;
 }
 
-@theme inline {
+@theme {
+  /* --- pink --- */
+  --color-pink: var(--pink);
+  --color-pink-75: var(--pink-75);
+  --color-pink-50: var(--pink-50);
+  --color-pink-25: var(--pink-25);
+
+  /* --- purple --- */
+  --color-purple: var(--purple);
+  --color-purple-75: var(--purple-75);
+  --color-purple-50: var(--purple-50);
+  --color-purple-25: var(--purple-25);
+
+  /* --- ostatní barvičky --- */
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-white: var(--white);
+  --color-white-light: var(--white-light);
+  --color-black: var(--black);
+  --color-gray-dark: var(--gray-dark);
+  --color-gray-light: var(--gray-light);
+  --font-sans: var(--font-rubik);
+  --font-barlow: var(--font-barlow-condensed);
 }
 
-@media (prefers-color-scheme: dark) {
+body {
+  @apply font-sans;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-barlow font-bold leading-tight;
+}
+
+h1 {
+  @apply text-5xl md:text-6xl lg:text-7xl mb-6 tracking-tight;
+}
+
+h2 {
+  @apply text-4xl md:text-5xl lg:text-6xl mb-5 tracking-tight;
+}
+
+h3 {
+  @apply text-3xl md:text-4xl mb-4 tracking-normal;
+}
+
+h4 {
+  @apply text-2xl md:text-3xl mb-3 tracking-normal;
+}
+
+h5 {
+  @apply text-2xl md:text-3xl mb-2 tracking-normal;
+}
+
+h6 {
+  @apply text-lg tracking-widest uppercase mb-1;
+}
+
+/* --- přepínač dark módu --- */
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+
