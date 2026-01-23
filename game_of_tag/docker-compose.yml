@@ -8,7 +8,7 @@
 #     ports:
 #       - "3000:3000"
 #     environment:
-#       DATABASE_URL: postgres://myuser:mypassword@db:5432/qr_game_local
+#       DATABASE_URL: 
 #     depends_on:
 #       - postgres
   
@@ -29,9 +29,9 @@
 #     container_name: game_of_tag_db
 #     restart: always
 #     environment:
-#       POSTGRES_USER: andy
-#       POSTGRES_PASSWORD: KLe9s7rHfU*f5a
-#       POSTGRES_DB: game_of_tag
+#       POSTGRES_USER: 
+#       POSTGRES_PASSWORD: 
+#       POSTGRES_DB: 
 #     ports:
 #       - "5432:5432"
 #     volumes:
@@ -52,7 +52,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgres://andy:KLe9s7rHfU*f5a@postgres:5432/game_of_tag
+      DATABASE_URL: 
     depends_on:
       - postgres
     cap_drop:
@@ -75,9 +75,9 @@ services:
     container_name: game_of_tag_db
     restart: always
     environment:
-      POSTGRES_USER: andy
-      POSTGRES_PASSWORD: KLe9s7rHfU*f5a
-      POSTGRES_DB: game_of_tag
+      POSTGRES_USER: 
+      POSTGRES_PASSWORD: 
+      POSTGRES_DB: 
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
