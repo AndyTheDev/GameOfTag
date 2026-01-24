@@ -3,6 +3,11 @@
 import { db } from "../db/index";
 import { locations, player, log, quests } from "../db/schema";
 import { eq, and, desc } from "drizzle-orm";
+import { checkRateLimit } from "../utils/rateLimit";
+import { getClientKey } from "../utils/requestContext";
+import { handleServerError } from "../utils/errorHandling";
+import { logInfo } from "../utils/logger";
+import { emitLogUpdate } from "../utils/logStream";
 
 const QUEST_LIMIT_SECONDS = 360; // 6 minut na splnění
 const LOCKOUT_SECONDS = 300;     // 5 minut timeout
@@ -43,6 +48,12 @@ export async function getLocationDetails(rawCode: string) {
   const parsed = parseLocationId(rawCode);
   if (!parsed) return { success: false, message: "Neplatný formát kódu." };
 
+  const clientKey = await getClientKey();
+  const limit = checkRateLimit(`getLocationDetails:${clientKey}`, { windowMs: 10_000, max: 20 });
+  if (!limit.allowed) {
+    return { success: false, message: "Příliš mnoho pokusů, zpomal." }; // Zakladni ochrana proti spamovani endpointu.
+  }
+
   try {
     const location = await db.query.locations.findFirst({
       where: eq(locations.idLocation, parsed.id),
@@ -54,13 +65,18 @@ export async function getLocationDetails(rawCode: string) {
 
     return { success: true, name: location.name, id: location.idLocation };
   } catch (error) {
-    console.error(error);
-    return { success: false, message: "Chyba databáze." };
+    return handleServerError("Chyba databáze.", error, { action: "getLocationDetails" });
   }
 }
 
 // --- hlavní logika ---
 export async function verifyAndLogQuest(locationId: number, playerPass: string) {
+  const clientKey = await getClientKey();
+  const limit = checkRateLimit(`verifyAndLogQuest:${clientKey}`, { windowMs: 10_000, max: 10 });
+  if (!limit.allowed) {
+    return { success: false, message: "Příliš mnoho pokusů, počkej chvíli." };
+  }
+
   try {
     const now = new Date(); 
 
@@ -129,6 +145,8 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
                     questId: lastLogAnywhere.questId,
                     logTime: timeoutLogTime
                 });
+                emitLogUpdate(); // Notifikace pro admin SSE, at se logy aktualizuji v real-time.
+                logInfo("Log timeout zapsan", { playerId: foundPlayer.idPlayer, locationId: lastLogAnywhere.locationId });
                 
                 return { 
                     success: false, 
@@ -206,6 +224,8 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
         questId: randomQuestId,
         logTime: startTimeISO 
     });
+    emitLogUpdate();
+    logInfo("Log start zapsan", { playerId: foundPlayer.idPlayer, locationId });
 
     return {
         success: true,
@@ -218,8 +238,7 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
     };
 
   } catch (error) {
-    console.error("Chyba:", error);
-    return { success: false, message: "Chyba serveru." };
+    return handleServerError("Chyba serveru.", error, { action: "verifyAndLogQuest" });
   }
 }
 
@@ -269,6 +288,12 @@ function haversineDistance(
  * Find nearest checkpoint to given coordinates
  */
 export async function findNearestCheckpoint(playerLat: number, playerLng: number) {
+  const clientKey = await getClientKey();
+  const limit = checkRateLimit(`findNearestCheckpoint:${clientKey}`, { windowMs: 10_000, max: 15 });
+  if (!limit.allowed) {
+    return { success: false, message: "Příliš mnoho požadavků, zkus to za chvíli." };
+  }
+
   try {
     const allLocations = await db.query.locations.findMany({
       columns: { idLocation: true, name: true, gps: true, type: true }
@@ -315,13 +340,18 @@ export async function findNearestCheckpoint(playerLat: number, playerLng: number
       }
     };
   } catch (error) {
-    console.error("Chyba při hledání checkpointu:", error);
-    return { success: false, message: "Chyba serveru." };
+    return handleServerError("Chyba serveru.", error, { action: "findNearestCheckpoint" });
   }
 }
 
 // 3. UKONČENÍ ÚKOLU (Beze změny)
 export async function finishQuest(locationId: number, playerPass: string, resultStatus: 'success' | 'timeout') {
+    const clientKey = await getClientKey();
+    const limit = checkRateLimit(`finishQuest:${clientKey}`, { windowMs: 10_000, max: 10 });
+    if (!limit.allowed) {
+        return { success: false, message: "Příliš mnoho požadavků, zkus to později." };
+    }
+
     try {
         const foundPlayer = await db.query.player.findFirst({ where: eq(player.pass, playerPass) });
         if (!foundPlayer) return { success: false, message: "Auth error" };
@@ -341,10 +371,11 @@ export async function finishQuest(locationId: number, playerPass: string, result
             questId: lastLog?.questId || null,
             logTime: new Date().toISOString() 
         });
+        emitLogUpdate();
+        logInfo("Log finish zapsan", { playerId: foundPlayer.idPlayer, locationId, resultStatus });
 
         return { success: true };
     } catch (e) {
-        console.error(e);
-        return { success: false, message: "Chyba při ukládání." };
+        return handleServerError("Chyba při ukládání.", e, { action: "finishQuest" });
     }
 }

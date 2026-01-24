@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { adminLogin, getFullLogs } from "../../src/actions/admin";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { adminLogin, adminLogout, getFullLogs } from "../../src/actions/admin";
 
 // Rozšířený typ o nové sloupce
 type LogItem = {
@@ -28,10 +28,16 @@ export default function AdminPage() {
   // --- LOGIN LOGIKA ---
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    const safeName = name.trim();
+    const safePass = pass.trim();
+    if (safeName.length < 2 || safePass.length < 3) {
+      setError("Vyplň prosím jméno a PIN.");
+      return; // Jednoducha validace na klientovi, aby se zbytecne nevolal server.
+    }
     setLoading(true);
     setError("");
 
-    const res = await adminLogin(name, pass);
+    const res = await adminLogin(safeName, safePass);
     if (res.success) {
       setIsAuth(true);
       fetchData();
@@ -42,15 +48,45 @@ export default function AdminPage() {
   }
 
   // --- NAČTENÍ DAT ---
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     const res = await getFullLogs();
-    if (res.success) {
+    if (res.success && "data" in res) {
       // TypeScriptu musíme říct, že data odpovídají našemu rozšířenému typu
       setLogs(res.data as unknown as LogItem[]);
+      setError(""); // Pri uspesnem nacteni smazeme stary error, aby nepletl.
+    } else if (res.message) {
+      setError(res.message);
+      if (res.message === "Nejsi přihlášen.") {
+        // Při neautorizovanem pristupu zobrazime znovu login.
+        setIsAuth(false);
+      }
     }
     setLoading(false);
+  }, []);
+
+  async function handleLogout() {
+    await adminLogout();
+    setIsAuth(false);
+    setLogs([]);
   }
+
+  useEffect(() => {
+    if (!isAuth) return;
+    // SSE kanál udržuje admin logy aktualni bez rucniho refresh.
+    const source = new EventSource("/api/admin/logs/stream");
+    const handleUpdate = () => fetchData();
+
+    source.addEventListener("log_update", handleUpdate);
+    source.onerror = () => {
+      setError("Realtime kanál se odpojil.");
+      source.close();
+    };
+
+    return () => {
+      source.close();
+    };
+  }, [fetchData, isAuth]);
 
   // --- VÝPOČET SKÓRE ---
   // Používáme useMemo, aby se to nepřepočítávalo zbytečně
@@ -120,12 +156,18 @@ export default function AdminPage() {
               className="bg-slate-950 border border-slate-700 text-white p-3 rounded"
               placeholder="Jméno"
               value={name} onChange={e => setName(e.target.value)}
+              minLength={2}
+              maxLength={40}
+              required
             />
             <input 
               className="bg-slate-950 border border-slate-700 text-white p-3 rounded"
               type="password"
               placeholder="PIN"
               value={pass} onChange={e => setPass(e.target.value)}
+              minLength={3}
+              maxLength={40}
+              required
             />
             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
             <button 
@@ -152,7 +194,7 @@ export default function AdminPage() {
              <button onClick={fetchData} className="px-4 py-2 bg-slate-800 rounded hover:bg-slate-700 border border-slate-600">
                {loading ? "Načítám..." : "Aktualizovat"}
              </button>
-             <button onClick={() => setIsAuth(false)} className="px-4 py-2 bg-red-900/30 text-red-400 rounded hover:bg-red-900/50 border border-red-900">
+             <button onClick={handleLogout} className="px-4 py-2 bg-red-900/30 text-red-400 rounded hover:bg-red-900/50 border border-red-900">
                Odhlásit
              </button>
           </div>

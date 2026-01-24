@@ -27,17 +27,26 @@ export default function CheckpointForm({ initialCode }: Props) {
   const [questData, setQuestData] = useState<QuestData | null>(null);
   const [targetTime, setTargetTime] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [showConfirmComplete, setShowConfirmComplete] = useState(false);
 
   // 1. Init
   useEffect(() => {
     async function init() {
       const result = await getLocationDetails(initialCode);
-      if (result.success) {
-        setLocationName(result.name!);
-        setLocationId(result.id!);
+      if (
+        result.success &&
+        "name" in result &&
+        typeof result.name === "string" &&
+        "id" in result &&
+        typeof result.id === "number"
+      ) {
+        // Type guard kvuli union typu ze server action.
+        setLocationName(result.name);
+        setLocationId(result.id);
         setStatus("ready");
       } else {
-        setMessage(result.message || "Chyba načítání lokace");
+        const fallbackMessage = "Chyba načítání lokace";
+        setMessage("message" in result ? result.message || fallbackMessage : fallbackMessage);
         setMessageVariant("error");
         setStatus("error");
       }
@@ -49,6 +58,7 @@ export default function CheckpointForm({ initialCode }: Props) {
   const handleTimeExpired = useCallback(async () => {
      // A) Vypršel AKTIVNÍ úkol -> Přechod do FREEZE (LOCKED)
      if (status === "active" && locationId) {
+         const safePassword = password.trim();
          
          // DŮLEŽITÁ ZMĚNA: Trest začíná TEĎ, protože právě teď to vypršelo v prohlížeči.
          // Nemůžeme spoléhat na 'targetTime', protože ten mohl být v minulosti (kvůli chybě).
@@ -62,7 +72,7 @@ export default function CheckpointForm({ initialCode }: Props) {
          setTimeLeft(Math.max(0, Math.ceil((newLockoutTarget - Date.now()) / 1000)));
 
          // Zapíšeme na server
-         await finishQuest(locationId, password, 'timeout');
+         await finishQuest(locationId, safePassword, 'timeout');
      } 
      
      // B) Vypršel TREST (LOCKED) -> Přechod do READY
@@ -98,17 +108,31 @@ export default function CheckpointForm({ initialCode }: Props) {
   async function handlePasswordSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!locationId) return;
+    const safePassword = password.trim();
+    if (safePassword.length < 3) {
+      setMessage("Zadej prosím své heslo.");
+      setMessageVariant("error");
+      setStatus("ready");
+      return; // Jednoducha validace na klientovi pro lepsi UX.
+    }
+    setPassword(safePassword); // Ulozime ocistenou hodnotu, aby se pouzila i pri dokončení.
     setStatus("loading");
     setMessage("");
     setMessageVariant("info");
     
-    const result = await verifyAndLogQuest(locationId, password);
+    const result = await verifyAndLogQuest(locationId, safePassword);
 
-    if (result.success && result.status === "active" && result.startTime) {
+    if (
+      result.success &&
+      "status" in result &&
+      result.status === "active" &&
+      "startTime" in result &&
+      result.startTime
+    ) {
       setQuestData({
-        playerName: result.playerName!,
-        title: result.questName!,
-        description: result.questDescription!,
+        playerName: "playerName" in result ? result.playerName ?? "" : "",
+        title: "questName" in result ? result.questName ?? "" : "",
+        description: "questDescription" in result ? result.questDescription ?? "" : "",
       });
 
       // Cíl = Čas startu z DB (už normalizovaný na serveru) + 6 minut
@@ -119,7 +143,12 @@ export default function CheckpointForm({ initialCode }: Props) {
       setTimeLeft(Math.max(0, Math.ceil((endTimestamp - Date.now()) / 1000)));
       setStatus("active");
     } 
-    else if (result.status === "locked" && result.startTime) {
+    else if (
+      "status" in result &&
+      result.status === "locked" &&
+      "startTime" in result &&
+      result.startTime
+    ) {
         // Cíl = Čas kdy trest začal (normalizovaný) + 5 minut
         const lockStartMs = new Date(result.startTime).getTime();
         const lockTargetMs = lockStartMs + (LOCKOUT_SECONDS * 1000);
@@ -128,7 +157,7 @@ export default function CheckpointForm({ initialCode }: Props) {
 
         setStatus("locked");
     } 
-    else if (result.status === "completed") {
+    else if ("status" in result && result.status === "completed") {
         setStatus("completed");
     } 
     else {
@@ -140,8 +169,20 @@ export default function CheckpointForm({ initialCode }: Props) {
 
   async function handleCompleteTask() {
       if (!locationId) return;
+      setShowConfirmComplete(true);
+  }
+
+  async function handleConfirmCompleteTask() {
+      if (!locationId) return;
+      setShowConfirmComplete(false);
+      const safePassword = password.trim();
+      if (!safePassword) {
+          setMessage("Heslo chybí, zkus se přihlásit znovu.");
+          setMessageVariant("error");
+          return;
+      }
       setStatus("loading");
-      const res = await finishQuest(locationId, password, 'success');
+      const res = await finishQuest(locationId, safePassword, 'success');
       if (res.success) {
           setStatus("completed");
           setTargetTime(null);
@@ -228,6 +269,9 @@ export default function CheckpointForm({ initialCode }: Props) {
              placeholder="Tvé heslo"
              className="w-full p-4 bg-white text-gray-dark rounded-2xl border-2 border-pink-50 text-center text-lg focus:border-pink outline-none"
              disabled={status === "loading"}
+             minLength={3}
+             maxLength={40}
+             required
            />
            <button type="submit" disabled={status === "loading"} className="w-full bg-purple py-4 rounded-2xl font-bold text-white hover:bg-purple-75 disabled:opacity-50 transition-all">
              {status === "loading" ? "Ověřuji..." : "Vstoupit"}
@@ -249,6 +293,30 @@ export default function CheckpointForm({ initialCode }: Props) {
            >
              ÚKOL SPLNĚN!
            </button>
+        </div>
+      )}
+
+      {showConfirmComplete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          {/* Potvrzeni v game stylu zabrani omylu a nerusi UX. */}
+          <div className="w-full max-w-sm rounded-3xl border-2 border-pink-50 bg-white p-6 text-center shadow-lg">
+            <h4 className="text-xl font-bold text-purple">Opravdu splnit úkol?</h4>
+            <p className="mt-2 text-gray-dark">Tuto akci už nepůjde vzít zpět.</p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setShowConfirmComplete(false)}
+                className="flex-1 rounded-2xl border-2 border-pink-50 bg-white py-3 font-bold text-purple hover:bg-pink-25 transition-all"
+              >
+                Zrušit
+              </button>
+              <button
+                onClick={handleConfirmCompleteTask}
+                className="flex-1 rounded-2xl bg-pink py-3 font-bold text-purple hover:bg-pink-75 transition-all"
+              >
+                Potvrdit
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
