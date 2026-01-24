@@ -115,7 +115,9 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
             
             // a) Čas na úkol VYPRŠEL (kdekoliv)
             if (diffSeconds > QUEST_LIMIT_SECONDS) {
-                const timeoutLogTime = now.toISOString();
+                // Trest timeout začne běžet ihned po vypršení času na úkol, ne až se uživatel vrátí na stránku.
+                const startTimeMs = new Date(normalizeLogTime(lastLogAnywhere.logTime)).getTime();
+                const timeoutLogTime = new Date(startTimeMs + (QUEST_LIMIT_SECONDS * 1000)).toISOString();
                 
                 // Zapíšeme TIMEOUT (globálně platný)
                 await db.insert(log).values({
@@ -217,6 +219,103 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
 
   } catch (error) {
     console.error("Chyba:", error);
+    return { success: false, message: "Chyba serveru." };
+  }
+}
+
+// --- GPS / Proximity functions ---
+
+const CHECKPOINT_RADIUS_METERS = 20;
+
+/**
+ * Parse GPS string like "50.0847061N, 14.4610453E" into {lat, lng}
+ */
+function parseGpsString(gps: string): { lat: number; lng: number } | null {
+  // Format: "50.0847061N, 14.4610453E"
+  const match = gps.match(/^([\d.]+)([NS]),?\s*([\d.]+)([EW])$/i);
+  if (!match) return null;
+  
+  let lat = parseFloat(match[1]);
+  let lng = parseFloat(match[3]);
+  
+  if (match[2].toUpperCase() === 'S') lat = -lat;
+  if (match[4].toUpperCase() === 'W') lng = -lng;
+  
+  return { lat, lng };
+}
+
+/**
+ * Haversine distance in meters between two lat/lng points
+ */
+function haversineDistance(
+  lat1: number, lng1: number,
+  lat2: number, lng2: number
+): number {
+  const R = 6371000; // Earth radius in meters
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+/**
+ * Find nearest checkpoint to given coordinates
+ */
+export async function findNearestCheckpoint(playerLat: number, playerLng: number) {
+  try {
+    const allLocations = await db.query.locations.findMany({
+      columns: { idLocation: true, name: true, gps: true, type: true }
+    });
+
+    if (allLocations.length === 0) {
+      return { success: false, message: "Žádné checkpointy v databázi." };
+    }
+
+    let nearest: { id: number; name: string; distance: number; type: string } | null = null;
+
+    for (const loc of allLocations) {
+      const coords = parseGpsString(loc.gps);
+      if (!coords) continue;
+
+      const distance = haversineDistance(playerLat, playerLng, coords.lat, coords.lng);
+      
+      if (!nearest || distance < nearest.distance) {
+        nearest = {
+          id: loc.idLocation,
+          name: loc.name,
+          distance,
+          type: loc.type
+        };
+      }
+    }
+
+    if (!nearest) {
+      return { success: false, message: "Nepodařilo se najít žádný checkpoint." };
+    }
+
+    const withinRadius = nearest.distance <= CHECKPOINT_RADIUS_METERS;
+    const code = `${nearest.name}${nearest.id}`;
+
+    return {
+      success: true,
+      withinRadius,
+      checkpoint: {
+        id: nearest.id,
+        name: nearest.name,
+        code,
+        type: nearest.type,
+        distanceMeters: Math.round(nearest.distance)
+      }
+    };
+  } catch (error) {
+    console.error("Chyba při hledání checkpointu:", error);
     return { success: false, message: "Chyba serveru." };
   }
 }
