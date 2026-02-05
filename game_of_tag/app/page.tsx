@@ -12,7 +12,7 @@ import { Button } from '@/src/components/Button';
 
 export default function Home() {
   return (
-    <div>
+    <div className='relative w-full overflow-x-hidden'>
       <Header 
           type='basic'
           backgroundColor='light'
@@ -23,10 +23,10 @@ export default function Home() {
         grid='none'
         backgroundColor='light'
       >
-        <div className="absolute pointer-events-none top-[-40] left-[-100] w-4xl h-[768px] opacity-20 bg-[radial-gradient(ellipse_70.71%_70.71%_at_50.00%_50.00%,var(--color-pink)_0%,rgba(255,54,184,0)_70%)] blur-3xl" />
-        <div className="absolute pointer-events-none top-350 right-20 w-4xl h-[768px] opacity-20 bg-[radial-gradient(ellipse_70.71%_70.71%_at_50.00%_50.00%,var(--color-pink)_0%,rgba(255,54,184,0)_70%)] blur-3xl" />
-        <div className="absolute pointer-events-none top-80 right-[-40] w-4xl h-[768px] opacity-20 bg-[radial-gradient(ellipse_70.71%_70.71%_at_50.00%_50.00%,#8A00FF_25%,rgba(255,54,184,0)_70%)] blur-3xl" />
-        <div className="absolute pointer-events-none top-650 left-[-10] w-4xl h-[768px] opacity-20 bg-[radial-gradient(ellipse_70.71%_70.71%_at_50.00%_50.00%,#8A00FF_25%,rgba(255,54,184,0)_70%)] blur-3xl" />
+        <div className="absolute pointer-events-none overflow-hidden top-[-40] left-[-100] w-4xl h-[768px] opacity-20 bg-[radial-gradient(ellipse_70.71%_70.71%_at_50.00%_50.00%,var(--color-pink)_0%,rgba(255,54,184,0)_70%)] blur-3xl" />
+        <div className="absolute pointer-events-none overflow-hidden top-350 right-20 w-4xl h-[768px] opacity-20 bg-[radial-gradient(ellipse_70.71%_70.71%_at_50.00%_50.00%,var(--color-pink)_0%,rgba(255,54,184,0)_70%)] blur-3xl" />
+        <div className="absolute pointer-events-none overflow-hidden top-80 right-[-40] w-4xl h-[768px] opacity-20 bg-[radial-gradient(ellipse_70.71%_70.71%_at_50.00%_50.00%,#8A00FF_25%,rgba(255,54,184,0)_70%)] blur-3xl" />
+        <div className="absolute pointer-events-none overflow-hidden top-650 left-[-10] w-4xl h-[768px] opacity-20 bg-[radial-gradient(ellipse_70.71%_70.71%_at_50.00%_50.00%,#8A00FF_25%,rgba(255,54,184,0)_70%)] blur-3xl" />
         <div className="px-6 pt-16 inline-flex flex-col justify-start items-center">
           <div className="pb-6 flex flex-col justify-start items-start">
             <div className="px-4 py-1 bg-purple-75 rounded-2xl inline-flex justify-start items-center gap-2">
@@ -37,7 +37,7 @@ export default function Home() {
           </div>
 
           <div className="max-w-[800px] pb-6 flex flex-col justify-start items-start">
-            <div className="w-[400px] h-32 max-w-[800px] flex flex-col justify-start items-center">
+            <div className="w-full h-32 max-w-[800px] flex flex-col justify-start items-center">
               <div className="text-center justify-center">
                 <h1 className='text-purple'>Proměň Prahu ve své <span className="text-pink">hřiště</span></h1>
               </div>
@@ -70,7 +70,7 @@ export default function Home() {
         <div className="self-stretch mt-20 h-48 px-10 inline-flex flex-col justify-start items-start">
           <div className="w-full px-6 pt-7 pb-3.5 flex flex-col justify-start items-start gap-6">
             <div className="self-stretch flex flex-col justify-start items-center">
-              <h3 className="text-center justify-center text-purple">“V Game of Tag spolu soupeří tři týmy o to, který z nich probehně Prahou jako první dříve, než mu v tom zabrání lovci.”</h3>
+              <h3 className="text-center justify-center text-purple">“V Game of Tag spolu týmy soupeří o to, který z nich probehně Prahou jako první dříve, než mu v tom zabrání lovci.”</h3>
             </div>
           <div className="self-stretch h-4" />
           </div>
@@ -157,17 +157,17 @@ export default function Home() {
         backgroundColor='light'
       >
 
-          <div className="flex flex-col items-center gap-16 bg-purple rounded-3xl p-12">
-              <div className='mr-auto px-10'>
+          <div className="flex flex-col items-center gap-8 bg-purple rounded-3xl p-12">
+              <div className='mr-auto px-2'>
                   <h6 className="text-pink">Jak to Celé funguje</h6>
                   <h3 className="text-white">Jednoduchá pravidla, velkolepý zážitek.</h3>
                   <p className="text-white-light text-base font-normal leading-6">Pravidla? To je hračka, každý přece jako malý hrál na babu.</p>
               </div>
 
-              <div className='grid md:grid-cols-2 gap-8 mx-10'>
+              <div className='grid md:grid-cols-2 gap-8 md:p-2 '>
                   <InfoCard
                     title="Rozdělení do týmu"
-                    text="Jako hráč jsi členem jednoho ze tří týmů, pro který sbíráš body. V týmu si rozdělíte role na lovce a běžce podle vymyšlené týmové strategie. Tuto roli si můžeš během hry změnit!"
+                    text="Jako hráč jsi členem jednoho týmu, pro který sbíráš body. V týmu si rozdělíte role na lovce a běžce podle vymyšlené strategie. Tuto roli si můžeš během hry změnit!"
                     icon={<h4 className='text-pink'>1</h4>}
                     variant="dark"
                   />
@@ -188,7 +188,7 @@ export default function Home() {
 
                   <InfoCard
                     title="Lovci a jejich role"
-                    text="Jako lovec máš za úkol chytat běžce ostatních týmů a zabránit jim tak ve sběru bodů pro jejich týmy. Vidíš polohu všech běžců na mapě, můžeš si tak vybrat, koho lovíš. Každého běžce ale můžeš chytit pouze jednou!"
+                    text="Jako lovec máš za úkol chytat běžce ostatních týmů a zabránit jim tak ve sběru bodů pro jejich týmy. Vidíš polohu všech běžců na mapě a můžeš si tak vybrat, koho lovíš. Každého běžce ale můžeš chytit pouze jednou!"
                     icon={<h4 className='text-pink'>4</h4>}
                     variant="dark"
                   />
@@ -218,7 +218,6 @@ export default function Home() {
         <div className="inline-flex flex-col justify-start items-start">
           <div className="w-full flex flex-col justify-start items-center gap-6">
             <h3 className="text-center justify-center text-white">Přidej se k druhému kolu Game of Tag!</h3>
-            <p className='text-center text-white font-bold'>Přihlašování bude brzy spuštěno.</p>
             <Button 
               variant='white'
               size='large'

@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${barlowCondensedExtrabold.variable} ${rubikRegular.variable} antialiased`}
+        className={`${barlowCondensedExtrabold.variable} ${rubikRegular.variable} antialiased overflow-x-hidden`}
       >
         {children}
       </body>
