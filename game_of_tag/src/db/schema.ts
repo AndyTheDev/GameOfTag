@@ -1,128 +1,98 @@
-import { pgTable, integer, text, unique, boolean, timestamp, foreignKey, primaryKey } from "drizzle-orm/pg-core"
-import { sql } from "drizzle-orm"
+import { 
+  pgTable, 
+  serial, 
+  text, 
+  integer, 
+  timestamp, 
+  boolean, 
+  uniqueIndex, 
+  time, 
+  date 
+} from 'drizzle-orm/pg-core';
 
+// --- ČÍSELNÍKY ---
 
-
-export const locations = pgTable("locations", {
-	idLocation: integer("id_location").primaryKey().generatedByDefaultAsIdentity({ name: "locations_id_location_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	gamesetId: integer("gameset_id"),
-	name: text().notNull(),
-	type: text().notNull(),
-	gps: text().notNull(),
-	map: text().notNull(),
+export const teams = pgTable('team', {
+  idTeam: serial('id_team').primaryKey(),
+  name: text('name').notNull(),
 });
 
-export const player = pgTable("player", {
-	idPlayer: integer("id_player").primaryKey().generatedByDefaultAsIdentity({ name: "player_id_player_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	name: text().notNull(),
-	playName: text("play_name"),
-	pass: text().notNull(),
-	questLock: boolean("quest_lock").default(false).notNull(),
-	questLockEndtime: timestamp("quest_lock_endtime", { mode: 'string' }),
-}, (table) => [
-	unique("player_pass_key").on(table.pass),
-]);
-
-export const logType = pgTable("log_type", {
-	idLogType: integer("id_log_type").primaryKey().generatedByDefaultAsIdentity({ name: "log_type_id_log_type_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	name: text(),
+export const questTypes = pgTable('quest_type', {
+  idQuestType: serial('id_quest_type').primaryKey(),
+  name: text('name').notNull(),
 });
 
-export const gameset = pgTable("gameset", {
-	idGameset: integer("id_gameset").primaryKey().generatedByDefaultAsIdentity({ name: "gameset_id_gameset_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	name: text().notNull(),
+export const privilegeLevels = pgTable('privilege_level', {
+  idPrivilegeLevel: serial('id_privilege_level').primaryKey(),
+  name: text('name').notNull(),
 });
 
-export const gameSession = pgTable("game_session", {
-	idGameSession: integer("id_game_session").primaryKey().generatedByDefaultAsIdentity({ name: "game_session_id_game_session_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	startTime: timestamp("start_time", { mode: 'string' }).notNull(),
-	duration: integer().notNull(),
+export const logTypes = pgTable('log_type', {
+  idLogType: serial('id_log_type').primaryKey(),
+  name: text('name').notNull(),
 });
 
-export const log = pgTable("log", {
-	idLog: integer("id_log").primaryKey().generatedByDefaultAsIdentity({ name: "log_id_log_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	gameId: integer("game_id").notNull(),
-	logTime: timestamp("log_time", { mode: 'string' }).defaultNow().notNull(),
-	logTypeId: integer("log_type_id").notNull(),
-	playerId: integer("player_id").notNull(),
-	gamesetId: integer("gameset_id").notNull(),
-	locationId: integer("location_id").notNull(),
-	questId: integer("quest_id"),
-	questStatusId: integer("quest_status_id"),
-	locationStatusId: integer("location_status_id"),
-}, (table) => [
-	foreignKey({
-			columns: [table.gameId],
-			foreignColumns: [gameSession.idGameSession],
-			name: "log_game_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.logTypeId],
-			foreignColumns: [logType.idLogType],
-			name: "log_log_type_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.playerId],
-			foreignColumns: [player.idPlayer],
-			name: "log_player_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.gamesetId],
-			foreignColumns: [gameset.idGameset],
-			name: "log_gameset_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.locationId],
-			foreignColumns: [locations.idLocation],
-			name: "log_location_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.questId],
-			foreignColumns: [quests.idQuest],
-			name: "log_quest_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.questStatusId],
-			foreignColumns: [questStatus.idQuestStatus],
-			name: "log_quest_status_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.locationStatusId],
-			foreignColumns: [locationStatus.idLocationStatus],
-			name: "log_location_status_id_fkey"
-		}),
-]);
-
-export const quests = pgTable("quests", {
-	idQuest: integer("id_quest").primaryKey().generatedByDefaultAsIdentity({ name: "quests_id_quest_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	name: text().notNull(),
-	description: text().notNull(),
-	timeLimit: integer("time_limit").notNull(),
+export const questStatuses = pgTable('quest_status', {
+  idQuestStatus: serial('id_quest_status').primaryKey(),
+  name: text('name').notNull(), // Změněno na text pro "Splněno" atd.
 });
 
-export const questStatus = pgTable("quest_status", {
-	idQuestStatus: integer("id_quest_status").primaryKey().generatedByDefaultAsIdentity({ name: "quest_status_id_quest_status_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	name: text().notNull(),
+// --- HLAVNÍ TABULKY ---
+
+export const quests = pgTable('quests', {
+  idQuest: serial('id_quest').primaryKey(),
+  name: text('name').notNull(),
+  description: text('description').notNull(),
+  questTypeId: integer('quest_type').notNull().references(() => questTypes.idQuestType),
+  timeLimit: integer('time_limit').notNull(), // v sekundách
 });
 
-export const locationStatus = pgTable("location_status", {
-	idLocationStatus: integer("id_location_status").primaryKey().generatedByDefaultAsIdentity({ name: "location_status_id_location_status_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	name: text().notNull(),
+export const players = pgTable('player', {
+  idPlayer: serial('id_player').primaryKey(),
+  name: text('name').notNull(),
+  playName: text('play_name'),
+  pass: text('pass').notNull().unique(),
+  teamId: integer('team_id').references(() => teams.idTeam),
+  privilegeLevel: integer('privilege_level').notNull().references(() => privilegeLevels.idPrivilegeLevel),
+  questLock: boolean('quest_lock').notNull().default(false),
+  questLockEndtime: timestamp('quest_lock_endtime'),
 });
 
-export const gamesetLocations = pgTable("gameset_locations", {
-	gamesetId: integer("gameset_id").notNull(),
-	locationId: integer("location_id").notNull(),
-}, (table) => [
-	foreignKey({
-			columns: [table.gamesetId],
-			foreignColumns: [gameset.idGameset],
-			name: "gameset_locations_gameset_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.locationId],
-			foreignColumns: [locations.idLocation],
-			name: "gameset_locations_location_id_fkey"
-		}),
-	primaryKey({ columns: [table.gamesetId, table.locationId], name: "gameset_locations_pkey"}),
-]);
+export const locations = pgTable('location', {
+  idLocation: serial('id_location').primaryKey(),
+  name: text('name').notNull(),
+  typeId: integer('type_id').notNull().references(() => questTypes.idQuestType),
+  teamId: integer('team_id').references(() => teams.idTeam),
+  gps: text('gps').notNull(),
+  map: text('map').notNull(),
+});
+
+// --- PROGRESS A LOGY ---
+
+export const playerProgress = pgTable('player_progress', {
+  idProgress: serial('id_progress').primaryKey(),
+  playerId: integer('player_id').references(() => players.idPlayer),
+  locationId: integer('location_id').references(() => locations.idLocation),
+  completedAt: timestamp('completed_at').defaultNow(),
+}, (table) => ({
+  // Unikátní index pro zajištění, že hráč splní jednu lokaci jen jednou
+  playerLocationUnique: uniqueIndex('player_location_unique').on(table.playerId, table.locationId),
+}));
+
+export const gameSessions = pgTable('game_session', {
+  idGameSession: serial('id_game_session').primaryKey(),
+  date: date('date').notNull(),
+  time: time('time').notNull(),
+  duration: integer('duration').notNull(), // v sekundách
+});
+
+export const logs = pgTable('log', {
+  idLog: serial('id_log').primaryKey(),
+  gameId: integer('game_id').notNull().references(() => gameSessions.idGameSession),
+  logTime: timestamp('log_time').notNull().defaultNow(),
+  logTypeId: integer('log_type').notNull().references(() => logTypes.idLogType),
+  playerId: integer('player_id').notNull().references(() => players.idPlayer),
+  locationId: integer('location_id').notNull().references(() => locations.idLocation),
+  questId: integer('quest_id').references(() => quests.idQuest),
+  questStatusId: integer('quest_status').references(() => questStatuses.idQuestStatus),
+});

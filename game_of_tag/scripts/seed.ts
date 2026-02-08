@@ -2,7 +2,7 @@ import "dotenv/config";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { player, locations, quests, logType, gameset, gameSession } from "../src/db/schema"; 
+import { players, locations, quests, logTypes } from "../src/db/schema"; 
 import * as dotenv from "dotenv";
 import * as path from "path";
 
@@ -31,7 +31,7 @@ async function main() {
 
   // 1. TYPY LOGŮ (Ty jsou fixní, ty tam necháme natvrdo)
   console.log("... typy logů");
-  await db.insert(logType).values([
+  await db.insert(logTypes).values([
     { idLogType: 1, name: "Quest started" },
     { idLogType: 2, name: "Quest timeout" },
     { idLogType: 3, name: "Quest succesful" },

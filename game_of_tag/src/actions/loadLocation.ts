@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "../db/index";
-import { locations, player, log, quests } from "../db/schema";
+import { locations, players, logs, quests } from "../db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { checkRateLimit } from "../utils/rateLimit";
 import { getClientKey } from "../utils/requestContext";
@@ -81,7 +81,7 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
     const now = new Date(); 
 
     // A) Ověření hráče
-    const foundPlayer = await db.query.player.findFirst({ where: eq(player.pass, playerPass) });
+    const foundPlayer = await db.query.players.findFirst({ where: eq(players.pass, playerPass) });
     if (!foundPlayer) return { success: false, message: "Špatné heslo hráče." };
 
     // B) Ověření lokace
@@ -90,9 +90,9 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
 
     // C) ZÍSKÁNÍ POSLEDNÍHO LOGU (KDEKOLIV)
     // Toto je klíčové - bereme poslední akci hráče bez ohledu na to, kde se stala.
-    const lastLogAnywhere = await db.query.log.findFirst({
-        where: eq(log.playerId, foundPlayer.idPlayer),
-        orderBy: [desc(log.logTime)], 
+    const lastLogAnywhere = await db.query.logs.findFirst({
+        where: eq(logs.playerId, foundPlayer.idPlayer),
+        orderBy: [desc(logs.logTime)], 
     });
 
     if (lastLogAnywhere) {
@@ -136,14 +136,13 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
                 const timeoutLogTime = new Date(startTimeMs + (QUEST_LIMIT_SECONDS * 1000)).toISOString();
                 
                 // Zapíšeme TIMEOUT (globálně platný)
-                await db.insert(log).values({
-                    gameId: 1, 
-                    gamesetId: locationInfo.gamesetId || 1, 
+                await db.insert(logs).values({
+                    gameId: 1,
                     locationId: lastLogAnywhere.locationId, 
                     playerId: foundPlayer.idPlayer,
                     logTypeId: LOG_TYPE_TIMEOUT, 
                     questId: lastLogAnywhere.questId,
-                    logTime: timeoutLogTime
+                    logTime: new Date(timeoutLogTime)
                 });
                 emitLogUpdate(); // Notifikace pro admin SSE, at se logy aktualizuji v real-time.
                 logInfo("Log timeout zapsan", { playerId: foundPlayer.idPlayer, locationId: lastLogAnywhere.locationId });
@@ -190,11 +189,11 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
 
     // --- 3. KONTROLA: LOKÁLNÍ SPLNĚNÍ ---
     // (Tady kontrolujeme jen tuto lokaci, protože splněná lokace neblokuje ostatní)
-    const localLog = await db.query.log.findFirst({
+    const localLog = await db.query.logs.findFirst({
       where: and(
-        eq(log.playerId, foundPlayer.idPlayer),
-        eq(log.locationId, locationId),
-        eq(log.logTypeId, LOG_TYPE_SUCCESS)
+        eq(logs.playerId, foundPlayer.idPlayer),
+        eq(logs.locationId, locationId),
+        eq(logs.logTypeId, LOG_TYPE_SUCCESS)
       ),
     });
 
@@ -215,14 +214,13 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
     const questInfo = await db.query.quests.findFirst({ where: eq(quests.idQuest, randomQuestId) });
     const startTimeISO = now.toISOString();
 
-    await db.insert(log).values({
-        gameId: 1, 
-        gamesetId: locationInfo.gamesetId || 1, 
+    await db.insert(logs).values({
+        gameId: 1,
         locationId, 
         playerId: foundPlayer.idPlayer,
         logTypeId: LOG_TYPE_START,
         questId: randomQuestId,
-        logTime: startTimeISO 
+        logTime: new Date(startTimeISO) 
     });
     emitLogUpdate();
     logInfo("Log start zapsan", { playerId: foundPlayer.idPlayer, locationId });
@@ -244,7 +242,7 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
 
 // --- GPS / Proximity functions ---
 
-const CHECKPOINT_RADIUS_METERS = 20;
+const CHECKPOINT_RADIUS_METERS = 100;
 
 /**
  * Parse GPS string like "50.0847061N, 14.4610453E" into {lat, lng}
@@ -296,14 +294,14 @@ export async function findNearestCheckpoint(playerLat: number, playerLng: number
 
   try {
     const allLocations = await db.query.locations.findMany({
-      columns: { idLocation: true, name: true, gps: true, type: true }
+      columns: { idLocation: true, name: true, gps: true, typeId: true }
     });
 
     if (allLocations.length === 0) {
       return { success: false, message: "Žádné checkpointy v databázi." };
     }
 
-    let nearest: { id: number; name: string; distance: number; type: string } | null = null;
+    let nearest: { id: number; name: string; distance: number; type: number } | null = null;
 
     for (const loc of allLocations) {
       const coords = parseGpsString(loc.gps);
@@ -316,7 +314,7 @@ export async function findNearestCheckpoint(playerLat: number, playerLng: number
           id: loc.idLocation,
           name: loc.name,
           distance,
-          type: loc.type
+          type: loc.typeId
         };
       }
     }
@@ -353,23 +351,22 @@ export async function finishQuest(locationId: number, playerPass: string, result
     }
 
     try {
-        const foundPlayer = await db.query.player.findFirst({ where: eq(player.pass, playerPass) });
+        const foundPlayer = await db.query.players.findFirst({ where: eq(players.pass, playerPass) });
         if (!foundPlayer) return { success: false, message: "Auth error" };
 
         const locationInfo = await db.query.locations.findFirst({ where: eq(locations.idLocation, locationId) });
 
-        const lastLog = await db.query.log.findFirst({
-            where: and(eq(log.playerId, foundPlayer.idPlayer), eq(log.locationId, locationId)),
-            orderBy: [desc(log.logTime)],
+        const lastLog = await db.query.logs.findFirst({
+            where: and(eq(logs.playerId, foundPlayer.idPlayer), eq(logs.locationId, locationId)),
+            orderBy: [desc(logs.logTime)],
         });
 
-        await db.insert(log).values({
+        await db.insert(logs).values({
             gameId: 1,
-            gamesetId: locationInfo?.gamesetId || 1,
             locationId, playerId: foundPlayer.idPlayer,
             logTypeId: resultStatus === 'success' ? LOG_TYPE_SUCCESS : LOG_TYPE_TIMEOUT,
             questId: lastLog?.questId || null,
-            logTime: new Date().toISOString() 
+            logTime: new Date()
         });
         emitLogUpdate();
         logInfo("Log finish zapsan", { playerId: foundPlayer.idPlayer, locationId, resultStatus });

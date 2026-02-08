@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "../db/index";
-import { log, player, locations, quests, logType } from "../db/schema";
+import { logs, players, locations, quests, logTypes } from "../db/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { checkRateLimit } from "../utils/rateLimit";
 import { getClientKey } from "../utils/requestContext";
@@ -17,10 +17,10 @@ export async function adminLogin(name: string, pass: string) {
   }
 
   try {
-    const foundUser = await db.query.player.findFirst({
+    const foundUser = await db.query.players.findFirst({
       where: and(
-        eq(player.name, name),
-        eq(player.pass, pass)
+        eq(players.name, name),
+        eq(players.pass, pass)
       )
     });
 
@@ -62,23 +62,23 @@ export async function getFullLogs() {
 
   try {
     const data = await db.select({
-      id: log.idLog,
-      time: log.logTime, 
-      playerName: player.name,
-      playerTeam: player.playName, 
+      id: logs.idLog,
+      time: logs.logTime, 
+      playerName: players.name,
+      playerTeam: players.playName, 
       locationName: locations.name,
       locationId: locations.idLocation,
-      locationType: locations.type, 
-      action: logType.name,     
+      locationType: locations.typeId, 
+      action: logTypes.name,     
       questName: quests.name,
-      logTypeId: log.logTypeId
+      logTypeId: logs.logTypeId
     })
-    .from(log)
-    .leftJoin(player, eq(log.playerId, player.idPlayer))
-    .leftJoin(locations, eq(log.locationId, locations.idLocation))
-    .leftJoin(logType, eq(log.logTypeId, logType.idLogType))
-    .leftJoin(quests, eq(log.questId, quests.idQuest))
-    .orderBy(desc(log.logTime));
+    .from(logs)
+    .leftJoin(players, eq(logs.playerId, players.idPlayer))
+    .leftJoin(locations, eq(logs.locationId, locations.idLocation))
+    .leftJoin(logTypes, eq(logs.logTypeId, logTypes.idLogType))
+    .leftJoin(quests, eq(logs.questId, quests.idQuest))
+    .orderBy(desc(logs.logTime));
 
     return { success: true, data };
   } catch (e) {

@@ -281,7 +281,6 @@ export default function CheckpointForm({ initialCode }: Props) {
 
       {status === "active" && questData && (
         <div className="flex flex-col gap-6 animate-in fade-in">
-          <h4 className="text-purple">Přihlášený hráč: {questData.playerName}</h4>
            <div className="bg-background p-6 rounded-2xl border-2 border-pink-50">
               <h4 className="text-pink font-bold mb-2 border-b border-pink-50 pb-2">{questData.title}</h4>
               <p className="text-gray-dark text-lg">{questData.description}</p>
@@ -301,7 +300,7 @@ export default function CheckpointForm({ initialCode }: Props) {
           {/* Potvrzeni v game stylu zabrani omylu a nerusi UX. */}
           <div className="w-full max-w-sm rounded-3xl border-2 border-pink-50 bg-white p-6 text-center shadow-lg">
             <h4 className="text-xl font-bold text-purple">Opravdu splnit úkol?</h4>
-            <p className="mt-2 text-gray-dark">Tuto akci už nepůjde vzít zpět.</p>
+            <p className="mt-2 text-gray-dark">Tuto akci nelze vrátit zpět.</p>
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() => setShowConfirmComplete(false)}
@@ -330,7 +329,7 @@ export default function CheckpointForm({ initialCode }: Props) {
       {status === "completed" && (
           <div className="text-center py-10 animate-in zoom-in">
               <h3 className="text-3xl font-bold text-purple mb-4">Checkpoint {locationName}{locationId} splněn!</h3>
-              <p className="text-gray-dark">Tento checkpoint máš úspěšně za sebou. Tvé kredity na dopravu jsou obnoveny a máš tak 3 kredity k použití!</p>
+              <p className="text-gray-dark">Tento checkpoint máš úspěšně za sebou.</p>
           </div>
       )}
 
