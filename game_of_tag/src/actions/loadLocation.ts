@@ -3,6 +3,11 @@
 import { db } from "../db/index";
 import { locations, player, log, quests } from "../db/schema";
 import { eq, and, desc } from "drizzle-orm";
+import { checkRateLimit } from "../utils/rateLimit";
+import { getClientKey } from "../utils/requestContext";
+import { handleServerError } from "../utils/errorHandling";
+import { logInfo } from "../utils/logger";
+import { emitLogUpdate } from "../utils/logStream";
 
 const QUEST_LIMIT_SECONDS = 360; // 6 minut na splnění
 const LOCKOUT_SECONDS = 300;     // 5 minut timeout
@@ -43,6 +48,12 @@ export async function getLocationDetails(rawCode: string) {
   const parsed = parseLocationId(rawCode);
   if (!parsed) return { success: false, message: "Neplatný formát kódu." };
 
+  const clientKey = await getClientKey();
+  const limit = checkRateLimit(`getLocationDetails:${clientKey}`, { windowMs: 10_000, max: 20 });
+  if (!limit.allowed) {
+    return { success: false, message: "Příliš mnoho pokusů, zpomal." }; // Zakladni ochrana proti spamovani endpointu.
+  }
+
   try {
     const location = await db.query.locations.findFirst({
       where: eq(locations.idLocation, parsed.id),
@@ -54,13 +65,18 @@ export async function getLocationDetails(rawCode: string) {
 
     return { success: true, name: location.name, id: location.idLocation };
   } catch (error) {
-    console.error(error);
-    return { success: false, message: "Chyba databáze." };
+    return handleServerError("Chyba databáze.", error, { action: "getLocationDetails" });
   }
 }
 
 // --- hlavní logika ---
 export async function verifyAndLogQuest(locationId: number, playerPass: string) {
+  const clientKey = await getClientKey();
+  const limit = checkRateLimit(`verifyAndLogQuest:${clientKey}`, { windowMs: 10_000, max: 10 });
+  if (!limit.allowed) {
+    return { success: false, message: "Příliš mnoho pokusů, počkej chvíli." };
+  }
+
   try {
     const now = new Date(); 
 
@@ -115,7 +131,9 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
             
             // a) Čas na úkol VYPRŠEL (kdekoliv)
             if (diffSeconds > QUEST_LIMIT_SECONDS) {
-                const timeoutLogTime = now.toISOString();
+                // Trest timeout začne běžet ihned po vypršení času na úkol, ne až se uživatel vrátí na stránku.
+                const startTimeMs = new Date(normalizeLogTime(lastLogAnywhere.logTime)).getTime();
+                const timeoutLogTime = new Date(startTimeMs + (QUEST_LIMIT_SECONDS * 1000)).toISOString();
                 
                 // Zapíšeme TIMEOUT (globálně platný)
                 await db.insert(log).values({
@@ -127,6 +145,8 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
                     questId: lastLogAnywhere.questId,
                     logTime: timeoutLogTime
                 });
+                emitLogUpdate(); // Notifikace pro admin SSE, at se logy aktualizuji v real-time.
+                logInfo("Log timeout zapsan", { playerId: foundPlayer.idPlayer, locationId: lastLogAnywhere.locationId });
                 
                 return { 
                     success: false, 
@@ -204,6 +224,8 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
         questId: randomQuestId,
         logTime: startTimeISO 
     });
+    emitLogUpdate();
+    logInfo("Log start zapsan", { playerId: foundPlayer.idPlayer, locationId });
 
     return {
         success: true,
@@ -216,13 +238,120 @@ export async function verifyAndLogQuest(locationId: number, playerPass: string) 
     };
 
   } catch (error) {
-    console.error("Chyba:", error);
-    return { success: false, message: "Chyba serveru." };
+    return handleServerError("Chyba serveru.", error, { action: "verifyAndLogQuest" });
+  }
+}
+
+// --- GPS / Proximity functions ---
+
+const CHECKPOINT_RADIUS_METERS = 20;
+
+/**
+ * Parse GPS string like "50.0847061N, 14.4610453E" into {lat, lng}
+ */
+function parseGpsString(gps: string): { lat: number; lng: number } | null {
+  // Format: "50.0847061N, 14.4610453E"
+  const match = gps.match(/^([\d.]+)([NS]),?\s*([\d.]+)([EW])$/i);
+  if (!match) return null;
+  
+  let lat = parseFloat(match[1]);
+  let lng = parseFloat(match[3]);
+  
+  if (match[2].toUpperCase() === 'S') lat = -lat;
+  if (match[4].toUpperCase() === 'W') lng = -lng;
+  
+  return { lat, lng };
+}
+
+/**
+ * Haversine distance in meters between two lat/lng points
+ */
+function haversineDistance(
+  lat1: number, lng1: number,
+  lat2: number, lng2: number
+): number {
+  const R = 6371000; // Earth radius in meters
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+/**
+ * Find nearest checkpoint to given coordinates
+ */
+export async function findNearestCheckpoint(playerLat: number, playerLng: number) {
+  const clientKey = await getClientKey();
+  const limit = checkRateLimit(`findNearestCheckpoint:${clientKey}`, { windowMs: 10_000, max: 15 });
+  if (!limit.allowed) {
+    return { success: false, message: "Příliš mnoho požadavků, zkus to za chvíli." };
+  }
+
+  try {
+    const allLocations = await db.query.locations.findMany({
+      columns: { idLocation: true, name: true, gps: true, type: true }
+    });
+
+    if (allLocations.length === 0) {
+      return { success: false, message: "Žádné checkpointy v databázi." };
+    }
+
+    let nearest: { id: number; name: string; distance: number; type: string } | null = null;
+
+    for (const loc of allLocations) {
+      const coords = parseGpsString(loc.gps);
+      if (!coords) continue;
+
+      const distance = haversineDistance(playerLat, playerLng, coords.lat, coords.lng);
+      
+      if (!nearest || distance < nearest.distance) {
+        nearest = {
+          id: loc.idLocation,
+          name: loc.name,
+          distance,
+          type: loc.type
+        };
+      }
+    }
+
+    if (!nearest) {
+      return { success: false, message: "Nepodařilo se najít žádný checkpoint." };
+    }
+
+    const withinRadius = nearest.distance <= CHECKPOINT_RADIUS_METERS;
+    const code = `${nearest.name}${nearest.id}`;
+
+    return {
+      success: true,
+      withinRadius,
+      checkpoint: {
+        id: nearest.id,
+        name: nearest.name,
+        code,
+        type: nearest.type,
+        distanceMeters: Math.round(nearest.distance)
+      }
+    };
+  } catch (error) {
+    return handleServerError("Chyba serveru.", error, { action: "findNearestCheckpoint" });
   }
 }
 
 // 3. UKONČENÍ ÚKOLU (Beze změny)
 export async function finishQuest(locationId: number, playerPass: string, resultStatus: 'success' | 'timeout') {
+    const clientKey = await getClientKey();
+    const limit = checkRateLimit(`finishQuest:${clientKey}`, { windowMs: 10_000, max: 10 });
+    if (!limit.allowed) {
+        return { success: false, message: "Příliš mnoho požadavků, zkus to později." };
+    }
+
     try {
         const foundPlayer = await db.query.player.findFirst({ where: eq(player.pass, playerPass) });
         if (!foundPlayer) return { success: false, message: "Auth error" };
@@ -242,10 +371,11 @@ export async function finishQuest(locationId: number, playerPass: string, result
             questId: lastLog?.questId || null,
             logTime: new Date().toISOString() 
         });
+        emitLogUpdate();
+        logInfo("Log finish zapsan", { playerId: foundPlayer.idPlayer, locationId, resultStatus });
 
         return { success: true };
     } catch (e) {
-        console.error(e);
-        return { success: false, message: "Chyba při ukládání." };
+        return handleServerError("Chyba při ukládání.", e, { action: "finishQuest" });
     }
 }
