@@ -1,0 +1,188 @@
+{
+  "gameSessions": [
+    {
+      "idGameSession": 1,
+      "date": "2026-02-09",
+      "time": "20:50:32.426556",
+      "duration": 10800
+    }
+  ],
+  "logTypes": [
+    {
+      "idLogType": 1,
+      "name": "info"
+    },
+    {
+      "idLogType": 2,
+      "name": "error"
+    },
+    {
+      "idLogType": 4,
+      "name": "checkpoint_failed"
+    },
+    {
+      "idLogType": 3,
+      "name": "checkpoint_success"
+    }
+  ],
+  "privilegeLevels": [
+    {
+      "idPrivilegeLevel": 1,
+      "name": "admin"
+    },
+    {
+      "idPrivilegeLevel": 2,
+      "name": "player"
+    }
+  ],
+  "questStatuses": [
+    {
+      "idQuestStatus": 1,
+      "name": "Started"
+    },
+    {
+      "idQuestStatus": 2,
+      "name": "Finished"
+    },
+    {
+      "idQuestStatus": 3,
+      "name": "Failed"
+    }
+  ],
+  "questTypes": [
+    {
+      "idQuestType": 1,
+      "name": "City"
+    },
+    {
+      "idQuestType": 3,
+      "name": "Sport"
+    },
+    {
+      "idQuestType": 2,
+      "name": "Skill"
+    }
+  ],
+  "teams": [
+    {
+      "idTeam": 1,
+      "name": "Green"
+    },
+    {
+      "idTeam": 2,
+      "name": "Red"
+    },
+    {
+      "idTeam": 3,
+      "name": "Blue"
+    }
+  ],
+  "quests": [
+    {
+      "idQuest": 2,
+      "name": "Komu",
+      "description": "to říkáš? (typ úkolu  - městské výzvy)",
+      "questTypeId": 2,
+      "timeLimit": 360
+    },
+    {
+      "idQuest": 1,
+      "name": "Kdo?",
+      "description": "se ptal? (typ úkolu 1 - mixed))",
+      "questTypeId": 1,
+      "timeLimit": 360
+    }
+  ],
+  "locations": [
+    {
+      "idLocation": 1,
+      "name": "IVO",
+      "typeId": 1,
+      "teamId": 1,
+      "gps": "50.0883667N, 14.4617725E",
+      "map": "Praha"
+    },
+    {
+      "idLocation": 2,
+      "name": "IVO",
+      "typeId": 2,
+      "teamId": 1,
+      "gps": "50.0865172N, 14.4526275E",
+      "map": "Praha"
+    },
+    {
+      "idLocation": 3,
+      "name": "IVO",
+      "typeId": 1,
+      "teamId": 1,
+      "gps": "50.0841275N, 14.4342028E",
+      "map": "Praha"
+    },
+    {
+      "idLocation": 4,
+      "name": "IVO",
+      "typeId": 2,
+      "teamId": 1,
+      "gps": "50.0837200N, 14.4336000E",
+      "map": "Praha"
+    },
+    {
+      "idLocation": 5,
+      "name": "IVO",
+      "typeId": 2,
+      "teamId": 1,
+      "gps": "50.0853675N, 14.4294161E",
+      "map": "Praha"
+    },
+    {
+      "idLocation": 6,
+      "name": "IVO",
+      "typeId": 1,
+      "teamId": 1,
+      "gps": "50.0864639N, 14.4198489E",
+      "map": "Praha"
+    },
+    {
+      "idLocation": 7,
+      "name": "IVO",
+      "typeId": 2,
+      "teamId": 1,
+      "gps": "50.0965353329614N, 14.445903877565446E",
+      "map": "Praha"
+    }
+  ],
+  "players": [
+    {
+      "idPlayer": 1,
+      "name": "Andy",
+      "playName": "Andy",
+      "pass": "741741",
+      "teamId": 1,
+      "privilegeLevel": 1,
+      "questLock": false,
+      "questLockEndtime": null,
+      "roleId": 1
+    },
+    {
+      "idPlayer": 2,
+      "name": "Ivo",
+      "playName": "Ivo",
+      "pass": "845424",
+      "teamId": 1,
+      "privilegeLevel": 1,
+      "questLock": false,
+      "questLockEndtime": null,
+      "roleId": 1
+    }
+  ],
+  "playerRoles": [
+    {
+      "idPlayerRole": 1,
+      "name": "Běžec"
+    },
+    {
+      "idPlayerRole": 2,
+      "name": "Lovec"
+    }
+  ]
+}

@@ -1,81 +1,121 @@
-import * as dotenv from "dotenv";
-import * as fs from "fs";
-import * as path from "path";
+// import * as dotenv from "dotenv";
+// import * as fs from "fs";
+// import * as path from "path";
 
-async function main() {
-  console.log("🔍 Diagnostika souboru .env...");
+// async function main() {
+//   console.log("🔍 Diagnostika souboru .env...");
 
-  // 1. Zjistíme, odkud skript spouštíš (tvá kořenová složka)
-  const currentDir = process.cwd();
-  console.log(`📂 Pracovní složka: ${currentDir}`);
+//   // 1. Zjistíme, odkud skript spouštíš (tvá kořenová složka)
+//   const currentDir = process.cwd();
+//   console.log(`📂 Pracovní složka: ${currentDir}`);
 
-  // 2. Sestavíme cestu k .env
-  const envPath = path.join(currentDir, ".env.local");
+//   // 2. Sestavíme cestu k .env
+//   const envPath = path.join(currentDir, ".env.local");
 
-  // 3. Fyzická kontrola existence souboru
-  if (!fs.existsSync(envPath)) {
-    console.error(`❌ CHYBA: Soubor na cestě '${envPath}' fyzicky neexistuje!`);
+//   // 3. Fyzická kontrola existence souboru
+//   if (!fs.existsSync(envPath)) {
+//     console.error(`❌ CHYBA: Soubor na cestě '${envPath}' fyzicky neexistuje!`);
     
-    console.log("\n👀 Hledám podobné soubory v této složce:");
-    const files = fs.readdirSync(currentDir);
-    const envFiles = files.filter(f => f.startsWith(".env") || f.includes("env"));
+//     console.log("\n👀 Hledám podobné soubory v této složce:");
+//     const files = fs.readdirSync(currentDir);
+//     const envFiles = files.filter(f => f.startsWith(".env") || f.includes("env"));
     
-    if (envFiles.length > 0) {
-        envFiles.forEach(f => console.log(`   -> Nalezen soubor: '${f}' (Není to náhodou .env.txt?)`));
-    } else {
-        console.log("   -> Žádné soubory připomínající .env nenalezeny.");
-    }
-    process.exit(1);
-  }
+//     if (envFiles.length > 0) {
+//         envFiles.forEach(f => console.log(`   -> Nalezen soubor: '${f}' (Není to náhodou .env.txt?)`));
+//     } else {
+//         console.log("   -> Žádné soubory připomínající .env nenalezeny.");
+//     }
+//     process.exit(1);
+//   }
 
-  // 4. Pokud existuje, načteme ho
-  dotenv.config({ path: envPath });
+//   // 4. Pokud existuje, načteme ho
+//   dotenv.config({ path: envPath });
 
-  if (!process.env.DATABASE_URL) {
-     console.error("❌ Soubor existuje, ale DATABASE_URL v něm chybí!");
-     process.exit(1);
-  }
+//   if (!process.env.DATABASE_URL) {
+//      console.error("❌ Soubor existuje, ale DATABASE_URL v něm chybí!");
+//      process.exit(1);
+//   }
 
-  console.log("✅ .env nalezen a načten!");
+//   console.log("✅ .env nalezen a načten!");
 
-  // 5. Dynamický import databáze
-  const { db } = await import("../src/db/index");
-  const { player, locations, quests, gameset, gameSession, logType } = await import("../src/db/schema");
+//   // 5. Dynamický import databáze
+//   const { db } = await import("../src/db/index");
+//   const { player, locations, quests, gameset, gameSession, logType } = await import("../src/db/schema");
 
-  console.log("\n--- KOPÍRUJ OD TUD ---");
+//   console.log("\n--- KOPÍRUJ OD TUD ---");
   
-  try {
-      const locs = await db.select().from(locations);
-      console.log("\n// DATA PRO LOKACE:");
-      console.log(JSON.stringify(locs, null, 2));
+//   try {
+//       const locs = await db.select().from(locations);
+//       console.log("\n// DATA PRO LOKACE:");
+//       console.log(JSON.stringify(locs, null, 2));
 
-      const players = await db.select().from(player);
-      console.log("\n// DATA PRO HRÁČE:");
-      console.log(JSON.stringify(players, null, 2));
+//       const players = await db.select().from(player);
+//       console.log("\n// DATA PRO HRÁČE:");
+//       console.log(JSON.stringify(players, null, 2));
 
-      const q = await db.select().from(quests);
-      console.log("\n// DATA PRO QUESTY:");
-      console.log(JSON.stringify(q, null, 2));
+//       const q = await db.select().from(quests);
+//       console.log("\n// DATA PRO QUESTY:");
+//       console.log(JSON.stringify(q, null, 2));
 
-      const g = await db.select().from(gameset);
-      console.log("\n// DATA PRO GAMESET:");
-      console.log(JSON.stringify(g, null, 2));
-                //8. Game session
-        const gamesession = await db.select().from(gameSession);
-        console.log("\n// DATA PRO GAME SESSION:");
-        console.log(JSON.stringify(gamesession, null, 2));
+//       const g = await db.select().from(gameset);
+//       console.log("\n// DATA PRO GAMESET:");
+//       console.log(JSON.stringify(g, null, 2));
+//                 //8. Game session
+//         const gamesession = await db.select().from(gameSession);
+//         console.log("\n// DATA PRO GAME SESSION:");
+//         console.log(JSON.stringify(gamesession, null, 2));
 
-        //9. Log type
-        const logtype = await db.select().from(logType);
-        console.log("\n// DATA PRO TYPY LOGŮ:");
-        console.log(JSON.stringify(logtype, null, 2));
+//         //9. Log type
+//         const logtype = await db.select().from(logType);
+//         console.log("\n// DATA PRO TYPY LOGŮ:");
+//         console.log(JSON.stringify(logtype, null, 2));
       
-  } catch (error) {
-      console.error("\n❌ Chyba DB:", error);
-  }
+//   } catch (error) {
+//       console.error("\n❌ Chyba DB:", error);
+//   }
 
-  console.log("\n--- KONEC KOPÍROVÁNÍ ---");
-  process.exit(0);
+//   console.log("\n--- KONEC KOPÍROVÁNÍ ---");
+//   process.exit(0);
+// }
+
+// main();
+
+import { db } from '../src/db'; 
+import * as schema from '../src/db/schema';
+import * as fs from 'fs';
+import * as path from 'path';
+
+async function createDump() {
+  console.log('🔍 Zahajuji export dat z DB...');
+
+  const data = {
+    // Číselníky a základní data
+    gameSessions: await db.select().from(schema.gameSessions),
+    logTypes: await db.select().from(schema.logTypes),
+    privilegeLevels: await db.select().from(schema.privilegeLevels),
+    questStatuses: await db.select().from(schema.questStatuses),
+    questTypes: await db.select().from(schema.questTypes),
+    teams: await db.select().from(schema.teams),
+    
+    // Hlavní entity
+    quests: await db.select().from(schema.quests),
+    locations: await db.select().from(schema.locations),
+    players: await db.select().from(schema.players),
+    
+    // Nová tabulka z obrázku (ujisti se, že je v schema.ts)
+    // @ts-ignore - pokud ji ještě nemáš v typech
+    playerRoles: await db.select().from(schema.playerRoles), 
+  };
+
+  const dir = path.join(process.cwd(), 'src/db/data');
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+  fs.writeFileSync(
+    path.join(dir, 'dump.json'),
+    JSON.stringify(data, null, 2)
+  );
+
+  console.log('✅ Export dokončen: src/db/data/dump.json');
 }
 
-main();
+createDump().catch(console.error);

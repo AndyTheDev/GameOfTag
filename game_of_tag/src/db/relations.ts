@@ -7,6 +7,11 @@ export const teamsRelations = relations(schema.teams, ({ many }) => ({
   locations: many(schema.locations),
 }));
 
+// --- RELACE PRO ROLE HRÁČŮ ---
+export const playerRolesRelations = relations(schema.playerRoles, ({ many }) => ({
+  players: many(schema.players),
+}));
+
 // --- RELACE PRO HRÁČE ---
 export const playersRelations = relations(schema.players, ({ one, many }) => ({
   team: one(schema.teams, {
@@ -16,6 +21,10 @@ export const playersRelations = relations(schema.players, ({ one, many }) => ({
   privilege: one(schema.privilegeLevels, {
     fields: [schema.players.privilegeLevel],
     references: [schema.privilegeLevels.idPrivilegeLevel],
+  }),
+  role: one(schema.playerRoles, {
+    fields: [schema.players.roleId],
+    references: [schema.playerRoles.idPlayerRole],
   }),
   progress: many(schema.playerProgress),
   logs: many(schema.logs),
