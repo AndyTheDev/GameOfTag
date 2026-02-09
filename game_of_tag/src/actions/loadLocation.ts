@@ -285,9 +285,22 @@ function haversineDistance(
 /**
  * Find nearest checkpoint to given coordinates
  */
-export async function findNearestCheckpoint(playerLat: number, playerLng: number) {
+// 1. Definice typu (Discriminated Union)
+export type FindNearestResult = 
+  | { 
+      success: true; 
+      withinRadius: boolean; 
+      checkpoint: { id: number; name: string; code: string; type: number; distanceMeters: number; } 
+    }
+  | { 
+      success: false; 
+      message: string 
+    };
+
+export async function findNearestCheckpoint(playerLat: number, playerLng: number): Promise<FindNearestResult> {
   const clientKey = await getClientKey();
   const limit = checkRateLimit(`findNearestCheckpoint:${clientKey}`, { windowMs: 10_000, max: 15 });
+  
   if (!limit.allowed) {
     return { success: false, message: "Příliš mnoho požadavků, zkus to za chvíli." };
   }
@@ -326,6 +339,7 @@ export async function findNearestCheckpoint(playerLat: number, playerLng: number
     const withinRadius = nearest.distance <= CHECKPOINT_RADIUS_METERS;
     const code = `${nearest.name}${nearest.id}`;
 
+    // Tady vracíme zaručený "success: true" typ
     return {
       success: true,
       withinRadius,
@@ -337,10 +351,74 @@ export async function findNearestCheckpoint(playerLat: number, playerLng: number
         distanceMeters: Math.round(nearest.distance)
       }
     };
+
   } catch (error) {
-    return handleServerError("Chyba serveru.", error, { action: "findNearestCheckpoint" });
+    console.error("Chyba v findNearestCheckpoint:", error);
+    // Místo pouhého "as" vracíme explicitně strukturu, kterou TS očekává pro success: false
+    return { 
+      success: false, 
+      message: "Nastala neočekávaná chyba na serveru." 
+    };
   }
 }
+
+
+// export async function findNearestCheckpoint(playerLat: number, playerLng: number) {
+//   const clientKey = await getClientKey();
+//   const limit = checkRateLimit(`findNearestCheckpoint:${clientKey}`, { windowMs: 10_000, max: 15 });
+//   if (!limit.allowed) {
+//     return { success: false, message: "Příliš mnoho požadavků, zkus to za chvíli." };
+//   }
+
+//   try {
+//     const allLocations = await db.query.locations.findMany({
+//       columns: { idLocation: true, name: true, gps: true, typeId: true }
+//     });
+
+//     if (allLocations.length === 0) {
+//       return { success: false, message: "Žádné checkpointy v databázi." };
+//     }
+
+//     let nearest: { id: number; name: string; distance: number; type: number } | null = null;
+
+//     for (const loc of allLocations) {
+//       const coords = parseGpsString(loc.gps);
+//       if (!coords) continue;
+
+//       const distance = haversineDistance(playerLat, playerLng, coords.lat, coords.lng);
+      
+//       if (!nearest || distance < nearest.distance) {
+//         nearest = {
+//           id: loc.idLocation,
+//           name: loc.name,
+//           distance,
+//           type: loc.typeId
+//         };
+//       }
+//     }
+
+//     if (!nearest) {
+//       return { success: false, message: "Nepodařilo se najít žádný checkpoint." };
+//     }
+
+//     const withinRadius = nearest.distance <= CHECKPOINT_RADIUS_METERS;
+//     const code = `${nearest.name}${nearest.id}`;
+
+//     return {
+//       success: true,
+//       withinRadius,
+//       checkpoint: {
+//         id: nearest.id,
+//         name: nearest.name,
+//         code,
+//         type: nearest.type,
+//         distanceMeters: Math.round(nearest.distance)
+//       }
+//     };
+//   } catch (error) {
+//     return handleServerError("Chyba serveru.", error, { action: "findNearestCheckpoint" });
+//   }
+// }
 
 // 3. UKONČENÍ ÚKOLU (Beze změny)
 export async function finishQuest(locationId: number, playerPass: string, resultStatus: 'success' | 'timeout') {

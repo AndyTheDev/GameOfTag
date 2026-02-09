@@ -12,7 +12,7 @@ type CheckpointResult = {
   id: number;
   name: string;
   code: string;
-  type: string;
+  type: number;
   distanceMeters: number;
 };
 
