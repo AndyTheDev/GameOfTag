@@ -12,39 +12,39 @@ import {
 // --- ČÍSELNÍKY ---
 
 export const teams = pgTable('team', {
-  idTeam: integer('id_team').primaryKey().generatedAlwaysAsIdentity(),
+  idTeam: integer('id_team').primaryKey().generatedByDefaultAsIdentity(),
   name: text('name').notNull(),
 });
 
 export const playerRoles = pgTable('player_role', {
-  idPlayerRole: integer('id_player_role').primaryKey().generatedAlwaysAsIdentity(),
+  idPlayerRole: integer('id_player_role').primaryKey().generatedByDefaultAsIdentity(),
   name: text('name').notNull(),
 });
 
 export const questTypes = pgTable('quest_type', {
-  idQuestType: integer('id_quest_type').primaryKey().generatedAlwaysAsIdentity(),
+  idQuestType: integer('id_quest_type').primaryKey().generatedByDefaultAsIdentity(),
   name: text('name').notNull(),
 });
 
 export const privilegeLevels = pgTable('privilege_level', {
-  idPrivilegeLevel: integer('id_privilege_level').primaryKey().generatedAlwaysAsIdentity(),
+  idPrivilegeLevel: integer('id_privilege_level').primaryKey().generatedByDefaultAsIdentity(),
   name: text('name').notNull(),
 });
 
 export const logTypes = pgTable('log_type', {
-  idLogType: integer('id_log_type').primaryKey().generatedAlwaysAsIdentity(),
+  idLogType: integer('id_log_type').primaryKey().generatedByDefaultAsIdentity(),
   name: text('name').notNull(),
 });
 
 export const questStatuses = pgTable('quest_status', {
-  idQuestStatus: integer('id_quest_status').primaryKey().generatedAlwaysAsIdentity(),
+  idQuestStatus: integer('id_quest_status').primaryKey().generatedByDefaultAsIdentity(),
   name: text('name').notNull(), // Změněno na text pro "Splněno" atd.
 });
 
 // --- HLAVNÍ TABULKY ---
 
 export const quests = pgTable('quests', {
-  idQuest: integer('id_quest').primaryKey().generatedAlwaysAsIdentity(),
+  idQuest: integer('id_quest').primaryKey().generatedByDefaultAsIdentity(),
   name: text('name').notNull(),
   description: text('description').notNull(),
   questTypeId: integer('quest_type').notNull().references(() => questTypes.idQuestType),
@@ -52,7 +52,7 @@ export const quests = pgTable('quests', {
 });
 
 export const players = pgTable('player', {
-  idPlayer: integer('id_player').primaryKey().generatedAlwaysAsIdentity(),
+  idPlayer: integer('id_player').primaryKey().generatedByDefaultAsIdentity(),
   name: text('name').notNull(),
   playName: text('play_name'),
   pass: text('pass').notNull().unique(),
@@ -64,7 +64,7 @@ export const players = pgTable('player', {
 });
 
 export const locations = pgTable('location', {
-  idLocation: integer('id_location').primaryKey().generatedAlwaysAsIdentity(),
+  idLocation: integer('id_location').primaryKey().generatedByDefaultAsIdentity(),
   name: text('name').notNull(),
   typeId: integer('type_id').notNull().references(() => questTypes.idQuestType),
   teamId: integer('team_id').references(() => teams.idTeam),
@@ -75,7 +75,7 @@ export const locations = pgTable('location', {
 // --- PROGRESS A LOGY ---
 
 export const playerProgress = pgTable('player_progress', {
-  idProgress: integer('id_progress').primaryKey().generatedAlwaysAsIdentity(),
+  idProgress: integer('id_progress').primaryKey().generatedByDefaultAsIdentity(),
   playerId: integer('player_id').references(() => players.idPlayer),
   locationId: integer('location_id').references(() => locations.idLocation),
   completedAt: timestamp('completed_at').defaultNow(),
@@ -85,14 +85,14 @@ export const playerProgress = pgTable('player_progress', {
 }));
 
 export const gameSessions = pgTable('game_session', {
-  idGameSession: integer('id_game_session').primaryKey().generatedAlwaysAsIdentity(),
+  idGameSession: integer('id_game_session').primaryKey().generatedByDefaultAsIdentity(),
   date: date('date').notNull(),
   time: time('time').notNull(),
   duration: integer('duration').notNull(), // v sekundách
 });
 
 export const logs = pgTable('log', {
-  idLog: integer('id_log').primaryKey().generatedAlwaysAsIdentity(),
+  idLog: integer('id_log').primaryKey().generatedByDefaultAsIdentity(),
   gameId: integer('game_id').notNull().references(() => gameSessions.idGameSession),
   logTime: timestamp('log_time').notNull().defaultNow(),
   logTypeId: integer('log_type').notNull().references(() => logTypes.idLogType),

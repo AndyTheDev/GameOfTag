@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:dump": "npx tsx --env-file=.env scripts/dump-data.ts",
-    "db:seed": "npx tsx --env-file=.env src/db/seed.ts"
+    "db:seed": "npx tsx --env-file=.env scripts/seed.ts"
   },
   "dependencies": {
     "dotenv": "^17.2.3",
