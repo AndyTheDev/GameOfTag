@@ -52,7 +52,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: 
+      DATABASE_URL: postgres://andy:KLe9s7rHfU*f5a@postgres:5432/game_of_tag
     depends_on:
       - postgres
     cap_drop:
@@ -75,9 +75,9 @@ services:
     container_name: game_of_tag_db
     restart: always
     environment:
-      POSTGRES_USER: 
-      POSTGRES_PASSWORD: 
-      POSTGRES_DB: 
+      POSTGRES_USER: andy
+      POSTGRES_PASSWORD: KLe9s7rHfU*f5a
+      POSTGRES_DB: game_of_tag
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
