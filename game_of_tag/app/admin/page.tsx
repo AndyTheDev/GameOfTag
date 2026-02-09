@@ -42,7 +42,11 @@ export default function AdminPage() {
       setIsAuth(true);
       fetchData();
     } else {
-      setError(res.message || "Chyba");
+      if ("message" in res) {
+        setError(res.message || "Nastala neznámá chyba");
+      } else {
+        setError("Přihlášení selhalo");
+      }
     }
     setLoading(false);
   }
