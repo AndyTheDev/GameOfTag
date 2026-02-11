@@ -38,7 +38,7 @@ export const logTypes = pgTable('log_type', {
 
 export const questStatuses = pgTable('quest_status', {
   idQuestStatus: integer('id_quest_status').primaryKey().generatedByDefaultAsIdentity(),
-  name: text('name').notNull(), // Změněno na text pro "Splněno" atd.
+  name: text('name').notNull(), 
 });
 
 // --- HLAVNÍ TABULKY ---
@@ -48,7 +48,7 @@ export const quests = pgTable('quests', {
   name: text('name').notNull(),
   description: text('description').notNull(),
   questTypeId: integer('quest_type').notNull().references(() => questTypes.idQuestType),
-  timeLimit: integer('time_limit').notNull(), // v sekundách
+  timeLimit: integer('time_limit').notNull(),
 });
 
 export const players = pgTable('player', {
@@ -61,6 +61,9 @@ export const players = pgTable('player', {
   questLock: boolean('quest_lock').notNull().default(false),
   questLockEndtime: timestamp('quest_lock_endtime'),
   roleId: integer('role_id').references(() => playerRoles.idPlayerRole),
+  points: integer('points').notNull().default(0),
+  bubbleBurstTime: timestamp('bubble_burst_time'),
+  runnerShieldTime: timestamp('runner_shield_time'),
 });
 
 export const locations = pgTable('location', {
@@ -69,7 +72,6 @@ export const locations = pgTable('location', {
   typeId: integer('type_id').notNull().references(() => questTypes.idQuestType),
   teamId: integer('team_id').references(() => teams.idTeam),
   gps: text('gps').notNull(),
-  map: text('map').notNull(),
 });
 
 // --- PROGRESS A LOGY ---
@@ -97,7 +99,7 @@ export const logs = pgTable('log', {
   logTime: timestamp('log_time').notNull().defaultNow(),
   logTypeId: integer('log_type').notNull().references(() => logTypes.idLogType),
   playerId: integer('player_id').notNull().references(() => players.idPlayer),
-  locationId: integer('location_id').notNull().references(() => locations.idLocation),
+  locationId: integer('location_id').references(() => locations.idLocation),
   questId: integer('quest_id').references(() => quests.idQuest),
   questStatusId: integer('quest_status').references(() => questStatuses.idQuestStatus),
 });
