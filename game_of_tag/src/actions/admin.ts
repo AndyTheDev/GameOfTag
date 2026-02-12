@@ -44,6 +44,14 @@ type LocationInput = {
   gps: string;
 };
 
+type QuestInput = {
+  id?: number;
+  name: string;
+  description: string;
+  questTypeId: number;
+  timeLimit: number;
+};
+
 // --- AUTH ---
 export async function adminLogin(name: string, pass: string) {
   const clientKey = await getClientKey();
@@ -161,14 +169,11 @@ export async function getPlayerStatus() {
       playName: players.playName,
       team: teams.name,
       role: playerRoles.name,
-      points: players.points, // <--- TOTO JSME PŘIDALI (čteme přímo z DB)
+      points: players.points, 
     })
     .from(players)
     .leftJoin(teams, eq(players.teamId, teams.idTeam))
     .leftJoin(playerRoles, eq(players.roleId, playerRoles.idPlayerRole));
-
-    // Poznámka: Starý výpočet přes playerProgress jsem smazal, 
-    // protože teď je zdrojem pravdy sloupec players.points.
 
     // 2. Získáme poslední log každého hráče (pro zobrazení aktivity)
     const lastLogs = await db.selectDistinctOn([logs.playerId], {
@@ -199,6 +204,17 @@ export async function getPlayerStatus() {
 
   } catch (e) {
     return handleServerError("Chyba statusu.", e);
+  }
+}
+
+export async function getQuests() {
+  const session = await requireAdminSession();
+  if (!session.ok) return { success: false };
+  try {
+    const data = await db.select().from(quests).orderBy(quests.idQuest);
+    return { success: true, data };
+  } catch (e) {
+    return handleServerError("Chyba úkolů.", e);
   }
 }
 
@@ -273,5 +289,31 @@ export async function saveCheckpoint(data: LocationInput) {
   } catch (e) {
     console.error("CHYBA SAVE CHECKPOINT:", e);
     return handleServerError("Nelze uložit lokaci.", e);
+  }
+}
+
+export async function saveQuest(data: QuestInput) {
+  const session = await requireAdminSession();
+  if (!session.ok) return { success: false, message: "Neautorizováno" };
+
+  try {
+    const sanitizedData = {
+        name: data.name,
+        description: data.description,
+        questTypeId: Number(data.questTypeId),
+        timeLimit: Number(data.timeLimit)
+    };
+
+    if (data.id) {
+      // UPDATE
+      await db.update(quests).set(sanitizedData).where(eq(quests.idQuest, data.id));
+    } else {
+      // CREATE
+      await db.insert(quests).values(sanitizedData);
+    }
+    return { success: true };
+  } catch (e) {
+    console.error("CHYBA SAVE QUEST:", e);
+    return handleServerError("Nelze uložit úkol.", e);
   }
 }

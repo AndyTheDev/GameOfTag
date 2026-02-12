@@ -16,7 +16,6 @@ import { getPragueDate } from '../lib/time';
 
 // ID rolí a lokací - přizpůsob si dle své DB
 const ROLE_HUNTER_ID = 2; 
-const DEFAULT_LOCATION_ID = 1; // Nutné pro logy (NOT NULL constraint)
 
 export async function catchRunnerAction(slug: string, hunterPassword: string) {
   // 1. Validace Slugu a získání ID běžce
@@ -79,6 +78,8 @@ export async function catchRunnerAction(slug: string, hunterPassword: string) {
          return { success: false, message: 'Tento běžec má stále aktivní ochranu po předchozím chycení.' };
       }
 
+
+
       // --- EXEKUCE (Vše OK) ---
 
       // A. Updaty Lovec
@@ -110,6 +111,7 @@ export async function catchRunnerAction(slug: string, hunterPassword: string) {
         logTypeId: LOG_TYPE_CATCH,
         playerId: hunter.idPlayer,
         logTime: now,
+        caughtPlayerId: runner.idPlayer
       });
 
       // Log 9: Lovec Timeout Start (Player = Lovec)

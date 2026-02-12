@@ -1,34 +1,55 @@
 import { db } from '@/src/db';
 import { players, logs, gameSessions } from '@/src/db/schema';
-import { eq, and, lt, isNotNull, desc } from 'drizzle-orm';
+import { eq, and, lt, isNotNull, desc, sql } from 'drizzle-orm';
 import { 
+  LOG_TYPE_START,                // 1
+  LOG_TYPE_TIMEOUT,              // 2
+  LOG_TYPE_SUCCESS,              // 3
   LOG_TYPE_TIMEOUT_RESET,        // 4
   LOG_TYPE_BUBBLE_BURST,         // 8
   LOG_TYPE_HUNTER_TIMEOUT_RESET, // 10
-  ROLE_HUNTER_ID
+  ROLE_HUNTER_ID,
+  ROLE_RUNNER_ID,
+  QUEST_LIMIT_SECONDS,
+  LOCKOUT_SECONDS
 } from '@/src/constants';
 
 /**
  * Tato funkce kontroluje expirované časovače u hráčů.
  * Musí být volána pravidelně (např. každou minutu).
  */
+const GAME_ID = 1;
+
 export async function processGameTimeouts() {
+
   const now = new Date(); // Aktuální čas serveru (UTC)
+  console.log(`\n🔄 [${now.toLocaleTimeString()}] CRON START: Kontrola timeoutů...`);
+  let logsCreated = 0;
+  let errors = 0;
 
   try {
     // 1. Získáme aktivní hru pro přiřazení logů
     // Hledáme poslední vytvořenou session
-    const activeGame = await db.query.gameSessions.findFirst({
-      orderBy: [desc(gameSessions.date)],
+    // const activeGame = await db.query.gameSessions.findFirst({
+    //   orderBy: [desc(gameSessions.date)],
+    // });
+
+    // if (!activeGame) {
+    //     console.log("CRON: Žádná aktivní herní session.");
+    //     return { success: false, message: "No active game" };
+    // }
+
+    // const gameId = activeGame.idGameSession;
+    // let logsCreated = 0;
+
+    // FIX: Robustnější získání gameId. Pokud není aktivní session, vezmeme poslední nebo fallback na 1.
+    // Tím zajistíme, že CRON nezhavaruje, i když admini ještě nezaložili hru pro dnešek.
+    const lastSession = await db.query.gameSessions.findFirst({
+      orderBy: [desc(gameSessions.idGameSession)],
     });
+    const gameId = lastSession ? lastSession.idGameSession : 1;
 
-    if (!activeGame) {
-        console.log("CRON: Žádná aktivní herní session.");
-        return { success: false, message: "No active game" };
-    }
-
-    const gameId = activeGame.idGameSession;
-    let logsCreated = 0;
+    
 
     // =========================================================================
     // A. ZPRACOVÁNÍ BUBLIN (Log 8)
@@ -64,8 +85,80 @@ export async function processGameTimeouts() {
       }
     });
 
+const expiredRunners = await db.select()
+        .from(players)
+        .where(and(
+            eq(players.roleId, ROLE_RUNNER_ID),
+            isNotNull(players.questEndTime),
+            lt(players.questEndTime, now)
+        ));
+
+    if (expiredRunners.length > 0) {
+        console.log(`CRON: Nalezeno ${expiredRunners.length} expirovaných běžců.`);
+    }
+
+    for (const player of expiredRunners) {
+        try {
+            await db.transaction(async (tx) => {
+                const expirationTime = player.questEndTime || now;
+                const lockEnd = new Date(now.getTime() + LOCKOUT_SECONDS * 1000);
+
+                // Zkusíme najít poslední START log
+                const lastStartLogs = await tx.select()
+                    .from(logs)
+                    .where(and(
+                        eq(logs.playerId, player.idPlayer),
+                        eq(logs.logTypeId, LOG_TYPE_START)
+                    ))
+                    .orderBy(desc(logs.logTime))
+                    .limit(1);
+                
+                const lastLog = lastStartLogs[0];
+
+                // Zapíšeme TIMEOUT
+                await tx.insert(logs).values({
+                    gameId: gameId, // <--- OPRAVENO: Používáme dynamické gameId, ne konstantu
+                    logTypeId: LOG_TYPE_TIMEOUT,
+                    playerId: player.idPlayer,
+                    locationId: lastLog?.locationId || null, 
+                    questId: lastLog?.questId || null,
+                    logTime: expirationTime,
+                });
+
+                // Zablokujeme hráče
+                await tx.update(players)
+                    .set({ 
+                        questEndTime: null, 
+                        questLock: true,
+                        questLockEndtime: lockEnd
+                    })
+                    .where(eq(players.idPlayer, player.idPlayer));
+                
+                logsCreated++;
+                console.log(`CRON: Hráč ${player.idPlayer} (Běžec) dostal timeout.`);
+            });
+        } catch (playerError: any) {
+            // Zvýšíme počítadlo chyb
+            errors++;
+            // Formátovaný výpis chyby pro terminál
+            console.error(`\n❌ CRON ERROR [TIMEOUT LOG] | Player ID: ${player.idPlayer}`);
+            console.error(`---------------------------------------------------`);
+            console.error(`Message: ${playerError?.message || 'Unknown error'}`);
+            // Specifické pro Postgres/Drizzle (např. kód 23503 je Foreign Key Violation)
+            if (playerError?.code) {
+                console.error(`DB Code: ${playerError.code}`);
+            }
+            if (playerError?.constraint) {
+                console.error(`Constraint: ${playerError.constraint}`);
+            }
+            
+            // Stack trace pro debug, kde přesně to spadlo
+            console.error(`Stack:`, playerError?.stack);
+            console.error(`---------------------------------------------------\n`);
+        }
+    }
     // =========================================================================
-    // B. ZPRACOVÁNÍ ZÁMKŮ / TIMEOUTŮ (Log 4 a 10)
+    // C. ZPRACOVÁNÍ ZÁMKŮ / TIMEOUTŮ (Log 4 a 10)
     // Hledáme hráče, kde quest_lock_endtime < teď
     // =========================================================================
     await db.transaction(async (tx) => {

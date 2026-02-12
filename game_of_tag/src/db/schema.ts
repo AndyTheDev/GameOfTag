@@ -64,6 +64,7 @@ export const players = pgTable('player', {
   points: integer('points').notNull().default(0),
   bubbleBurstTime: timestamp('bubble_burst_time'),
   runnerShieldTime: timestamp('runner_shield_time'),
+  questEndTime: timestamp('quest_end_time'),
 });
 
 export const locations = pgTable('location', {
@@ -102,4 +103,5 @@ export const logs = pgTable('log', {
   locationId: integer('location_id').references(() => locations.idLocation),
   questId: integer('quest_id').references(() => quests.idQuest),
   questStatusId: integer('quest_status').references(() => questStatuses.idQuestStatus),
+  caughtPlayerId: integer('caught_player_id').references(() => players.idPlayer),
 });
