@@ -10,20 +10,45 @@
   "logTypes": [
     {
       "idLogType": 1,
-      "name": "info"
+      "name": "Úkol spuštěn"
     },
     {
       "idLogType": 2,
-      "name": "error"
-    },
-    {
-      "idLogType": 4,
-      "name": "checkpoint_failed"
+      "name": "Vypršel čas na úkol"
     },
     {
       "idLogType": 3,
-      "name": "checkpoint_success"
+      "name": "Úkol splněn"
+    },
+    {
+      "idLogType": 4,
+      "name": "Může opět plnit úkoly"
+    },
+    {
+      "idLogType": 5,
+      "name": "Nepřesná GPS"
+    },
+    {
+      "idLogType": 6,
+      "name": "Chycení hráče"
+    },
+    {
+      "idLogType": 7,
+      "name": "Běžec spouští bublinu"
+    },
+    {
+      "idLogType": 8,
+      "name": "Běžec si vypíná bublinu"
+    },
+    {
+      "idLogType": 9,
+      "name": "Lovec nesmí lovit"
+    },
+    {
+      "idLogType": 10,
+      "name": "Lovec může opět lovit"
     }
+
   ],
   "privilegeLevels": [
     {
@@ -55,12 +80,12 @@
       "name": "City"
     },
     {
-      "idQuestType": 3,
-      "name": "Sport"
+      "idQuestType": 2,
+      "name": "Nature"
     },
     {
-      "idQuestType": 2,
-      "name": "Skill"
+      "idQuestType": 3,
+      "name": "Mixed"
     }
   ],
   "teams": [
@@ -161,7 +186,11 @@
       "privilegeLevel": 1,
       "questLock": false,
       "questLockEndtime": null,
-      "roleId": 1
+      "roleId": 1,
+      "points": 0,
+      "bubbleBurstTime": null,
+      "runnerShieldTime": null,
+      "questEndTime": null
     },
     {
       "idPlayer": 2,
@@ -172,7 +201,11 @@
       "privilegeLevel": 1,
       "questLock": false,
       "questLockEndtime": null,
-      "roleId": 1
+      "roleId": 1,
+      "points": 0,
+      "bubbleBurstTime": null,
+      "runnerShieldTime": null,
+      "questEndTime": null
     }
   ],
   "playerRoles": [
