@@ -121,21 +121,21 @@
     {
       "idQuest": 2,
       "name": "Komu",
-      "description": "to říkáš? (typ úkolu  - městské výzvy)",
+      "description": "to říkáš? (typ úkolu 2 - city, TESTOVACÍ ÚKOL)",
       "questTypeId": 2,
       "timeLimit": 360
     },
     {
       "idQuest": 1,
       "name": "Kdo?",
-      "description": "se ptal? (typ úkolu 1 - mixed))",
+      "description": "se ptal? (typ úkolu 1 - mixed, TESTOVACÍ ÚKOL))",
       "questTypeId": 1,
       "timeLimit": 360
     },
     {
       "idQuest": 4,
       "name": "Co",
-      "description": "je na tom zajímavýho",
+      "description": "je na tom zajímavýho? (typ úkolu 3 - nature, TESTOVACÍ ÚKOL)",
       "questTypeId": 3,
       "timeLimit": 360
     }
