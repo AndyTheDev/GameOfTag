@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { db } from '../src/db/index';
 import * as schema from '../src/db/schema';
 import * as fs from 'fs';

@@ -433,32 +433,6 @@ export async function verifyAndLogQuest(locationId: number, password: string) {
             sql`${logs.logTypeId} IN (${LOG_TYPE_SUCCESS}, ${LOG_TYPE_TIMEOUT})`
         )
       });
-
-      // // Pokud NEBYL ukončen (tzn. je aktivní nebo "zombie"), řešíme ho
-      // if (!endLog) {
-      //   const startTimeMs = new Date(lastStartLog.logTime).getTime();
-      //   const limitMs = QUEST_LIMIT_SECONDS * 1000;
-        
-      //   // ZOMBIE CHECK (Fallback, pokud CRON nejel)
-      //   if (Date.now() > startTimeMs + limitMs) {
-      //     // Voláme finishQuest s timeoutem
-      //     await finishQuest(locationId, password, 'timeout');
-          
-      //     const refreshedPlayer = await db.query.players.findFirst({
-      //       where: eq(players.idPlayer, player.idPlayer)
-      //     });
-          
-      //     return {
-      //       success: true,
-      //       status: "locked",
-      //       startTime: refreshedPlayer?.questLockEndtime
-      //     };
-      //   }
-
-      //   activeQuestId = lastStartLog.questId || null;
-      //   activeStartTime = lastStartLog.logTime;
-      // }
-      // Pokud BYL ukončen (endLog existuje), activeQuestId zůstane null a kód spadne do bloku "2. NOVÝ ÚKOL", což umožní RESCAN.
     }
 
     // 2. NOVÝ ÚKOL
