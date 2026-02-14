@@ -100,6 +100,10 @@
     {
       "idTeam": 3,
       "name": "Blue"
+    },
+    {
+      "idTeam": 4,
+      "name": "Yellow"
     }
   ],
   "quests": [
@@ -116,64 +120,6 @@
       "description": "se ptal? (typ úkolu 1 - mixed))",
       "questTypeId": 1,
       "timeLimit": 360
-    }
-  ],
-  "locations": [
-    {
-      "idLocation": 1,
-      "name": "IVO",
-      "typeId": 1,
-      "teamId": 1,
-      "gps": "50.0883667N, 14.4617725E",
-      "map": "Praha"
-    },
-    {
-      "idLocation": 2,
-      "name": "IVO",
-      "typeId": 2,
-      "teamId": 1,
-      "gps": "50.0865172N, 14.4526275E",
-      "map": "Praha"
-    },
-    {
-      "idLocation": 3,
-      "name": "IVO",
-      "typeId": 1,
-      "teamId": 1,
-      "gps": "50.0841275N, 14.4342028E",
-      "map": "Praha"
-    },
-    {
-      "idLocation": 4,
-      "name": "IVO",
-      "typeId": 2,
-      "teamId": 1,
-      "gps": "50.0837200N, 14.4336000E",
-      "map": "Praha"
-    },
-    {
-      "idLocation": 5,
-      "name": "IVO",
-      "typeId": 2,
-      "teamId": 1,
-      "gps": "50.0853675N, 14.4294161E",
-      "map": "Praha"
-    },
-    {
-      "idLocation": 6,
-      "name": "IVO",
-      "typeId": 1,
-      "teamId": 1,
-      "gps": "50.0864639N, 14.4198489E",
-      "map": "Praha"
-    },
-    {
-      "idLocation": 7,
-      "name": "IVO",
-      "typeId": 2,
-      "teamId": 1,
-      "gps": "50.0965353329614N, 14.445903877565446E",
-      "map": "Praha"
     }
   ],
   "players": [

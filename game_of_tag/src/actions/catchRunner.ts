@@ -1,25 +1,26 @@
 'use server';
 
 import { db } from '@/src/db';
-import { players, logs, gameSessions } from '@/src/db/schema';
-import { eq, and, gt, desc } from 'drizzle-orm';
+import { players, logs, gameSessions, teams } from '@/src/db/schema';
+import { eq, and, gt, desc, sql } from 'drizzle-orm';
 import { 
   LOCKOUT_SECONDS, 
   RUNNER_SHIELD_TIME, 
   RUNNER_BUBBLE_TIME,
   LOG_TYPE_CATCH,
   LOG_TYPE_BUBBLE,
-  LOG_TYPE_HUNTER_TIMEOUT 
+  LOG_TYPE_HUNTER_TIMEOUT,
+  ROLE_HUNTER_ID
 } from '@/src/constants';
 import { parsePlayerIdFromSlug, validateSlug } from '@/src/lib/slug';
 import { getPragueDate } from '../lib/time';
 
-// ID rolí a lokací - přizpůsob si dle své DB
-const ROLE_HUNTER_ID = 2; 
-
 export async function catchRunnerAction(slug: string, hunterPassword: string) {
+  
   // 1. Validace Slugu a získání ID běžce
   const runnerId = parsePlayerIdFromSlug(slug);
+  console.log("TEST ROUTY, slug je:", runnerId);
+
   if (!runnerId) {
     return { success: false, message: 'Neplatný QR kód (chybný formát).' };
   }
@@ -91,6 +92,14 @@ export async function catchRunnerAction(slug: string, hunterPassword: string) {
           questLockEndtime: hunterLockEnd,
         })
         .where(eq(players.idPlayer, hunter.idPlayer));
+
+      if (hunter.teamId) {
+        await tx.update(teams)
+          .set({
+            points: sql`${teams.points} + 1`,
+          })
+          .where(eq(teams.idTeam, hunter.teamId));
+      }
 
       // B. Updaty Běžec
       const runnerShieldEnd = getPragueDate(now.getTime() + RUNNER_SHIELD_TIME * 1000);

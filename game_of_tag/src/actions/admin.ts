@@ -124,7 +124,7 @@ export async function getAdminMetadata() {
 
   try {
     const [allTeams, allRoles, allPrivileges, allQuestTypes] = await Promise.all([
-      db.select().from(teams),
+      db.select().from(teams).orderBy(teams.idTeam),
       db.select().from(playerRoles),
       db.select().from(privilegeLevels),
       db.select().from(questTypes),

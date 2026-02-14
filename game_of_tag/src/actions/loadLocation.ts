@@ -131,6 +131,109 @@ export type FindNearestResult =
       message: string 
     };
 
+// export async function findNearestCheckpoint(
+//   password: string,
+//   playerLat: number,
+//   playerLng: number,
+//   accuracy: number
+// ): Promise<FindNearestResult> {
+//   const clientKey = await getClientKey();
+//   const limit = checkRateLimit(`findNearestCheckpoint:${clientKey}`, { windowMs: 10_000, max: 15 });
+  
+//   if (!limit.allowed) {
+//     return { success: false, message: "Příliš mnoho požadavků, zkus to za chvíli." };
+//   }
+
+//   try {
+//     const validation = await validatePlayerStatus(password);
+//     if (!validation.player) { 
+//         return { success: false, message: validation.message || "Neautorizovaný přístup." };
+//     }
+//     if (!validation.valid) {
+//         return { success: false, message: validation.message || "Nemůžeš hledat checkpointy." };
+//     }
+
+//     const player = validation.player;
+
+//     if (!player.teamId) {
+//       return { success: false, message: "Hráč není přiřazen k žádnému týmu." };
+//     }
+
+//     // B. Získání POUZE ÚSPĚŠNĚ splněných lokací
+//     // Díky podmínce logTypeId === LOG_TYPE_SUCCESS se zde neobjeví lokace, 
+//     // kde hráč dostal Timeout. Tyto lokace tedy budou pro algoritmus "neviditelné" v seznamu hotových,
+//     // a proto je najde jako dostupné (což řeší tvůj Problém 1).
+//     const completedLogs = await db.query.logs.findMany({
+//       where: and(
+//         eq(logs.playerId, player.idPlayer), 
+//         eq(logs.logTypeId, LOG_TYPE_SUCCESS) 
+//       ),
+//       columns: {
+//         locationId: true
+//       }
+//     });
+
+//     const completedLocationIds = new Set(completedLogs.map(log => log.locationId));
+
+//     const teamLocations = await db.query.locations.findMany({
+//       where: eq(locations.teamId, player.teamId),
+//       columns: { idLocation: true, name: true, gps: true, typeId: true }
+//     });
+
+//     if (teamLocations.length === 0) {
+//       return { success: false, message: "Tvůj tým nemá žádné aktivní checkpointy." };
+//     }
+
+//     let nearest: { id: number; name: string; distance: number; type: number } | null = null;
+
+//     for (const loc of teamLocations) {
+//       if (completedLocationIds.has(loc.idLocation)) continue;
+
+//       const coords = parseGpsString(loc.gps);
+//       if (!coords) continue;
+
+//       const distance = haversineDistance(playerLat, playerLng, coords.lat, coords.lng);
+      
+//       if (!nearest || distance < nearest.distance) {
+//         nearest = {
+//           id: loc.idLocation,
+//           name: loc.name,
+//           distance,
+//           type: loc.typeId
+//         };
+//       }
+//     }
+
+//     if (!nearest) {
+//       return { success: false, message: "Všechny dostupné checkpointy máš splněné!" };
+//     }
+
+//     const withinRadius = nearest.distance <= CHECKPOINT_RADIUS_METERS;
+
+//     const code = `${nearest.id}-${nearest.name}`; 
+
+//     return {
+//       success: true,
+//       withinRadius,
+//       checkpoint: {
+//         id: nearest.id,
+//         name: nearest.name,
+//         code,
+//         type: nearest.type,
+//         distanceMeters: Math.round(nearest.distance),
+//         accuracyMeters: Math.round(accuracy)
+//       }
+//     };
+
+//   } catch (error) {
+//     console.error("Chyba v findNearestCheckpoint:", error);
+//     return { 
+//       success: false, 
+//       message: "Nastala neočekávaná chyba na serveru." 
+//     };
+//   }
+// }
+
 export async function findNearestCheckpoint(
   password: string,
   playerLat: number,
@@ -159,36 +262,22 @@ export async function findNearestCheckpoint(
       return { success: false, message: "Hráč není přiřazen k žádnému týmu." };
     }
 
-    // B. Získání POUZE ÚSPĚŠNĚ splněných lokací
-    // Díky podmínce logTypeId === LOG_TYPE_SUCCESS se zde neobjeví lokace, 
-    // kde hráč dostal Timeout. Tyto lokace tedy budou pro algoritmus "neviditelné" v seznamu hotových,
-    // a proto je najde jako dostupné (což řeší tvůj Problém 1).
-    const completedLogs = await db.query.logs.findMany({
+    // Získání pouze těch lokací, které patří hráčovu týmu a ještě NEBYLY splněny
+    const availableLocations = await db.query.locations.findMany({
       where: and(
-        eq(logs.playerId, player.idPlayer), 
-        eq(logs.logTypeId, LOG_TYPE_SUCCESS) 
+        eq(locations.teamId, player.teamId),
+        eq(locations.completed, false) // Tady filtrujeme nesplněné
       ),
-      columns: {
-        locationId: true
-      }
-    });
-
-    const completedLocationIds = new Set(completedLogs.map(log => log.locationId));
-
-    const teamLocations = await db.query.locations.findMany({
-      where: eq(locations.teamId, player.teamId),
       columns: { idLocation: true, name: true, gps: true, typeId: true }
     });
 
-    if (teamLocations.length === 0) {
-      return { success: false, message: "Tvůj tým nemá žádné aktivní checkpointy." };
+    if (availableLocations.length === 0) {
+      return { success: false, message: "Tvůj tým má všechny checkpointy splněné!" };
     }
 
     let nearest: { id: number; name: string; distance: number; type: number } | null = null;
 
-    for (const loc of teamLocations) {
-      if (completedLocationIds.has(loc.idLocation)) continue;
-
+    for (const loc of availableLocations) {
       const coords = parseGpsString(loc.gps);
       if (!coords) continue;
 
@@ -204,12 +293,13 @@ export async function findNearestCheckpoint(
       }
     }
 
+    // Pokud selhalo parsování GPS u všech lokací (edge case)
     if (!nearest) {
-      return { success: false, message: "Všechny dostupné checkpointy máš splněné!" };
+      return { success: false, message: "Nepodařilo se zpracovat souřadnice checkpointů." };
     }
 
     const withinRadius = nearest.distance <= CHECKPOINT_RADIUS_METERS;
-    const code = `${nearest.name}${nearest.id}`; 
+    const code = `${nearest.id}-${nearest.name}`; 
 
     return {
       success: true,
@@ -232,6 +322,8 @@ export async function findNearestCheckpoint(
     };
   }
 }
+
+
 
 export async function checkActiveQuest(password: string) {
   const validation = await validatePlayerStatus(password);
@@ -285,7 +377,7 @@ export async function checkActiveQuest(password: string) {
       return { hasActive: false };
   }
 
-  const code = `${location.name}${location.idLocation}`;
+  const code = `${location.idLocation}-${location.name}`;
 
   return { 
     hasActive: true, 
@@ -342,30 +434,30 @@ export async function verifyAndLogQuest(locationId: number, password: string) {
         )
       });
 
-      // Pokud NEBYL ukončen (tzn. je aktivní nebo "zombie"), řešíme ho
-      if (!endLog) {
-        const startTimeMs = new Date(lastStartLog.logTime).getTime();
-        const limitMs = QUEST_LIMIT_SECONDS * 1000;
+      // // Pokud NEBYL ukončen (tzn. je aktivní nebo "zombie"), řešíme ho
+      // if (!endLog) {
+      //   const startTimeMs = new Date(lastStartLog.logTime).getTime();
+      //   const limitMs = QUEST_LIMIT_SECONDS * 1000;
         
-        // ZOMBIE CHECK (Fallback, pokud CRON nejel)
-        if (Date.now() > startTimeMs + limitMs) {
-          // Voláme finishQuest s timeoutem
-          await finishQuest(locationId, password, 'timeout');
+      //   // ZOMBIE CHECK (Fallback, pokud CRON nejel)
+      //   if (Date.now() > startTimeMs + limitMs) {
+      //     // Voláme finishQuest s timeoutem
+      //     await finishQuest(locationId, password, 'timeout');
           
-          const refreshedPlayer = await db.query.players.findFirst({
-            where: eq(players.idPlayer, player.idPlayer)
-          });
+      //     const refreshedPlayer = await db.query.players.findFirst({
+      //       where: eq(players.idPlayer, player.idPlayer)
+      //     });
           
-          return {
-            success: true,
-            status: "locked",
-            startTime: refreshedPlayer?.questLockEndtime
-          };
-        }
+      //     return {
+      //       success: true,
+      //       status: "locked",
+      //       startTime: refreshedPlayer?.questLockEndtime
+      //     };
+      //   }
 
-        activeQuestId = lastStartLog.questId || null;
-        activeStartTime = lastStartLog.logTime;
-      }
+      //   activeQuestId = lastStartLog.questId || null;
+      //   activeStartTime = lastStartLog.logTime;
+      // }
       // Pokud BYL ukončen (endLog existuje), activeQuestId zůstane null a kód spadne do bloku "2. NOVÝ ÚKOL", což umožní RESCAN.
     }
 
@@ -432,17 +524,79 @@ export async function verifyAndLogQuest(locationId: number, password: string) {
   }
 }
 
+// export async function finishQuest(locationId: number, password: string, result: 'success' | 'timeout') {
+//   try {
+//     const validation = await validatePlayerStatus(password);
+//     if (!validation.player) return { success: false, message: "Hráč nenalezen." };
+//     const player = validation.player;
+
+//     const lastSession = await db.query.gameSessions.findFirst({ orderBy: [desc(gameSessions.idGameSession)]});
+//     const gameId = lastSession ? lastSession.idGameSession : 1;
+
+//     if (result === 'success') {
+//       await db.transaction(async (tx) => {
+//           await tx.insert(logs).values({
+//             gameId: gameId,
+//             logTypeId: LOG_TYPE_SUCCESS,
+//             playerId: player.idPlayer,
+//             locationId: locationId,
+//             logTime: new Date()
+//           });
+          
+//           await tx.update(players)
+//             .set({ 
+//                 points: sql`${players.points} + 1`,
+//                 questEndTime: null 
+//             }) 
+//             .where(eq(players.idPlayer, player.idPlayer));
+//       });
+//       return { success: true, status: "completed" };
+
+//     } else {
+//       const now = new Date();
+//       const lockUntil = new Date(now.getTime() + LOCKOUT_SECONDS * 1000);
+
+//       await db.transaction(async (tx) => {
+//           await tx.insert(logs).values({
+//             gameId: gameId,
+//             logTypeId: LOG_TYPE_TIMEOUT,
+//             playerId: player.idPlayer,
+//             locationId: locationId,
+//             logTime: now
+//           });
+
+//           await tx.update(players).set({
+//             questLock: true,
+//             questLockEndtime: lockUntil,
+//             questEndTime: null 
+//           }).where(eq(players.idPlayer, player.idPlayer));
+//       });
+//       return { success: true, status: "locked" };
+//     }
+
+//   } catch (e) {
+//     console.error("finishQuest error:", e);
+//     return { success: false, message: "Chyba při ukládání výsledku." };
+//   }
+// }
+
 export async function finishQuest(locationId: number, password: string, result: 'success' | 'timeout') {
   try {
     const validation = await validatePlayerStatus(password);
+    
+    // Validace hráče
     if (!validation.player) return { success: false, message: "Hráč nenalezen." };
     const player = validation.player;
 
-    const lastSession = await db.query.gameSessions.findFirst({ orderBy: [desc(gameSessions.idGameSession)]});
+    // Získání Game Session
+    const lastSession = await db.query.gameSessions.findFirst({ 
+        orderBy: [desc(gameSessions.idGameSession)]
+    });
     const gameId = lastSession ? lastSession.idGameSession : 1;
 
     if (result === 'success') {
       await db.transaction(async (tx) => {
+          // 1. Vytvoření logu (Původní logika)
           await tx.insert(logs).values({
             gameId: gameId,
             logTypeId: LOG_TYPE_SUCCESS,
@@ -451,16 +605,36 @@ export async function finishQuest(locationId: number, password: string, result: 
             logTime: new Date()
           });
           
+          // 2. Update hráče - body a odemčení (Původní logika)
           await tx.update(players)
             .set({ 
                 points: sql`${players.points} + 1`,
                 questEndTime: null 
             }) 
             .where(eq(players.idPlayer, player.idPlayer));
+
+          // 3. Update týmu - přičtení bodu (NOVÉ)
+          // Předpokládám, že player objekt má 'teamId'. Pokud ne, je třeba ho dotáhnout.
+          if (player.teamId) {
+              await tx.update(teams)
+                .set({
+                    points: sql`${teams.points} + 1` // Atomický increment
+                })
+                .where(eq(teams.idTeam, player.teamId));
+          }
+
+          // 4. Update lokace - označení jako hotové (NOVÉ)
+          await tx.update(locations)
+            .set({
+                completed: true
+            })
+            .where(eq(locations.idLocation, locationId));
       });
+
       return { success: true, status: "completed" };
 
     } else {
+      // Logika pro Timeout (beze změn v logice updates)
       const now = new Date();
       const lockUntil = new Date(now.getTime() + LOCKOUT_SECONDS * 1000);
 
@@ -479,20 +653,27 @@ export async function finishQuest(locationId: number, password: string, result: 
             questEndTime: null 
           }).where(eq(players.idPlayer, player.idPlayer));
       });
+      
       return { success: true, status: "locked" };
     }
 
   } catch (e) {
     console.error("finishQuest error:", e);
-    return { success: false, message: "Chyba při ukládání výsledku." };
+    return { success: false, message: "při ukládání výsledku." };
   }
 }
 
 export async function getLocationDetails(codeStr: string) {
-     const match = codeStr.match(/^([^\d]+)(\d+)$/);
-     if(!match) return { success: false, message: "Neplatný formát kódu." };
+     // ZMĚNA: Regex nyní hledá číslice na začátku, pak pomlčku, pak zbytek textu
+     // ^(\d+) -> zachytí ID na začátku
+     // -      -> očekává pomlčku
+     // (.*)$  -> zachytí zbytek jako název (umožňuje i pomlčky v názvu, např. 15-Namesti-Miru)
+     const match = codeStr.match(/^(\d+)-(.*)$/);
+     
+     if(!match) return { success: false, message: "Neplatný formát kódu (očekáváno ID-Nazev)." };
     
-     const id = parseInt(match[2]);
+     // První závorka v regexu je ID
+     const id = parseInt(match[1]);
 
      try {
          const loc = await db.query.locations.findFirst({
@@ -501,6 +682,9 @@ export async function getLocationDetails(codeStr: string) {
          });
         
          if (!loc) return { success: false, message: "Lokace neexistuje." };
+
+         // Volitelná kontrola: sedí i název? (pokud je to potřeba pro bezpečnost/validaci)
+         // if (loc.name !== match[2]) ...
 
          return { success: true, id: loc.idLocation, name: loc.name };
      } catch (e) {

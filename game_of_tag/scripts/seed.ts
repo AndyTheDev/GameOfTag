@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm'
 import { db } from '../src/db/index';
 import * as schema from '../src/db/schema';
 import * as fs from 'fs';
@@ -31,6 +32,36 @@ async function main() {
     if (d.players.length) await tx.insert(schema.players).values(d.players).onConflictDoNothing();
     
   });
+
+  async function resetSequences() {
+  console.log('🔄 Synchronizuji ID sekvence...');
+
+  // Seznam tabulek a jejich ID sloupců, které potřebují reset
+  const tables = [
+    { name: 'quests', column: 'id_quest' },
+    { name: 'location', column: 'id_location' },
+    { name: 'player', column: 'id_player' },
+    { name: 'log', column: 'id_log' },
+    { name: 'team', column: 'id_team' },
+    // přidej další tabulky dle potřeby
+  ];
+
+  for (const table of tables) {
+    try {
+      // Tento SQL příkaz najde MAX id a nastaví podle něj sekvenci
+      await db.execute(sql.raw(`
+        SELECT setval(
+          pg_get_serial_sequence('${table.name}', '${table.column}'),
+          COALESCE((SELECT MAX(${table.column}) FROM ${table.name}), 1)
+        );
+      `));
+      console.log(`✅ Sekvence pro '${table.name}' opravena.`);
+    } catch (error) {
+      console.warn(`⚠️ Chyba při resetu sekvence pro '${table.name}':`, error);
+      // Často to může selhat, pokud tabulka nemá sekvenci (např. uuid), to je OK.
+    }
+  }
+}
 
   console.log('🚀 Databáze je kompletně obnovena a kompatibilní.');
 }

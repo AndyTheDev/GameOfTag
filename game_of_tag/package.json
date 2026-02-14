@@ -8,7 +8,8 @@
     "start": "concurrently -n \"NEXT,WORKER\" -c \"cyan,magenta\" \"next start\" \"tsx src/worker.ts\"",
     "lint": "eslint",
     "db:dump": "npx tsx --env-file=.env scripts/dump-data.ts",
-    "db:seed": "npx tsx --env-file=.env scripts/seed.ts"
+    "db:seed": "npx tsx --env-file=.env scripts/seed.ts",
+    "db:delete-seed": "npx tsx --env-file=.env scripts/delete-seed.ts"
   },
   "dependencies": {
     "concurrently": "^9.2.1",

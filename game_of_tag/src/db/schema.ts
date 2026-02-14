@@ -14,6 +14,7 @@ import {
 export const teams = pgTable('team', {
   idTeam: integer('id_team').primaryKey().generatedByDefaultAsIdentity(),
   name: text('name').notNull(),
+  points: integer('points').notNull().default(0),
 });
 
 export const playerRoles = pgTable('player_role', {
@@ -73,6 +74,7 @@ export const locations = pgTable('location', {
   typeId: integer('type_id').notNull().references(() => questTypes.idQuestType),
   teamId: integer('team_id').references(() => teams.idTeam),
   gps: text('gps').notNull(),
+  completed: boolean('completed').default(false)
 });
 
 // --- PROGRESS A LOGY ---

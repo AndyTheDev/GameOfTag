@@ -721,17 +721,30 @@ import {
 import { 
   LOG_TYPE_SUCCESS, 
   LOG_TYPE_CATCH, 
-  LOG_TYPE_GPS_NOT_ACCURATE
+  LOG_TYPE_GPS_NOT_ACCURATE,
+  LOG_TYPE_TIMEOUT
 } from "../../src/constants";
 
-// --- STYLING HELPERS ---
-const getTeamColorClass = (teamName: string | null | undefined) => {
-  const t = teamName?.toLowerCase();
-  if (t?.includes("red")) return "text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]";
-  if (t?.includes("blue")) return "text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]";
-  if (t?.includes("green")) return "text-green-500 drop-shadow-[0_0_8px_rgba(34,197,94,0.5)]";
-  return "text-slate-400";
-};
+// // --- STYLING HELPERS ---
+// const getTeamColorClass = (teamName: string | null | undefined) => {
+//   const t = teamName?.toLowerCase();
+//   if (t?.includes("red")) return "text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]";
+//   if (t?.includes("blue")) return "text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]";
+//   if (t?.includes("green")) return "text-green-500 drop-shadow-[0_0_8px_rgba(34,197,94,0.5)]";
+//   if (t?.includes("yellow")) return "text-yellow-500 drop-shadow-[0_0_8px_rgba(255,252,128,0.8)]";
+//   return "text-slate-400";
+// };
+
+   // --- HELPERS ---
+   const getLogColor = (id: number) => {
+     switch(id) {
+       case LOG_TYPE_SUCCESS: return "text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]";
+       case LOG_TYPE_CATCH: return "text-pink font-bold drop-shadow-[0_0_5px_rgba(236,72,153,0.5)]";
+       case LOG_TYPE_GPS_NOT_ACCURATE: return "text-orange-400";
+       case LOG_TYPE_TIMEOUT: return "text-red-400"; // TIMEOUT
+       default: return "text-slate-400";
+     }
+   };
 
 // NOVÉ: Stylizace pro typy úkolů
 const getQuestTypeStyle = (typeName: string | undefined) => {
@@ -749,6 +762,52 @@ const BackgroundEffects = () => (
     <div className="fixed bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-pink-600/20 blur-[120px] rounded-full pointer-events-none z-0" />
   </>
 );
+
+// --- STYLING HELPERS (DYNAMIC) ---
+
+const getTeamTheme = (teamName: string | null | undefined) => {
+  const t = teamName?.toLowerCase() || "";
+  
+  // Seznam podporovaných barev v Tailwindu (seřazeno tak, aby se chytly časté barvy)
+  const supportedColors = [
+    "red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", 
+    "cyan", "sky", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose", 
+    "slate", "gray", "zinc", "neutral", "stone"
+  ];
+
+  // Najdeme barvu v názvu týmu, nebo použijeme defaultní "slate"
+  // Např. "Alpha Red Team" -> najde "red"
+  const color = supportedColors.find(c => t.includes(c)) || "slate";
+
+  return {
+    // Základní barva pro text a ikony
+    text: `text-${color}-500`,
+    
+    // Barva rámečku (s poloviční průhledností)
+    border: `border-${color}-500/50`,
+    
+    // Stín boxu - použijeme tmavší odstín pro hloubku
+    shadow: `shadow-${color}-900/20`,
+    
+    // Gradient pro hover efekt
+    gradientFrom: `from-${color}-500/10`,
+    
+    // Glow efekt:
+    // Trik: drop-shadow s currentColor používá aktuální barvu textu (text-*-500),
+    // takže nemusíme složitě řešit RGBA hodnoty.
+    glow: `drop-shadow-[0_0_8px_currentColor]`,
+    
+    // Helper property, kdybychom potřebovali samotný název barvy
+    rawColor: color
+  };
+};
+
+  // Wrapper pro jednoduché obarvení textu v tabulkách
+  const getTeamColorClass = (teamName: string | null | undefined) => {
+    const theme = getTeamTheme(teamName);
+    // Vrací např.: "text-blue-500 drop-shadow-[0_0_8px_currentColor]"
+    return `${theme.text} ${theme.glow}`;
+  };
 
 // --- UI COMPONENTS ---
 
@@ -870,36 +929,63 @@ export default function AdminPage() {
   }, [autoRefresh, isAuth, loadAllData]);
 
   // --- SCORE CALCULATION ---
-  const logScores = useMemo(() => {
-    const s = { red: 0, green: 0, blue: 0 };
-    logs.forEach(log => {
-      if (log.logTypeId === LOG_TYPE_SUCCESS || log.logTypeId === LOG_TYPE_CATCH) {
-        const teamName = log.playerTeam?.toLowerCase();
-        let points = 1; 
-        if (log.logTypeId === LOG_TYPE_SUCCESS && log.locationType === 2) points = 3; 
-        if (teamName?.includes("red")) s.red += points;
-        if (teamName?.includes("green")) s.green += points;
-        if (teamName?.includes("blue")) s.blue += points;
-      }
-    });
-    return s;
-  }, [logs]);
+  // const logScores = useMemo(() => {
+  //   const s = { red: 0, green: 0, blue: 0 };
+  //   logs.forEach(log => {
+  //     if (log.logTypeId === LOG_TYPE_SUCCESS || log.logTypeId === LOG_TYPE_CATCH) {
+  //       const teamName = log.playerTeam?.toLowerCase();
+  //       let points = 1; 
+  //       if (log.logTypeId === LOG_TYPE_SUCCESS && log.locationType === 2) points = 3; 
+  //       if (teamName?.includes("red")) s.red += points;
+  //       if (teamName?.includes("green")) s.green += points;
+  //       if (teamName?.includes("blue")) s.blue += points;
+  //     }
+  //   });
+  //   return s;
+  // }, [logs]);
 
-  const realScores = useMemo(() => {
-    const s = { red: 0, green: 0, blue: 0 };
-    if (!playersList.length || !meta?.teams) return s;
-    playersList.forEach(p => {
-      const team = meta.teams.find(t => t.idTeam === p.teamId);
-      if (team) {
-        const tName = team.name.toLowerCase();
-        const pts = p.points || 0;
-        if (tName.includes("red")) s.red += pts;
-        if (tName.includes("green")) s.green += pts;
-        if (tName.includes("blue")) s.blue += pts;
-      }
+  // const realScores = useMemo(() => {
+  //   const s = { red: 0, green: 0, blue: 0 };
+  //   if (!playersList.length || !meta?.teams) return s;
+  //   playersList.forEach(p => {
+  //     const team = meta.teams.find(t => t.idTeam === p.teamId);
+  //     if (team) {
+  //       const tName = team.name.toLowerCase();
+  //       const pts = p.points || 0;
+  //       if (tName.includes("red")) s.red += pts;
+  //       if (tName.includes("green")) s.green += pts;
+  //       if (tName.includes("blue")) s.blue += pts;
+  //     }
+  //   });
+  //   return s;
+  // }, [playersList, meta]);
+
+  const scoreStats = useMemo(() => {
+    // Pokud nemáme načtená metadata týmů, vrátíme prázdné pole
+    if (!meta?.teams) return [];
+
+    return meta.teams.map((team: any) => {
+      // 1. Získat body týmu přímo z tabulky TEAM (předpokládáme sloupec points)
+      const teamPointsFromDb = team.points || 0;
+
+      // 2. Spočítat sumu bodů hráčů, kteří patří do tohoto týmu
+      const playersSum = playersList
+        .filter(p => p.teamId === team.idTeam)
+        .reduce((sum, p) => sum + (p.points || 0), 0);
+
+      // 3. Kontrola integrity dat
+      const isMatch = teamPointsFromDb === playersSum;
+
+      return {
+        id: team.idTeam,
+        name: team.name,
+        displayPoints: teamPointsFromDb,
+        playersSum: playersSum,
+        isMatch: isMatch,
+        theme: getTeamTheme(team.name)
+      };
     });
-    return s;
-  }, [playersList, meta]);
+  }, [meta, playersList]);
 
   // --- EDITING HANDLERS ---
   const handleEditChange = (field: string, value: any) => {
@@ -954,7 +1040,10 @@ export default function AdminPage() {
   };
 
   const submitCheckpoint = async () => {
-      const res = await saveCheckpoint(editForm);
+      const { id, customId, ...rest } = editForm as any;
+      const payload = editingId === "new" ? rest : { ...rest, id };
+      const res = await saveCheckpoint(payload);
+      
       if (res.success) {
         setEditingId(null);
         const updated = await getCheckpoints();
@@ -987,24 +1076,30 @@ export default function AdminPage() {
   };
 
   const submitQuest = async () => {
-    const res = await saveQuest(editForm);
+    // 1. NEJDŘÍVE: Ošetření dat (Sanitizace)
+    // Zajistíme, že čísla jsou opravdu čísla. Pokud je to NaN, použijeme fallback (např. 1 nebo 0).
+    const sanitizedForm = {
+       ...editForm,
+       questTypeId: Number(editForm.questTypeId) || 1, // Pokud NaN, nastaví 1
+       timeLimit: Number(editForm.timeLimit) || 0      // Pokud NaN, nastaví 0
+    };
+
+    // 2. POTÉ: Logika pro ID (tvůj požadavek)
+    // Destrukturalizace z již opraveného objektu 'sanitizedForm'
+    const { id, ...rest } = sanitizedForm as any;
+    
+    // Pokud je "new", pošleme objekt bez ID ('rest'). Jinak celý objekt s ID.
+    const payload = editingId === "new" ? rest : sanitizedForm;
+
+    // 3. Odeslání
+    const res = await saveQuest(payload);
+    
     if (res.success) {
       setEditingId(null);
       const updated = await getQuests();
       if (updated.success && "data" in updated) setQuestsList(updated.data as any[]);
     } else {
       alert("Chyba: " + (res as any).message);
-    }
-  };
-
-  // --- HELPERS ---
-  const getLogColor = (id: number) => {
-    switch(id) {
-      case LOG_TYPE_SUCCESS: return "text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]";
-      case LOG_TYPE_CATCH: return "text- font-bold drop-shadow-[0_0_5px_rgba(236,72,153,0.5)]";
-      case LOG_TYPE_GPS_NOT_ACCURATE: return "text-orange-400";
-      case 2: return "text-red-400";
-      default: return "text-slate-400";
     }
   };
 
@@ -1064,35 +1159,45 @@ export default function AdminPage() {
         </div>
 
         {/* SCOREBOARD */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-           {['red', 'blue', 'green'].map(team => {
-             const teamKey = team as keyof typeof realScores;
-             const realScore = realScores[teamKey];
-             const logScore = logScores[teamKey];
-             const isMatch = realScore === logScore;
-             const color = team === 'red' ? 'red' : team === 'blue' ? 'blue' : 'green';
-             const borderColor = team === 'red' ? 'border-red-500/50' : team === 'blue' ? 'border-blue-500/50' : 'border-green-500/50';
-             const shadowColor = team === 'red' ? 'shadow-red-900/20' : team === 'blue' ? 'shadow-blue-900/20' : 'shadow-green-900/20';
-             
-             return (
-               <div key={team} className={`bg-slate-900/60 backdrop-blur-md border ${borderColor} p-6 rounded-2xl text-center shadow-xl ${shadowColor} relative overflow-hidden group`}>
-                 <div className={`absolute inset-0 bg-linear-to-b from-${color}-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
-                 <h3 className={`text-${color}-500 font-black uppercase tracking-[0.3em] text-sm mb-2`}>{team} TEAM</h3>
-                 <p className="text-6xl font-black text-white drop-shadow-md mb-2">{realScore}</p>
-                 <div className="text-xs font-mono border-t border-white/10 pt-2 mt-2">
-                    {isMatch ? (
+        <div className={`grid grid-cols-1 md:grid-cols-${Math.min(scoreStats.length || 3, 4)} gap-6 mb-10`}>
+           {scoreStats.length === 0 ? (
+             <div className="col-span-full text-center text-slate-500 py-8 bg-slate-900/50 rounded-2xl border border-white/5">
+               Načítám týmy nebo žádné týmy neexistují...
+             </div>
+           ) : (
+             scoreStats.map(stat => (
+               <div 
+                  key={stat.id} 
+                  className={`bg-slate-900/60 backdrop-blur-md border ${stat.theme.border} p-6 rounded-2xl text-center shadow-xl ${stat.theme.shadow} relative overflow-hidden group transition-all hover:scale-[1.02]`}
+                >
+                  {/* Dynamický gradient na pozadí */}
+                  <div className={`absolute inset-0 bg-linear-to-b ${stat.theme.gradientFrom} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
+                  
+                  {/* Název týmu s dynamickou barvou */}
+                  <h3 className={`${stat.theme.text} font-black uppercase tracking-[0.3em] text-sm mb-2 drop-shadow-sm`}>
+                    {stat.name}
+                  </h3>
+                  
+                  {/* Skóre - zde přidáváme glow efekt podle barvy týmu */}
+                  <p className={`text-6xl font-black text-white mb-2 ${stat.theme.glow}`}>
+                    {stat.displayPoints}
+                  </p>
+                  
+                  {/* Zbytek karty... */}
+                  <div className="text-xs font-mono border-t border-white/10 pt-2 mt-2">
+                    {stat.isMatch ? (
                         <span className="text-slate-500 flex items-center justify-center gap-1 opacity-70">
-                          <span className="text-green-500">✓</span> Skóre sedí s logy
+                          <span className="text-green-500">✓</span> DB Integrity OK
                         </span>
                     ) : (
                         <span className="text-orange-400 font-bold flex items-center justify-center gap-1 animate-pulse">
-                          <span className="text-red-500">⚠</span> Nesedí! Logy: {logScore}
+                          <span className="text-red-500">⚠</span> Chyba součtu: {stat.playersSum}
                         </span>
                     )}
-                 </div>
-               </div>
-             )
-           })}
+                  </div>
+                </div>
+             ))
+           )}
         </div>
 
         {/* TABS & CONTENT */}
@@ -1330,7 +1435,7 @@ export default function AdminPage() {
                   <div className="mb-8 bg-slate-800/50 backdrop-blur border border-/30 p-6 rounded-2xl shadow-[0_0_30px_rgba(236,72,153,0.1)]">
                     <h3 className="text-pink-400 mb-6 font-bold uppercase tracking-widest text-sm border-b border-white/5 pb-2">Nový Checkpoint</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                      <div className="col-span-2 md:col-span-1">
+                      {/* <div className="col-span-2 md:col-span-1">
                           <label className="text-xs text-slate-500 uppercase mb-1 block">ID (Volitelné)</label>
                           <input 
                               className="w-full bg-slate-900 p-2 rounded text-white border border-slate-700 placeholder-slate-600" 
@@ -1339,7 +1444,7 @@ export default function AdminPage() {
                               type="number"
                               onChange={e => handleEditChange('customId', e.target.value)} 
                           />
-                      </div>
+                      </div> */}
                       <div>
                         <label className="text-xs text-slate-500 uppercase mb-1 block">Název</label>
                         <InputField value={editForm.name} onChange={(e: any) => handleEditChange('name', e.target.value)} />

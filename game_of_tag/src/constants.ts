@@ -3,7 +3,7 @@ export const ROLE_RUNNER_ID = 1;
 export const ROLE_HUNTER_ID = 2;
 
 // Pro měření GPS polohy
-export const CHECKPOINT_RADIUS_METERS = 20;
+export const CHECKPOINT_RADIUS_METERS = 600;
 export const GPS_TIMEOUT_MS = 15000;
 
 // Pro plnění úkolů
