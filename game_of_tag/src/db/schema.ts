@@ -15,6 +15,8 @@ export const teams = pgTable('team', {
   idTeam: integer('id_team').primaryKey().generatedByDefaultAsIdentity(),
   name: text('name').notNull(),
   points: integer('points').notNull().default(0),
+  map: text('map'),
+  life360: text('life360')
 });
 
 export const playerRoles = pgTable('player_role', {
