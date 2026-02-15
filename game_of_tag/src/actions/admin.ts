@@ -317,3 +317,61 @@ export async function saveQuest(data: QuestInput) {
     return handleServerError("Nelze uložit úkol.", e);
   }
 }
+
+export async function saveTeam(data: any) {
+  try {
+    const parsedPoints = Number(data.points) || 0;
+
+    // Vytvoříme čistý objekt pouze s povinnými daty
+    const teamData: any = {
+      name: data.name,
+      points: parsedPoints,
+    };
+    
+    // Volitelné sloupce přidáme do objektu POUZE tehdy, 
+    // pokud je uživatel vyplnil (nejsou prázdné nebo null)
+    if (data.map && data.map.trim() !== "") {
+      teamData.map = data.map.trim();
+    }
+    if (data.life360 && data.life360.trim() !== "") {
+      teamData.life360 = data.life360.trim();
+    }
+
+    if (data.id) {
+      // UPDATE existujícího týmu
+      await db.update(teams)
+        .set(teamData)
+        .where(eq(teams.idTeam, data.id));
+    } else {
+      // INSERT nového týmu
+      await db.insert(teams).values(teamData);
+    }
+    
+    return { success: true };
+  } catch (error: any) {
+    // Tady si vypíšeme celou chybu do konzole serveru, 
+    // kdyby to náhodou padalo dál (např. chybějící sloupec).
+    console.error("🛑 DB Error saveTeam:", error); 
+    
+    return { success: false, message: error.message };
+  }
+}
+
+export async function deleteTeam(teamId: number) {
+  try {
+    await db.delete(teams).where(eq(teams.idTeam, teamId));
+    return { success: true };
+  } catch (error: any) {
+    console.error("🛑 DB Error deleteTeam:", error);
+    
+    // Kód 23503 je PostgreSQL chyba pro porušení cizího klíče (Foreign Key Violation)
+    if (error.code === '23503') {
+      return { 
+        success: false, 
+        message: "Nelze smazat tým, protože má stále přiřazené hráče nebo checkpointy. Nejprve je musíš smazat nebo přesunout do jiného týmu." 
+      };
+    }
+    
+    return { success: false, message: error.message };
+  }
+}

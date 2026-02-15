@@ -5,7 +5,7 @@ import {
   adminLogin, adminLogout, getFullLogs, 
   getPlayers, savePlayer, getCheckpoints, saveCheckpoint, 
   getAdminMetadata, getPlayerStatus,
-  getQuests, saveQuest 
+  getQuests, saveQuest, saveTeam, deleteTeam
 } from "../../src/actions/admin";
 import { 
   LOG_TYPE_SUCCESS, 
@@ -19,7 +19,7 @@ import {
      switch(id) {
        case LOG_TYPE_SUCCESS: return "text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]";
        case LOG_TYPE_CATCH: return "text-pink font-bold drop-shadow-[0_0_5px_rgba(236,72,153,0.5)]";
-       case LOG_TYPE_GPS_NOT_ACCURATE: return "text-orange-400";
+       case LOG_TYPE_GPS_NOT_ACCURATE: return "text-yellow-500";
        case LOG_TYPE_TIMEOUT: return "text-red-400"; // TIMEOUT
        default: return "text-slate-400";
      }
@@ -137,14 +137,14 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState("");
 
   // Data & Tabs
-  const [activeTab, setActiveTab] = useState<"logs" | "players" | "status" | "checkpoints" | "quests">("logs");
+  const [activeTab, setActiveTab] = useState<"logs" | "players" | "status" | "checkpoints" | "quests" | "teams">("logs");
   
   const [logs, setLogs] = useState<any[]>([]);
   const [playersList, setPlayersList] = useState<any[]>([]);
   const [checkpointsList, setCheckpointsList] = useState<any[]>([]);
   const [questsList, setQuestsList] = useState<any[]>([]);
   const [statusList, setStatusList] = useState<any[]>([]);
-  
+
   const [meta, setMeta] = useState<{teams: any[], roles: any[], privileges: any[], types: any[]} | null>(null);
 
   // Filters
@@ -153,7 +153,7 @@ export default function AdminPage() {
   const [questFilter, setQuestFilter] = useState<number | "all">("all"); // NOVÉ: Filtr pro úkoly
 
   // Editing State
-  const [editingId, setEditingId] = useState<number | "new" | null>(null);
+  const [editingId, setEditingId] = useState<number | string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
 
   // --- INITIAL LOAD & AUTH ---
@@ -350,6 +350,63 @@ export default function AdminPage() {
     }
   };
 
+  // --- STATISTIKY TÝMŮ ---
+  const enrichedTeams = useMemo(() => {
+    if (!meta?.teams) return [];
+    
+    return [...meta.teams].map(t => {
+      const pCount = playersList.filter(p => p.teamId === t.idTeam).length;
+      const cpCount = checkpointsList.filter(cp => cp.teamId === t.idTeam).length;
+      // Odhad splněných úkolů pomocí logů (bez nutnosti dalšího DB dotazu)
+      const completedCount = logs.filter(l => l.logTypeId === LOG_TYPE_SUCCESS && l.playerTeam === t.name).length;
+      
+      return { ...t, pCount, cpCount, completedCount };
+    }).sort((a, b) => (b.points || 0) - (a.points || 0)); // Řazení podle nasbíraných bodů
+  }, [meta?.teams, playersList, checkpointsList, logs]);
+
+  // --- TEAMS HANDLERS ---
+  const startEditTeam = (team: any) => {
+    setEditingId(`team_${team.idTeam}`); // prefix, aby se to netlouklo s ID z jiných tabů
+    setEditForm({
+      id: team.idTeam,
+      name: team.name,
+      points: team.points,
+      map: team.map || "",
+      life360: team.life360 || ""
+    });
+  };
+
+  const startCreateTeam = () => {
+    setEditingId("new_team");
+    setEditForm({ name: "", points: 0, map: "", life360: "" });
+  };
+
+  const submitTeam = async () => {
+    const payload = editingId === "new_team" ? { ...editForm } : { ...editForm, id: editForm.id };
+    const res = await saveTeam(payload);
+    
+    if (res.success) {
+      setEditingId(null);
+      loadAllData(); // Refreshne celou stránku, čímž se zaktualizuje meta.teams i statistiky
+    } else {
+      alert("Chyba: " + (res as any).message);
+    }
+  };
+
+  const handleDeleteTeam = async (id: number) => {
+    if (!window.confirm("Opravdu chceš smazat tento tým? Tuto akci nelze vrátit zpět.")) {
+      return;
+    }
+
+    const res = await deleteTeam(id);
+    if (res.success) {
+      setEditingId(null);
+      loadAllData(); // Zaktualizuje tabulku na frontendu
+    } else {
+      alert("Chyba při mazání: " + (res as any).message);
+    }
+  };
+
   // --- RENDER LOGIN ---
   if (!isAuth) {
     return (
@@ -457,6 +514,7 @@ export default function AdminPage() {
             <TabButton active={activeTab === 'players'} label="Hráči" onClick={() => setActiveTab('players')} />
             <TabButton active={activeTab === 'checkpoints'} label="Checkpointy" onClick={() => setActiveTab('checkpoints')} />
             <TabButton active={activeTab === 'quests'} label="Úkoly" onClick={() => setActiveTab('quests')} />
+            <TabButton active={activeTab === 'teams'} label="Týmy" onClick={() => setActiveTab('teams')} />
           </div>
 
           <div className="p-6">
@@ -720,53 +778,80 @@ export default function AdminPage() {
                     </div>
                   </div>
                 )}
-
                 <div className="grid grid-cols-1 gap-3">
                   {checkpointsList.map(cp => {
-                     const teamName = meta?.teams.find(t => t.idTeam === cp.teamId)?.name;
-                     return (
-                      <div key={cp.idLocation} className="bg-black/20 rounded-xl border border-white/5 hover:border-/30 transition-all group">
+                    const teamName = meta?.teams.find(t => t.idTeam === cp.teamId)?.name;
+                    return (
+                      <div key={cp.idLocation} className="bg-black/20 rounded-xl border border-white/5 hover:border-white/30 transition-all group">
                         <div className="p-4 flex justify-between items-center">
                           <div>
                             <span className="text-slate-500 font-mono mr-2">#{cp.idLocation}</span>
                             <span className="text-white font-bold text-lg group-hover:text-pink-300 transition-colors">{cp.name}</span>
-                            <div className="text-xs text-slate-500 mt-1 flex gap-3">
+                            <div className="text-xs text-slate-500 mt-1 flex items-center gap-3">
                               <span>Typ: <span className="text-slate-300">{meta?.types.find(t => t.idQuestType === cp.typeId)?.name}</span></span>
                               <span className="text-slate-600">|</span>
                               <span>Vlastník: <span className={`font-bold uppercase ${getTeamColorClass(teamName)}`}>{teamName || "Všichni"}</span></span>
+                              <span className="text-slate-600">|</span>
+                              
+                              {/* --- NOVÝ BLOK: Indikátor stavu splnění --- */}
+                              <span className={`px-2 py-0.5 rounded border ${
+                                cp.completed 
+                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                                  : 'bg-slate-800/50 text-slate-400 border-slate-700/50'
+                              }`}>
+                                {cp.completed ? '✓ Splněno' : 'Aktivní'}
+                              </span>
+                              {/* ------------------------------------------ */}
+                              
                             </div>
                           </div>
-                           <ActionButton onClick={() => editingId === cp.idLocation ? setEditingId(null) : startEditCheckpoint(cp)} variant="secondary">
+                          <ActionButton onClick={() => editingId === cp.idLocation ? setEditingId(null) : startEditCheckpoint(cp)} variant="secondary">
                             {editingId === cp.idLocation ? "Zavřít" : "Upravit"}
                           </ActionButton>
                         </div>
 
                         {editingId === cp.idLocation && (
-                           <div className="p-6 border-t border-white/5 bg-slate-900/50">
+                          <div className="p-6 border-t border-white/5 bg-slate-900/50">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                               <div><label className="text-xs text-slate-500 uppercase mb-1 block">Název</label><InputField value={editForm.name} onChange={(e: any) => handleEditChange('name', e.target.value)} /></div>
                               <div><label className="text-xs text-slate-500 uppercase mb-1 block">GPS</label><InputField value={editForm.gps} onChange={(e: any) => handleEditChange('gps', e.target.value)} /></div>
                               <div>
-                                 <label className="text-xs text-slate-500 uppercase mb-1 block">Typ</label>
-                                 <SelectField value={editForm.typeId} onChange={(e: any) => handleEditChange('typeId', Number(e.target.value))}>
-                                   {meta?.types.map(t => <option key={t.idQuestType} value={t.idQuestType}>{t.name}</option>)}
-                                 </SelectField>
+                                <label className="text-xs text-slate-500 uppercase mb-1 block">Typ</label>
+                                <SelectField value={editForm.typeId} onChange={(e: any) => handleEditChange('typeId', Number(e.target.value))}>
+                                  {meta?.types.map(t => <option key={t.idQuestType} value={t.idQuestType}>{t.name}</option>)}
+                                </SelectField>
                               </div>
                               <div>
-                                 <label className="text-xs text-slate-500 uppercase mb-1 block">Vlastník</label>
-                                 <SelectField value={editForm.teamId || ""} onChange={(e: any) => handleEditChange('teamId', e.target.value ? Number(e.target.value) : null)}>
-                                   <option value="">-- Žádný tým --</option>
-                                   {meta?.teams.map(t => <option key={t.idTeam} value={t.idTeam}>{t.name}</option>)}
-                                 </SelectField>
+                                <label className="text-xs text-slate-500 uppercase mb-1 block">Vlastník</label>
+                                <SelectField value={editForm.teamId || ""} onChange={(e: any) => handleEditChange('teamId', e.target.value ? Number(e.target.value) : null)}>
+                                  <option value="">-- Žádný tým --</option>
+                                  {meta?.teams.map(t => <option key={t.idTeam} value={t.idTeam}>{t.name}</option>)}
+                                </SelectField>
                               </div>
+                              
+                              {/* --- NOVÝ BLOK: Editace stavu ve formuláři --- */}
+                              <div className="flex items-center gap-3 pt-6">
+                                <input 
+                                  type="checkbox" 
+                                  id={`completed-edit-${cp.idLocation}`}
+                                  checked={editForm.completed || false}
+                                  onChange={(e: any) => handleEditChange('completed', e.target.checked)}
+                                  className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-pink focus:ring-pink focus:ring-offset-slate-900 cursor-pointer"
+                                />
+                                <label htmlFor={`completed-edit-${cp.idLocation}`} className="text-sm text-slate-300 cursor-pointer">
+                                  Označit checkpoint jako splněný
+                                </label>
+                              </div>
+                              {/* --------------------------------------------- */}
+                              
                             </div>
                             <div className="flex justify-end">
-                               <ActionButton onClick={submitCheckpoint}>Uložit změny</ActionButton>
+                              <ActionButton onClick={submitCheckpoint}>Uložit změny</ActionButton>
                             </div>
                           </div>
                         )}
                       </div>
-                     );
+                    );
                   })}
                 </div>
               </div>
@@ -900,6 +985,101 @@ export default function AdminPage() {
                         )}
                       </div>
                       );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* --- TAB: TÝMY --- */}
+            {activeTab === 'teams' && (
+              <div className="animate-in fade-in zoom-in-95 duration-300">
+                <div className="mb-6">
+                  <ActionButton onClick={startCreateTeam}>+ Nový Tým</ActionButton>
+                </div>
+
+                {/* FORMULÁŘ PRO TÝM */}
+                {(editingId === 'new_team' || (typeof editingId === 'string' && editingId.startsWith('team_'))) && (
+                  <div className="mb-8 bg-slate-800/50 backdrop-blur border border-purple-500/30 p-6 rounded-2xl shadow-[0_0_30px_rgba(168,85,247,0.1)]">
+                    <h3 className="text-purple-400 mb-6 font-bold uppercase tracking-widest text-sm border-b border-white/5 pb-2">
+                      {editingId === 'new_team' ? "Nový Tým" : "Úprava Týmu"}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                      <div>
+                        <label className="text-xs text-slate-500 uppercase mb-1 block">Název Týmu</label>
+                        <InputField value={editForm.name} onChange={(e: any) => handleEditChange('name', e.target.value)} />
+                      </div>
+                      <div>
+                        <label className="text-xs text-slate-500 uppercase mb-1 block">Body</label>
+                        <InputField type="number" value={editForm.points} onChange={(e: any) => handleEditChange('points', e.target.value)} />
+                      </div>
+                      <div>
+                        <label className="text-xs text-slate-500 uppercase mb-1 block">Odkaz na mapu (volitelné)</label>
+                        <InputField value={editForm.map} onChange={(e: any) => handleEditChange('map', e.target.value)} />
+                      </div>
+                      <div>
+                        <label className="text-xs text-slate-500 uppercase mb-1 block">Life360 Skupina (volitelné)</label>
+                        <InputField value={editForm.life360} onChange={(e: any) => handleEditChange('life360', e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="flex gap-3 justify-end">
+                      {editingId !== 'new_team' && (
+                        <div className="mr-auto"> {/* Odstrčí tlačítko doleva */}
+                          <ActionButton onClick={() => handleDeleteTeam(editForm.id)} variant="secondary">
+                            <span className="text-red-500 hover:text-red-400 transition-colors">Smazat Tým</span>
+                          </ActionButton>
+                        </div>
+                      )}
+                      <ActionButton onClick={() => setEditingId(null)} variant="secondary">Zrušit</ActionButton>
+                      <ActionButton onClick={submitTeam}>Uložit Tým</ActionButton>
+                    </div>
+                  </div>
+                )}
+
+                {/* VÝPIS TÝMŮ VČETNĚ STATISTIK */}
+                <div className="grid grid-cols-1 gap-3">
+                  {enrichedTeams.map(team => {
+                    const tTheme = getTeamTheme(team.name);
+                    return (
+                      <div key={team.idTeam} className={`bg-black/20 rounded-xl border border-white/5 transition-all group hover:${tTheme.border}`}>
+                        <div className="p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                          
+                          <div className="flex-1">
+                            <div className="flex items-baseline gap-3">
+                               <span className="text-slate-500 font-mono text-sm">#{team.idTeam}</span>
+                               <span className={`font-black text-xl uppercase tracking-widest ${getTeamColorClass(team.name)}`}>
+                                 {team.name}
+                               </span>
+                            </div>
+                            
+                            {/* STATISTIKY TÝMU */}
+                            <div className="flex flex-wrap gap-4 mt-3 text-sm">
+                              <div className="bg-slate-900/80 px-3 py-1.5 rounded-lg border border-white/5 flex items-center gap-2">
+                                <span className="text-slate-500">Skóre:</span>
+                                <span className="text-white font-bold">{team.points}</span>
+                              </div>
+                              <div className="bg-slate-900/80 px-3 py-1.5 rounded-lg border border-white/5 flex items-center gap-2">
+                                <span className="text-slate-500">Hráčů:</span>
+                                <span className="text-white font-bold">{team.pCount}</span>
+                              </div>
+                              <div className="bg-slate-900/80 px-3 py-1.5 rounded-lg border border-white/5 flex items-center gap-2">
+                                <span className="text-slate-500">Vlastní CP:</span>
+                                <span className="text-white font-bold">{team.cpCount}</span>
+                              </div>
+                              <div className="bg-slate-900/80 px-3 py-1.5 rounded-lg border border-white/5 flex items-center gap-2">
+                                <span className="text-slate-500">Splněno CP:</span>
+                                <span className="text-green-400 font-bold drop-shadow-[0_0_3px_rgba(74,222,128,0.5)]">{team.completedCount}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="shrink-0">
+                            <ActionButton onClick={() => editingId === `team_${team.idTeam}` ? setEditingId(null) : startEditTeam(team)} variant="secondary">
+                               {editingId === `team_${team.idTeam}` ? "Zavřít" : "Upravit"}
+                            </ActionButton>
+                          </div>
+                        </div>
+                      </div>
+                    );
                   })}
                 </div>
               </div>

@@ -75,7 +75,7 @@ export const CatchForm = ({ slug }: CatchFormProps) => {
           </label>
           <input
             id="hunter-pass"
-            type="password"
+            type="text"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={status === 'loading'}

@@ -2,7 +2,12 @@
 
 import { ReactNode, useState } from "react";
 import { useRouter } from "next/navigation";
-import { findNearestCheckpoint, verifyPlayer, checkActiveQuest, logGpsError } from "@/src/actions/loadLocation"; // PŘIDÁN IMPORT
+import {
+  findNearestCheckpoint,
+  verifyPlayer,
+  checkActiveQuest,
+  logGpsError,
+  verifyManualCheckpoint } from "@/src/actions/loadLocation";
 import { Header } from "@/src/components/Header";
 import { Footer } from "@/src/components/Footer";
 import { CHECKPOINT_RADIUS_METERS, GPS_TIMEOUT_MS } from '../../src/constants';
@@ -10,7 +15,7 @@ import Link from "next/link";
 import CheckpointForm from "@/src/components/CheckpointForm";
 
 type LocationState = "idle" | "loading" | "error" | "found" | "not_in_range";
-type ViewMode = "login" | "gps" | "quest"; 
+type ViewMode = "login" | "gps" | "quest" | "manual";
 
 type CheckpointResult = {
   id: number;
@@ -39,6 +44,9 @@ export default function GamePage() {
   const [errorMessageBlock, setErrorMessageBlock] = useState<ReactNode>("");
   const [nearestCheckpoint, setNearestCheckpoint] = useState<CheckpointResult | null>(null);
   const [accuracyMeters, setAccuracyMeters] = useState<number>(0);
+
+  const [manualCode, setManualCode] = useState("");
+  const [isVerifyingManual, setIsVerifyingManual] = useState(false);
 
   async function handleLogin() {
     if (!password) {
@@ -71,6 +79,32 @@ export default function GamePage() {
         setAuthError("Chyba připojení.");
     } finally {
         setIsVerifying(false);
+    }
+  }
+
+  async function handleManualSubmit() {
+    if (!manualCode.trim()) {
+      setErrorMessage("Musíš zadat kód checkpointu.");
+      return;
+    }
+
+    setIsVerifyingManual(true);
+    setErrorMessage("");
+
+    try {
+      const result = await verifyManualCheckpoint(password, manualCode.trim());
+      
+      if (result.success && result.checkpoint) {
+        // Simulujeme stejný flow jako u GPS
+        setActiveQuestCode(result.checkpoint.code);
+        setViewMode("quest");
+      } else {
+        setErrorMessage(result.message || "Neplatný kód checkpointu.");
+      }
+    } catch (e) {
+      setErrorMessage("Chyba při ověřování kódu.");
+    } finally {
+      setIsVerifyingManual(false);
     }
   }
 
@@ -201,7 +235,7 @@ export default function GamePage() {
     }
   }
 
-  return (
+return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header type="basic" backgroundColor="light" />
 
@@ -211,7 +245,7 @@ export default function GamePage() {
 
         <div className="relative z-10 w-full max-w-2xl flex flex-col items-center text-center gap-8">
           
-          {viewMode !== "quest" && (
+          {viewMode !== "quest" && viewMode !== "manual" && (
             <div>
               <h2 className="text-purple">Načíst checkpoint</h2>
               <p className="text-gray-light text-lg">
@@ -219,6 +253,17 @@ export default function GamePage() {
                   ? "Ověř svou polohu a checkpoint se načte automaticky" 
                   : "Pro pokračování se prosím identifikuj"}
               </p>
+            </div>
+          )}
+
+          {viewMode === "manual" && (
+            <div>
+              <h2 className="text-purple">Zadat kód</h2>
+              <p className="text-gray-light text-lg">
+                Pokud ti nefunguje GPS dostatečně přesně, nelze se dostat na přesnou lokaci nebo nastal jiný problém, volej <a href="tel:+420603966663" className="text-purple font-bold hover:text-pink transition-colors">+420 603 966 663</a> nebo <a href="tel:+420775014602" className="text-purple font-bold hover:text-pink transition-colors">+420 775 014 602</a> a my ti <b>po zaslání screenshotu, kde je vidět, že jsi na místě svého checkpointu</b>, pošleme kód k manuálnímu odemčení
+              </p>
+              <br />
+              <b className="text-gray-light text-lg text-bold">Toto je záložní varianta, je určena pro výjimečné situace.</b>
             </div>
           )}
 
@@ -233,12 +278,13 @@ export default function GamePage() {
 
           {viewMode !== "quest" && (
              <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-sm border-2 border-pink-50">
+               
+               {/* 1. BLOK: PŘIHLÁŠENÍ */}
                {!isAuthenticated && (
                   <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                       <div className="flex flex-col items-start gap-2">
                           <label className="text-sm font-bold text-gray-dark ml-1">Zadej své heslo:</label>
                           <input 
-
                               value={password}
                               onChange={(e) => setPassword(e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
@@ -263,6 +309,7 @@ export default function GamePage() {
                   </div>
                )}
 
+               {/* 2. BLOK: GPS ZAMĚŘENÍ */}
                {isAuthenticated && viewMode === "gps" && (
                    <div className="animate-in fade-in zoom-in-95 duration-500">
                      <div className="rounded-2xl p-4 mb-6 flex items-center justify-between bg-purple-25/30">
@@ -335,11 +382,49 @@ export default function GamePage() {
                             <p className="text-gray-dark">{errorMessageBlock || errorMessage}</p>
                           </div>
                           <button onClick={handleLoadCheckpoint} className="w-full bg-pink text-purple py-3 rounded-2xl font-bold">Zkusit znovu</button>
-                          <Link href="https://www.gameoftag.cz" className="underline text-sm text-purple mt-2">Manuální vyhledání</Link>
+                          <button onClick={() => { setViewMode("manual"); setErrorMessage(""); }} className="underline text-sm bg-white text-purple border-purple mt-2 hover:text-pink transition-colors">Manuální vyhledání</button>
                        </div>
                      )}
                    </div>
                )}
+
+               {/* 3. BLOK: MANUÁLNÍ ZADÁNÍ KÓDU (Tento blok musel jít ven z GPS bloku!) */}
+               {isAuthenticated && viewMode === "manual" && (
+                   <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                       <div className="flex flex-col items-start gap-2">
+                           <label className="text-sm font-bold text-gray-dark ml-1">Kód checkpointu:</label>
+                           <input 
+                               value={manualCode}
+                               onChange={(e) => setManualCode(e.target.value)}
+                               onKeyDown={(e) => e.key === 'Enter' && handleManualSubmit()}
+                               placeholder="např. 12-Socha-Husa"
+                               className="w-full px-4 py-3 rounded-xl border-2 border-purple-25 bg-gray-50 text-dark-gray focus:outline-none focus:border-purple transition-colors"
+                           />
+                       </div>
+                       
+                       {errorMessage && (
+                           <div className="text-red-600 bg-red-200 p-4 rounded-xl text-md font-medium text-left">
+                               {errorMessage}
+                           </div>
+                       )}
+
+                       <button
+                           onClick={handleManualSubmit}
+                           disabled={isVerifyingManual}
+                           className="w-full mt-2 bg-purple text-white py-3 px-6 rounded-2xl font-bold text-lg hover:bg-purple-75 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100"
+                       >
+                           {isVerifyingManual ? "Ověřuji kód..." : "Odemknout checkpoint"}
+                       </button>
+
+                       <button 
+                           onClick={() => { setViewMode("gps"); setErrorMessage(""); setManualCode(""); }} 
+                           className="underline text-sm text-dark-gray mt-2 hover:text-purple transition-colors"
+                       >
+                           Zpět na zaměření přes GPS
+                       </button>
+                   </div>
+               )}
+
              </div>
           )}
         </div>

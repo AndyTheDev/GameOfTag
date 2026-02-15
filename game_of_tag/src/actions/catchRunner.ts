@@ -60,6 +60,11 @@ export async function catchRunnerAction(slug: string, hunterPassword: string) {
         return { success: false, message: 'Jako běžec nemůžeš chytat jiné běžce!' };
       }
 
+      // Není náhodou chycený hráč lovec?
+      if (runner.roleId === ROLE_HUNTER_ID) {
+        return { success: false, message: 'Nemůžeš chytit jiného lovce!' };
+      }
+
       // Jsou ve stejném týmu?
       if (hunter.teamId === runner.teamId) {
         return { success: false, message: 'Nemůžeš chytit běžce z vlastního týmu!' };

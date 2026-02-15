@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { getLocationDetails, verifyAndLogQuest, finishQuest } from "../actions/loadLocation"; 
 import { QUEST_LIMIT_SECONDS, LOCKOUT_SECONDS } from "../constants";
+import { Button } from "./Button";
 
 // Přidali jsme savedPassword
 type Props = { 
@@ -295,7 +296,13 @@ export default function CheckpointForm({ initialCode, savedPassword }: Props) {
           <div className="text-center py-6 animate-in zoom-in">
               <div className="text-6xl mb-4">🏆</div>
               <h3 className="text-2xl font-bold text-purple mb-2">Splněno!</h3>
-              <p className="text-gray-dark">Checkpoint {locationName} je tvůj.</p>
+              <p className="text-gray-dark">Checkpoint <b className="text-purple">{locationName}</b> je splněn. Tvůj tým získává <b className="text-purple">1 bod!</b></p>
+              <br />
+              <p className="text-gray-dark">Tento checkpoint už nikdo jiný z tvého týmu nemůže splnit. <b className="text-purple">Dej jim o tom vědět!</b></p>
+              <br />
+              <button onClick={() => window.location.reload()} className="flex-1 rounded-2xl bg-purple py-4 px-10 font-bold text-white hover:bg-purple-75 transition-all">
+                Zpět na skenování checkpointů
+              </button>
           </div>
       )}
     </div>

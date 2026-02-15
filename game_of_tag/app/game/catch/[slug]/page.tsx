@@ -38,7 +38,7 @@ export default async function CatchPage({ params }: PageProps) {
             <h2 className="text-purple">Chycení běžce</h2>
             
             <div className="mt-2 p-6 bg-white rounded-2xl w-md shadow-sm border border-white-light">
-              <p className="text-dark-gray text-sm uppercase tracking-widest mb-1">Našel jsi hráče</p>
+              <p className="text-dark-gray text-sm uppercase tracking-widest mb-1">Chytil jsi hráče</p>
               <h3 className="text-pink text-4xl font-bold mb-2">{runner.name}</h3>
               {runner.teamName && (
                 <div className="inline-block px-4 py-1 rounded-full bg-purple/10">
