@@ -10,6 +10,7 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
+
 ENV NODE_ENV production
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
@@ -20,6 +21,7 @@ EXPOSE 3000
 
 RUN chown -R node:node /app
 USER node
-
 CMD ["npm", "run", "start"]
+
+
 

@@ -12,7 +12,7 @@ import { Button } from '@/src/components/Button';
 
 export default function Home() {
   return (
-    <div className='relative w-full overflow-x-hidden'>
+    <div className='relative w-full overflow-hidden'>
       <Header 
           type='basic'
           backgroundColor='light'
@@ -26,12 +26,12 @@ export default function Home() {
         <div className="absolute pointer-events-none overflow-hidden top-[-40] left-[-100] w-4xl h-[768px] opacity-20 bg-[radial-gradient(ellipse_70.71%_70.71%_at_50.00%_50.00%,var(--color-pink)_0%,rgba(255,54,184,0)_70%)] blur-3xl" />
         <div className="absolute pointer-events-none overflow-hidden top-350 right-20 w-4xl h-[768px] opacity-20 bg-[radial-gradient(ellipse_70.71%_70.71%_at_50.00%_50.00%,var(--color-pink)_0%,rgba(255,54,184,0)_70%)] blur-3xl" />
         <div className="absolute pointer-events-none overflow-hidden top-80 right-[-40] w-4xl h-[768px] opacity-20 bg-[radial-gradient(ellipse_70.71%_70.71%_at_50.00%_50.00%,#8A00FF_25%,rgba(255,54,184,0)_70%)] blur-3xl" />
-        <div className="absolute pointer-events-none overflow-hidden top-650 left-[-10] w-4xl h-[768px] opacity-20 bg-[radial-gradient(ellipse_70.71%_70.71%_at_50.00%_50.00%,#8A00FF_25%,rgba(255,54,184,0)_70%)] blur-3xl" />
+        <div className="absolute pointer-events-none overflow-hidden top-600 left-[-10] w-4xl h-[768px] opacity-20 bg-[radial-gradient(ellipse_70.71%_70.71%_at_50.00%_50.00%,#8A00FF_25%,rgba(255,54,184,0)_70%)] blur-3xl" />
         <div className="px-6 pt-16 inline-flex flex-col justify-start items-center">
           <div className="pb-6 flex flex-col justify-start items-start">
             <div className="px-4 py-1 bg-purple-75 rounded-2xl inline-flex justify-start items-center gap-2">
               <div className="inline-flex flex-col justify-start items-center">
-                <p className='text-white text-sm'>Další kolo už <b>15.2.2026!</b></p>
+                <p className='text-white text-sm'>Další kolo už <b>22.3.2026!</b></p>
               </div>
             </div>
           </div>
@@ -55,7 +55,7 @@ export default function Home() {
               variant='purple'
               size='large'
               text='Chci se účastnit!'
-              route='https://docs.google.com/forms/d/e/1FAIpQLScMJuPMq7p5qRMqzbZ1rO-A0AZNa4JYLjcLB8PgaYekJ9Cq1A/viewform?usp=header'
+              route='https://docs.google.com/forms/d/e/1FAIpQLSc9JZH9DBY3m2dlzUHuyqGw6E_Dx66SkM3513GfEMWOWR5WsQ/viewform?usp=header'
             /> 
           </div>
         </div>
@@ -217,12 +217,12 @@ export default function Home() {
       >
         <div className="inline-flex flex-col justify-start items-start">
           <div className="w-full flex flex-col justify-start items-center gap-6">
-            <h3 className="text-center justify-center text-white">Přidej se k druhému kolu Game of Tag!</h3>
+            <h3 className="text-center justify-center text-white">Přidej se k třetímu kolu Game of Tag!</h3>
             <Button 
               variant='white'
               size='large'
               text='Chci se účastnit!'
-              route='https://docs.google.com/forms/d/e/1FAIpQLScMJuPMq7p5qRMqzbZ1rO-A0AZNa4JYLjcLB8PgaYekJ9Cq1A/viewform?usp=header'
+              route='https://docs.google.com/forms/d/e/1FAIpQLSc9JZH9DBY3m2dlzUHuyqGw6E_Dx66SkM3513GfEMWOWR5WsQ/viewform?usp=header'
             />
           </div>
         </div>
