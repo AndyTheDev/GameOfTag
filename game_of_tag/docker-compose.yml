@@ -11,7 +11,7 @@
 #       DATABASE_URL: 
 #     depends_on:
 #       - postgres
-  
+
 #   caddy:
 #     image: caddy:latest
 #     container_name: qr_game_caddy
@@ -36,11 +36,10 @@
 #       - "5432:5432"
 #     volumes:
 #       - ./postgres_data:/var/lib/postgresql/data
-      
+
 # volumes:
 #   caddy_data:
 #   caddy_config:
-
 
 version: '3.8'
 
@@ -58,13 +57,24 @@ services:
     cap_drop:
       - ALL
 
+  worker:
+    build: .
+    container_name: qr_game_worker
+    restart: always
+    environment:
+      DATABASE_URL: postgres://andy:KLe9s7rHfU*f5a@postgres:5432/game_of_tag
+  depends_on:
+    - postgres
+  # Přepíšeme výchozí CMD z Dockerfile, aby se nespustil web, ale náš skript
+  command: [ "npm", "run", "worker" ]
+
   caddy:
     image: caddy:latest
     container_name: qr_game_caddy
     restart: always
     ports:
-      - "80:80"   
-      - "443:443" 
+      - "80:80"
+      - "443:443"
     volumes:
       - caddy_data:/data
       - caddy_config:/config
@@ -82,7 +92,7 @@ services:
       - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      
+
 volumes:
   caddy_data:
   caddy_config:
