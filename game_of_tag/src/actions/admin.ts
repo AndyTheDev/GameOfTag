@@ -2,9 +2,9 @@
 "use server";
 
 import { db } from "../db/index";
-import { 
-  logs, players, locations, quests, logTypes, 
-  teams, playerRoles, privilegeLevels, questTypes, playerProgress 
+import {
+  logs, players, locations, quests, logTypes,
+  teams, playerRoles, privilegeLevels, questTypes, playerProgress
 } from "../db/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { checkRateLimit } from "../utils/rateLimit";
@@ -12,17 +12,20 @@ import { getClientKey } from "../utils/requestContext";
 import { createAdminSession, clearAdminSession, requireAdminSession } from "../utils/adminAuth";
 import { handleServerError } from "../utils/errorHandling";
 import { logInfo, logWarn } from "../utils/logger";
-import {    LOG_TYPE_START,
-   LOG_TYPE_TIMEOUT,
-   LOG_TYPE_SUCCESS,
-   LOG_TYPE_TIMEOUT_RESET,
-   LOG_TYPE_GPS_NOT_ACCURATE,
-   LOG_TYPE_CATCH, 
-   LOG_TYPE_BUBBLE,
-   LOG_TYPE_BUBBLE_BURST,
-   LOG_TYPE_HUNTER_TIMEOUT,
-   LOG_TYPE_HUNTER_TIMEOUT_RESET
- } from "../constants";
+import { configuration } from "../db/schema";
+import { processGameTimeouts } from "../lib/gameCron";
+import {
+  LOG_TYPE_START,
+  LOG_TYPE_TIMEOUT,
+  LOG_TYPE_SUCCESS,
+  LOG_TYPE_TIMEOUT_RESET,
+  LOG_TYPE_GPS_NOT_ACCURATE,
+  LOG_TYPE_CATCH,
+  LOG_TYPE_BUBBLE,
+  LOG_TYPE_BUBBLE_BURST,
+  LOG_TYPE_HUNTER_TIMEOUT,
+  LOG_TYPE_HUNTER_TIMEOUT_RESET
+} from "../constants";
 
 // --- TYPY PRO VSTUP ---
 type PlayerInput = {
@@ -42,6 +45,7 @@ type LocationInput = {
   typeId: number;
   teamId: number | null;
   gps: string;
+  completed?: boolean;
 };
 
 type QuestInput = {
@@ -64,10 +68,10 @@ export async function adminLogin(name: string, pass: string) {
     });
 
     if (!foundUser) return { success: false, message: "Špatně zadané údaje." };
-    
+
     // --- LOGIKA OVĚŘENÍ ADMINA ---
     if (foundUser.privilegeLevel !== 1) {
-       return { success: false, message: "Tento účet nemá oprávnění správce." };
+      return { success: false, message: "Tento účet nemá oprávnění správce." };
     }
 
     await createAdminSession(foundUser.idPlayer);
@@ -92,24 +96,24 @@ export async function getFullLogs() {
   try {
     const data = await db.select({
       id: logs.idLog,
-      time: logs.logTime, 
+      time: logs.logTime,
       playerName: players.name,
       playerPlayName: players.playName,
       playerTeam: teams.name,
       locationName: locations.name,
       locationId: locations.idLocation,
-      locationType: locations.typeId, 
-      action: logTypes.name,     
+      locationType: locations.typeId,
+      action: logTypes.name,
       questName: quests.name,
       logTypeId: logs.logTypeId
     })
-    .from(logs)
-    .leftJoin(players, eq(logs.playerId, players.idPlayer))
-    .leftJoin(teams, eq(players.teamId, teams.idTeam))
-    .leftJoin(locations, eq(logs.locationId, locations.idLocation))
-    .leftJoin(logTypes, eq(logs.logTypeId, logTypes.idLogType))
-    .leftJoin(quests, eq(logs.questId, quests.idQuest))
-    .orderBy(desc(logs.logTime));
+      .from(logs)
+      .leftJoin(players, eq(logs.playerId, players.idPlayer))
+      .leftJoin(teams, eq(players.teamId, teams.idTeam))
+      .leftJoin(locations, eq(logs.locationId, locations.idLocation))
+      .leftJoin(logTypes, eq(logs.logTypeId, logTypes.idLogType))
+      .leftJoin(quests, eq(logs.questId, quests.idQuest))
+      .orderBy(desc(logs.logTime));
 
     return { success: true, data };
   } catch (e) {
@@ -162,48 +166,58 @@ export async function getPlayerStatus() {
   if (!session.ok) return { success: false };
 
   try {
-    // 1. Získáme hráče VČETNĚ jejich bodů (sloupec points)
+    // 1. Získáme hráče VČETNĚ stavových polí z DB
     const playersData = await db.select({
       id: players.idPlayer,
       name: players.name,
       playName: players.playName,
       team: teams.name,
       role: playerRoles.name,
-      points: players.points, 
+      roleId: players.roleId,
+      points: players.points,
+      // Stavová pole
+      questEndTime: players.questEndTime,
+      questLockEndtime: players.questLockEndtime,
+      runnerShieldTime: players.runnerShieldTime,
+      bubbleBurstTime: players.bubbleBurstTime,
     })
-    .from(players)
-    .leftJoin(teams, eq(players.teamId, teams.idTeam))
-    .leftJoin(playerRoles, eq(players.roleId, playerRoles.idPlayerRole));
+      .from(players)
+      .leftJoin(teams, eq(players.teamId, teams.idTeam))
+      .leftJoin(playerRoles, eq(players.roleId, playerRoles.idPlayerRole));
 
-    // 2. Získáme poslední log každého hráče (pro zobrazení aktivity)
-    const lastLogs = await db.selectDistinctOn([logs.playerId], {
-      playerId: logs.playerId,
-      time: logs.logTime,
-      action: logTypes.name
-    })
-    .from(logs)
-    .leftJoin(logTypes, eq(logs.logTypeId, logTypes.idLogType))
-    .orderBy(logs.playerId, desc(logs.logTime));
+    // 2. Seřadit podle bodů (od nejvyššího)
+    playersData.sort((a, b) => (b.points || 0) - (a.points || 0));
 
-    // 3. Spojení dat
-    const result = playersData.map(p => {
-      const lastLog = lastLogs.find(l => l.playerId === p.id);
-      
-      return {
-        ...p,
-        points: p.points || 0, // Použijeme hodnotu přímo z tabulky hráčů
-        lastLogTime: lastLog?.time || null,
-        lastLogAction: lastLog?.action || null,
-      };
-    });
-
-    // 4. Seřadit podle bodů (od nejvyššího)
-    result.sort((a, b) => b.points - a.points);
-
-    return { success: true, data: result };
+    return { success: true, data: playersData };
 
   } catch (e) {
     return handleServerError("Chyba statusu.", e);
+  }
+}
+
+export async function getPlayerLogs(playerId: number) {
+  const session = await requireAdminSession();
+  if (!session.ok) return { success: false };
+
+  try {
+    const data = await db.select({
+      id: logs.idLog,
+      time: logs.logTime,
+      action: logTypes.name,
+      logTypeId: logs.logTypeId,
+      locationName: locations.name,
+      questName: quests.name,
+    })
+      .from(logs)
+      .leftJoin(logTypes, eq(logs.logTypeId, logTypes.idLogType))
+      .leftJoin(locations, eq(logs.locationId, locations.idLocation))
+      .leftJoin(quests, eq(logs.questId, quests.idQuest))
+      .where(eq(logs.playerId, playerId))
+      .orderBy(desc(logs.logTime));
+
+    return { success: true, data };
+  } catch (e) {
+    return handleServerError("Chyba logů hráče.", e);
   }
 }
 
@@ -226,13 +240,13 @@ export async function savePlayer(data: PlayerInput) {
 
   try {
     const sanitizedData = {
-        name: data.name,
-        playName: data.playName || "",
-        pass: data.pass,
-        teamId: data.teamId ? Number(data.teamId) : null, 
-        roleId: data.roleId ? Number(data.roleId) : null,
-        privilegeLevel: Number(data.privilegeLevel),
-        questLock: false
+      name: data.name,
+      playName: data.playName || "",
+      pass: data.pass,
+      teamId: data.teamId ? Number(data.teamId) : null,
+      roleId: data.roleId ? Number(data.roleId) : null,
+      privilegeLevel: Number(data.privilegeLevel),
+      questLock: false
     };
 
     if (data.id) {
@@ -252,10 +266,10 @@ export async function savePlayer(data: PlayerInput) {
     return { success: true };
   } catch (e: any) {
     console.error("CHYBA SAVE PLAYER:", e);
-    if (e.code === '23505') { 
-        return { success: false, message: "Hráč s tímto heslem již existuje." };
+    if (e.code === '23505') {
+      return { success: false, message: "Hráč s tímto heslem již existuje." };
     }
-    
+
     return handleServerError("Nelze uložit hráče.", e);
   }
 }
@@ -266,11 +280,12 @@ export async function saveCheckpoint(data: LocationInput) {
 
   try {
     const sanitizedData = {
-        name: data.name,
-        typeId: Number(data.typeId),
-        teamId: data.teamId ? Number(data.teamId) : null,
-        gps: data.gps || "0,0",
-        ...(data.customId ? { idLocation: Number(data.customId) } : {})
+      name: data.name,
+      typeId: Number(data.typeId),
+      teamId: data.teamId ? Number(data.teamId) : null,
+      gps: data.gps || "0,0",
+      completed: !!data.completed,
+      ...(data.customId ? { idLocation: Number(data.customId) } : {})
     };
 
     if (data.id) {
@@ -279,7 +294,8 @@ export async function saveCheckpoint(data: LocationInput) {
         name: sanitizedData.name,
         typeId: sanitizedData.typeId,
         teamId: sanitizedData.teamId,
-        gps: sanitizedData.gps
+        gps: sanitizedData.gps,
+        completed: sanitizedData.completed
       }).where(eq(locations.idLocation, data.id));
     } else {
       // CREATE
@@ -298,10 +314,10 @@ export async function saveQuest(data: QuestInput) {
 
   try {
     const sanitizedData = {
-        name: data.name,
-        description: data.description,
-        questTypeId: Number(data.questTypeId),
-        timeLimit: Number(data.timeLimit)
+      name: data.name,
+      description: data.description,
+      questTypeId: Number(data.questTypeId),
+      timeLimit: Number(data.timeLimit)
     };
 
     if (data.id) {
@@ -327,7 +343,7 @@ export async function saveTeam(data: any) {
       name: data.name,
       points: parsedPoints,
     };
-    
+
     // Volitelné sloupce přidáme do objektu POUZE tehdy, 
     // pokud je uživatel vyplnil (nejsou prázdné nebo null)
     if (data.map && data.map.trim() !== "") {
@@ -346,13 +362,13 @@ export async function saveTeam(data: any) {
       // INSERT nového týmu
       await db.insert(teams).values(teamData);
     }
-    
+
     return { success: true };
   } catch (error: any) {
     // Tady si vypíšeme celou chybu do konzole serveru, 
     // kdyby to náhodou padalo dál (např. chybějící sloupec).
-    console.error("🛑 DB Error saveTeam:", error); 
-    
+    console.error("🛑 DB Error saveTeam:", error);
+
     return { success: false, message: error.message };
   }
 }
@@ -363,15 +379,56 @@ export async function deleteTeam(teamId: number) {
     return { success: true };
   } catch (error: any) {
     console.error("🛑 DB Error deleteTeam:", error);
-    
+
     // Kód 23503 je PostgreSQL chyba pro porušení cizího klíče (Foreign Key Violation)
     if (error.code === '23503') {
-      return { 
-        success: false, 
-        message: "Nelze smazat tým, protože má stále přiřazené hráče nebo checkpointy. Nejprve je musíš smazat nebo přesunout do jiného týmu." 
+      return {
+        success: false,
+        message: "Nelze smazat tým, protože má stále přiřazené hráče nebo checkpointy. Nejprve je musíš smazat nebo přesunout do jiného týmu."
       };
     }
-    
+
     return { success: false, message: error.message };
+  }
+}
+
+export async function getCronStatus() {
+  const session = await requireAdminSession();
+  if (!session.ok) return { success: false, message: "Neautorizováno" };
+
+  try {
+    const row = await db.query.configuration.findFirst({
+      where: eq(configuration.name, 'CRON_LAST_RUN')
+    });
+
+    const lastRunDate = row?.lastRunAt ? new Date(row.lastRunAt) : null;
+    const lastRun = lastRunDate ? Math.floor(lastRunDate.getTime() / 1000) : 0;
+    const now = Math.floor(Date.now() / 1000);
+    const diff = lastRun > 0 ? now - lastRun : 999;
+
+    // Považujeme za "mrtvé", pokud neběžel déle než 30 sekund (běží každých 5s)
+    const isAlive = lastRun > 0 && diff < 10;
+
+    return {
+      success: true,
+      lastRun,
+      isAlive,
+      diff
+    };
+  } catch (e) {
+    return handleServerError("Chyba při zjišťování stavu CRONu.", e);
+  }
+}
+
+export async function triggerCronRestart() {
+  const session = await requireAdminSession();
+  if (!session.ok) return { success: false, message: "Neautorizováno" };
+
+  try {
+    // Ruční vyvolání logiky CRONu
+    await processGameTimeouts();
+    return { success: true, message: "CRON úspěšně spuštěn." };
+  } catch (e) {
+    return handleServerError("Chyba při ručním spuštění CRONu.", e);
   }
 }

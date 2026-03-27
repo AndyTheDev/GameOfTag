@@ -2,14 +2,17 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
-import { getLocationDetails, verifyAndLogQuest, finishQuest } from "../actions/loadLocation"; 
-import { QUEST_LIMIT_SECONDS, LOCKOUT_SECONDS } from "../constants";
+import { getLocationDetails, verifyAndLogQuest, finishQuest, checkLocationStatus } from "../actions/loadLocation";
 import { Button } from "./Button";
+import type { GameConfig } from "@/src/actions/adminConfig";
 
 // Přidali jsme savedPassword
-type Props = { 
-    initialCode: string; 
-    savedPassword?: string; 
+type Props = {
+  initialCode: string;
+  savedPassword?: string;
+  multiplayerPasswords?: string[];
+  config: GameConfig;
+  onQuestExpired?: () => void;
 };
 
 type QuestData = {
@@ -19,17 +22,17 @@ type QuestData = {
   description: string;
 };
 
-export default function CheckpointForm({ initialCode, savedPassword }: Props) {
+export default function CheckpointForm({ initialCode, savedPassword, multiplayerPasswords, config, onQuestExpired }: Props) {
   // Pokud máme uložené heslo, začneme rovnou v loading stavu, jinak ready
   const [status, setStatus] = useState<"initializing" | "ready" | "loading" | "active" | "completed" | "locked" | "error">("initializing");
-  
+
   const [password, setPassword] = useState(savedPassword || "");
   const [locationName, setLocationName] = useState("");
   const [locationId, setLocationId] = useState<number | null>(null);
-  
+
   const [message, setMessage] = useState("");
   const [messageVariant, setMessageVariant] = useState<"error" | "info">("info");
-  
+
   const [questData, setQuestData] = useState<QuestData | null>(null);
   const [targetTime, setTargetTime] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(0);
@@ -43,7 +46,7 @@ export default function CheckpointForm({ initialCode, savedPassword }: Props) {
     async function init() {
       // A) Načteme detaily lokace (Název + ID)
       const locResult = await getLocationDetails(initialCode);
-      
+
       let currentLocId: number | null = null;
 
       if (locResult.success && locResult.id) {
@@ -58,75 +61,126 @@ export default function CheckpointForm({ initialCode, savedPassword }: Props) {
 
       // B) Pokud máme heslo, automaticky načteme úkol (Auto-Login)
       if (savedPassword && currentLocId && !hasAutoLoaded.current) {
-         hasAutoLoaded.current = true; // Zamezíme zacyklení
-         setStatus("loading");
-         
-         // Voláme přímo logiku ověření
-         await performVerification(currentLocId, savedPassword);
+        hasAutoLoaded.current = true; // Zamezíme zacyklení
+        setStatus("loading");
+
+        const passesToVerify = multiplayerPasswords && multiplayerPasswords.length > 0
+          ? multiplayerPasswords
+          : [savedPassword];
+
+        // Voláme přímo logiku ověření
+        await performVerification(currentLocId, passesToVerify);
       } else {
-         // Pokud nemáme heslo, čekáme na uživatele
-         setStatus("ready");
+        // Pokud nemáme heslo, čekáme na uživatele
+        setStatus("ready");
       }
     }
-    
+
     init();
   }, [initialCode, savedPassword]);
 
   // Vyčleněná funkce pro ověření (použitá v auto-loginu i ručním submitu)
-  async function performVerification(locId: number, pass: string) {
-      const result = await verifyAndLogQuest(locId, pass);
+  async function performVerification(locId: number, passes: string[]) {
+    const result = await verifyAndLogQuest(locId, passes);
 
-      if (result.success) {
-          if (result.status === "active" && result.startTime) {
-              setQuestData({
-                  playerName: result.playerName || "",
-                  teamName: result.teamName || "",
-                  title: result.questName || "",
-                  description: result.questDescription || "",
-              });
+    if (result.success) {
+      if (result.status === "active" && result.startTime) {
+        setQuestData({
+          playerName: result.playerName || "",
+          teamName: result.teamName || "",
+          title: result.questName || "",
+          description: result.questDescription || "",
+        });
 
-              const startTimeMs = new Date(result.startTime).getTime();
-              const endTimestamp = startTimeMs + (QUEST_LIMIT_SECONDS * 1000);
-              
-              setTargetTime(endTimestamp);
-              setTimeLeft(Math.max(0, Math.ceil((endTimestamp - Date.now()) / 1000)));
-              setStatus("active");
-          } 
-          else if (result.status === "locked" && result.startTime) {
-              const lockStartMs = new Date(result.startTime).getTime();
-              const lockTargetMs = lockStartMs + (LOCKOUT_SECONDS * 1000);
-              setTargetTime(lockTargetMs);
-              setTimeLeft(Math.max(0, Math.ceil((lockTargetMs - Date.now()) / 1000)));
-              setStatus("locked");
-          } 
-          else if (result.status === "completed") {
-              setStatus("completed");
-          }
-      } else {
-          setMessage(result.message || "Chyba ověření.");
-          setMessageVariant("error");
-          setStatus("ready");
+        const startTimeMs = new Date(result.startTime).getTime();
+        const endTimestamp = startTimeMs + (config.QUEST_LIMIT_SECONDS * 1000);
+
+        setTargetTime(endTimestamp);
+        setTimeLeft(Math.max(0, Math.ceil((endTimestamp - Date.now()) / 1000)));
+        setStatus("active");
       }
+      else if (result.status === "locked" && result.startTime) {
+        const lockStartMs = new Date(result.startTime).getTime();
+        const lockTargetMs = lockStartMs + (config.LOCKOUT_SECONDS * 1000);
+        setTargetTime(lockTargetMs);
+        setTimeLeft(Math.max(0, Math.ceil((lockTargetMs - Date.now()) / 1000)));
+        setStatus("locked");
+      }
+      else if (result.status === "completed") {
+        setStatus("completed");
+      }
+    } else {
+      setMessage(result.message || "Chyba ověření.");
+      setMessageVariant("error");
+
+      if (result.message === "Na tomto checkpointu již právě probíhá aktivní úkol.") {
+        setStatus("error");
+        setTimeout(() => {
+          if (onQuestExpired) {
+            onQuestExpired();
+          }
+        }, 3000);
+      } else {
+        setStatus("ready");
+      }
+    }
   }
 
   // Logika při vypršení času (zůstává stejná)
   const handleTimeExpired = useCallback(async () => {
-     if (status === "active" && locationId) {
-         const now = Date.now();
-         const newLockoutTarget = now + (LOCKOUT_SECONDS * 1000);
-         setStatus("locked");
-         setMessage("Čas na úkol vypršel! Lokace je uzamčena.");
-         setMessageVariant("error");
-         setTargetTime(newLockoutTarget); 
-         setTimeLeft(Math.max(0, Math.ceil((newLockoutTarget - Date.now()) / 1000)));
-         await finishQuest(locationId, password, 'timeout');
-     } else if (status === "locked") {
-         setStatus("ready");
-         setMessage("Můžeš hrát znovu.");
-         setMessageVariant("info");
-         setTargetTime(null);
-     }
+    if (status === "active" && locationId) {
+      const now = Date.now();
+      const newLockoutTarget = now + (config.LOCKOUT_SECONDS * 1000);
+      setStatus("locked");
+      setMessage("Čas na úkol vypršel! Lokace je uzamčena.");
+      setMessageVariant("error");
+      setTargetTime(newLockoutTarget);
+      setTimeLeft(Math.max(0, Math.ceil((newLockoutTarget - Date.now()) / 1000)));
+      await finishQuest(locationId, password, 'timeout');
+    } else if (status === "locked") {
+      // Trest vypršel — krátce zobrazíme zprávu a vrátíme hráče zpět na GPS
+      setTargetTime(null);
+      setMessage("Trest vypršel! Můžeš znovu plnit úkoly.");
+      setMessageVariant("info");
+      setTimeout(() => {
+        if (onQuestExpired) {
+          onQuestExpired();
+        }
+      }, 2500);
+    }
   }, [locationId, password, status]);
+
+  // Polling: každé 4 s zjistíme, zda byl úkol splněn na jiném zařízení skupiny
+  useEffect(() => {
+    if (status !== "active" || !locationId) return;
+
+    const poll = setInterval(async () => {
+      const res = await checkLocationStatus(locationId, password);
+      if (res.completed) {
+        setStatus("completed");
+        setTargetTime(null);
+        setMessage("Úkol splnil jiný člen vaší skupiny.");
+        setMessageVariant("info");
+        clearInterval(poll);
+      } else if (!res.hasActiveQuest) {
+        // Hráč už nemá aktivní úkol, ačkoliv lokace není splněná (pravděpodobně byl spoluhráč chycen)
+        setStatus("error");
+        setTargetTime(null);
+        setMessage("Někdo ze tvé skupiny byl chycen lovcem. Úkol byl pro celou skupinu zrušen.");
+        setMessageVariant("error");
+        clearInterval(poll);
+        
+        // Zpět na GPS po 3 sekundách
+        setTimeout(() => {
+          if (onQuestExpired) {
+            onQuestExpired();
+          }
+        }, 3000);
+      }
+    }, 4000);
+
+    return () => clearInterval(poll);
+  }, [status, locationId, password, onQuestExpired]);
 
   // Časovač (zůstává stejný)
   useEffect(() => {
@@ -135,11 +189,11 @@ export default function CheckpointForm({ initialCode, savedPassword }: Props) {
       const now = Date.now();
       const diffSeconds = Math.ceil((targetTime - now) / 1000);
       if (diffSeconds <= 0) {
-          clearInterval(timer);
-          setTimeLeft(0);
-          handleTimeExpired(); 
+        clearInterval(timer);
+        setTimeLeft(0);
+        handleTimeExpired();
       } else {
-          setTimeLeft(diffSeconds);
+        setTimeLeft(diffSeconds);
       }
     }, 1000);
     return () => clearInterval(timer);
@@ -151,35 +205,43 @@ export default function CheckpointForm({ initialCode, savedPassword }: Props) {
     if (!locationId) return;
     const safePassword = password.trim();
     setStatus("loading");
-    await performVerification(locationId, safePassword);
+    await performVerification(locationId, [safePassword]);
   }
 
   // Dokončení úkolu (zůstává stejné)
   async function handleCompleteTask() {
-      if (!locationId) return;
-      setShowConfirmComplete(true);
+    if (!locationId) return;
+    setShowConfirmComplete(true);
   }
 
   async function handleConfirmCompleteTask() {
-      if (!locationId) return;
-      setShowConfirmComplete(false);
-      setStatus("loading");
-      const res = await finishQuest(locationId, password, 'success');
-      if (res.success) {
-          setStatus("completed");
-          setTargetTime(null);
+    if (!locationId) return;
+    setShowConfirmComplete(false);
+    setStatus("loading");
+    const res = await finishQuest(locationId, password, 'success');
+    if (res.success) {
+      if (res.status === "already_completed") {
+        // Jiný hráč ze skupiny úkol splnil dřív — zobrazíme success screen
+        setStatus("completed");
+        setTargetTime(null);
+        setMessage("Úkol byl splněn jiným hráčem z vaší skupiny.");
+        setMessageVariant("info");
       } else {
-          setMessage("Chyba při ukládání.");
-          setMessageVariant("error");
-          setStatus("active");
+        setStatus("completed");
+        setTargetTime(null);
       }
+    } else {
+      setMessage("Chyba při ukládání.");
+      setMessageVariant("error");
+      setStatus("active");
+    }
   }
 
   const formatTime = (sec: number) => {
-      const safeSec = Math.max(0, sec);
-      const m = Math.floor(safeSec / 60);
-      const s = safeSec % 60;
-      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    const safeSec = Math.max(0, sec);
+    const m = Math.floor(safeSec / 60);
+    const s = safeSec % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
   // --- RENDER ---
@@ -189,80 +251,83 @@ export default function CheckpointForm({ initialCode, savedPassword }: Props) {
 
   // Pokud se něco pokazilo
   if (status === "error") {
-      return (
-        <div className="text-center bg-pink-25 text-purple p-4 rounded-2xl border-2 border-pink-50">
-           {message}
-           <button onClick={() => window.location.reload()} className="block mt-4 text-sm underline">Zkusit znovu</button>
-        </div>
-      );
+    const isDuplicateQuest = message === "Na tomto checkpointu již právě probíhá aktivní úkol.";
+    return (
+      <div className="text-center bg-pink-25 text-purple p-4 rounded-2xl border-2 border-pink-50">
+        {message}
+        {!isDuplicateQuest && (
+          <button onClick={() => window.location.reload()} className="block mt-4 text-sm underline">Zkusit znovu</button>
+        )}
+      </div>
+    );
   }
 
   return (
     <div className="w-full max-w-md p-8 bg-white rounded-3xl shadow-sm border-2 border-pink-50">
-      
+
       {/* HLAVIČKA FORMULÁŘE */}
       <div className="text-center mb-6">
-          <p className="text-gray-light text-sm uppercase">Checkpoint: {locationName}</p>
-          
-          {/* Zobrazení jména a týmu, pokud máme questData */}
-          {questData ? (
-             <div className="mt-2">
-                <h2 className="text-2xl font-bold text-purple">{questData.playerName}</h2>
-                <span className="text-xs bg-purple text-white px-2 py-1 rounded-full">{questData.teamName}</span>
-             </div>
-          ) : (
-             <h2 className="text-2xl font-bold text-purple">Ověření</h2>
-          )}
+        <p className="text-gray-light text-sm uppercase">Checkpoint: {locationName}</p>
 
-          {(status === "active" || status === "locked") && (
-              <div className={`text-5xl font-mono mt-6 font-bold tracking-wider ${status === 'locked' ? 'text-pink' : 'text-purple'}`}>
-                  {formatTime(timeLeft)}
-              </div>
-          )}
+        {/* Zobrazení jména a týmu, pokud máme questData */}
+        {questData ? (
+          <div className="mt-2">
+            <h2 className="text-2xl font-bold text-purple">{questData.playerName}</h2>
+            <span className="text-xs bg-purple text-white px-2 py-1 rounded-full">{questData.teamName}</span>
+          </div>
+        ) : (
+          <h2 className="text-2xl font-bold text-purple">Ověření</h2>
+        )}
+
+        {(status === "active" || status === "locked") && (
+          <div className={`text-5xl font-mono mt-6 font-bold tracking-wider ${status === 'locked' ? 'text-pink' : 'text-purple'}`}>
+            {formatTime(timeLeft)}
+          </div>
+        )}
       </div>
 
       {message && (
-         <div className={`mb-6 p-3 rounded-2xl text-center border ${messageVariant === 'error' ? 'bg-pink-25 text-purple border-pink-50' : 'bg-purple-25 text-purple border-purple-50'}`}>
-            {message}
-         </div>
+        <div className={`mb-6 p-3 rounded-2xl text-center border ${messageVariant === 'error' ? 'bg-pink-25 text-purple border-pink-50' : 'bg-purple-25 text-purple border-purple-50'}`}>
+          {message}
+        </div>
       )}
 
       {/* STAV: Čekání na heslo (nebo manuální zadání) */}
       {(status === "ready" || status === "loading") && (
         <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-5">
-           {!savedPassword && ( 
-               // Zobrazíme input jen pokud nemáme heslo z rodiče (nebo chceme dovolit změnu)
-               <input
-                 type="text" value={password} onChange={(e) => setPassword(e.target.value)}
-                 placeholder="Tvé heslo"
-                 className="w-full p-4 bg-white text-gray-dark rounded-2xl border-2 border-pink-50 text-center text-lg focus:border-pink outline-none"
-                 disabled={status === "loading"}
-               />
-           )}
-           <button type="submit" disabled={status === "loading"} className="w-full bg-purple py-4 rounded-2xl font-bold text-white hover:bg-purple-75 disabled:opacity-50 transition-all flex justify-center items-center">
-             {status === "loading" ? (
-                 <>
-                   <span className="animate-spin mr-2">⏳</span> Načítám úkol...
-                 </>
-             ) : "Vstoupit"}
-           </button>
+          {!savedPassword && (
+            // Zobrazíme input jen pokud nemáme heslo z rodiče (nebo chceme dovolit změnu)
+            <input
+              type="text" value={password} onChange={(e) => setPassword(e.target.value)}
+              placeholder="Tvé heslo"
+              className="w-full p-4 bg-white text-gray-dark rounded-2xl border-2 border-pink-50 text-center text-lg focus:border-pink outline-none"
+              disabled={status === "loading"}
+            />
+          )}
+          <button type="submit" disabled={status === "loading"} className="w-full bg-purple py-4 rounded-2xl font-bold text-white hover:bg-purple-75 disabled:opacity-50 transition-all flex justify-center items-center">
+            {status === "loading" ? (
+              <>
+                <span className="animate-spin mr-2">⏳</span> Načítám úkol...
+              </>
+            ) : "Vstoupit"}
+          </button>
         </form>
       )}
 
       {/* STAV: Aktivní úkol */}
       {status === "active" && questData && (
         <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2">
-           <div className="bg-background p-6 rounded-2xl border-2 border-pink-50 text-left">
-              <h4 className="text-pink font-bold mb-2 border-b border-pink-50 pb-2 text-lg">{questData.title}</h4>
-              <p className="text-gray-dark text-lg leading-relaxed">{questData.description}</p>
-           </div>
-           
-           <button 
-             onClick={handleCompleteTask}
-             className="w-full bg-pink hover:bg-pink-75 text-purple font-bold py-5 rounded-2xl transform active:scale-95 transition-all text-xl shadow-md"
-           >
-             ÚKOL SPLNĚN!
-           </button>
+          <div className="bg-background p-6 rounded-2xl border-2 border-pink-50 text-left">
+            <h4 className="text-pink font-bold mb-2 border-b border-pink-50 pb-2 text-lg">{questData.title}</h4>
+            <p className="text-gray-dark text-lg leading-relaxed">{questData.description}</p>
+          </div>
+
+          <button
+            onClick={handleCompleteTask}
+            className="w-full bg-pink hover:bg-pink-75 text-purple font-bold py-5 rounded-2xl transform active:scale-95 transition-all text-xl shadow-md"
+          >
+            ÚKOL SPLNĚN!
+          </button>
         </div>
       )}
 
@@ -286,24 +351,24 @@ export default function CheckpointForm({ initialCode, savedPassword }: Props) {
 
       {/* STAV: Locked / Completed zprávy zůstávají stejné ... */}
       {status === "locked" && (
-          <div className="text-center text-gray-dark bg-background p-4 rounded-2xl border-2 border-pink-50">
-              <p className="font-bold text-pink text-lg">Máš aktivní trest.</p>
-              <p className="text-sm mt-2">Musíš zůstat na místě, dokud nevyprší časomíra.</p>
-          </div>
+        <div className="text-center text-gray-dark bg-background p-4 rounded-2xl border-2 border-pink-50">
+          <p className="font-bold text-pink text-lg">Máš aktivní trest.</p>
+          <p className="text-sm mt-2">Musíš zůstat na místě, dokud nevyprší časomíra.</p>
+        </div>
       )}
 
       {status === "completed" && (
-          <div className="text-center py-6 animate-in zoom-in">
-              <div className="text-6xl mb-4">🏆</div>
-              <h3 className="text-2xl font-bold text-purple mb-2">Splněno!</h3>
-              <p className="text-gray-dark">Checkpoint <b className="text-purple">{locationName}</b> je splněn. Tvůj tým získává <b className="text-purple">1 bod!</b></p>
-              <br />
-              <p className="text-gray-dark">Tento checkpoint už nikdo jiný z tvého týmu nemůže splnit. <b className="text-purple">Dej jim o tom vědět!</b></p>
-              <br />
-              <button onClick={() => window.location.reload()} className="flex-1 rounded-2xl bg-purple py-4 px-10 font-bold text-white hover:bg-purple-75 transition-all">
-                Zpět na skenování checkpointů
-              </button>
-          </div>
+        <div className="text-center py-6 animate-in zoom-in">
+          <div className="text-6xl mb-4">🏆</div>
+          <h3 className="text-2xl font-bold text-purple mb-2">Splněno!</h3>
+          <p className="text-gray-dark">Checkpoint <b className="text-purple">{locationName}</b> je splněn. Tvůj tým získává <b className="text-purple">za každého hráče {config.POINTS_QUEST} bodů!</b></p>
+          <br />
+          <p className="text-gray-dark">Tento checkpoint už nikdo jiný z tvého týmu nemůže splnit. <b className="text-purple">Dej jim o tom vědět!</b></p>
+          <br />
+          <button onClick={() => window.location.reload()} className="flex-1 rounded-2xl bg-purple py-4 px-10 font-bold text-white hover:bg-purple-75 transition-all">
+            Zpět na skenování checkpointů
+          </button>
+        </div>
       )}
     </div>
   );

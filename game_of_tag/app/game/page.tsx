@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   findNearestCheckpoint,
@@ -10,12 +10,13 @@ import {
   verifyManualCheckpoint } from "@/src/actions/loadLocation";
 import { Header } from "@/src/components/Header";
 import { Footer } from "@/src/components/Footer";
-import { CHECKPOINT_RADIUS_METERS, GPS_TIMEOUT_MS } from '../../src/constants';
+import { getGameConfig, GameConfig } from '@/src/actions/adminConfig';
 import Link from "next/link";
 import CheckpointForm from "@/src/components/CheckpointForm";
+import MultiplayerAuth from "@/src/components/MultiplayerAuth";
 
 type LocationState = "idle" | "loading" | "error" | "found" | "not_in_range";
-type ViewMode = "login" | "gps" | "quest" | "manual";
+type ViewMode = "login" | "gps" | "quest" | "manual" | "multiplayer_auth";
 
 type CheckpointResult = {
   id: number;
@@ -24,16 +25,23 @@ type CheckpointResult = {
   type: number;
   distanceMeters: number;
   accuracyMeters: number;
+  playersRequired: number;
 };
 
 export default function GamePage() {
   const router = useRouter();
   
+  const [config, setConfig] = useState<GameConfig | null>(null);
+  useEffect(() => {
+    getGameConfig().then(setConfig);
+  }, []);
+
   const [viewMode, setViewMode] = useState<ViewMode>("login");
 
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [playerName, setPlayerName] = useState("");
+  const [playerTeamId, setPlayerTeamId] = useState<number | null>(null); 
   const [authError, setAuthError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
 
@@ -47,6 +55,8 @@ export default function GamePage() {
 
   const [manualCode, setManualCode] = useState("");
   const [isVerifyingManual, setIsVerifyingManual] = useState(false);
+  const [multiplayerPasswords, setMultiplayerPasswords] = useState<string[]>([]);
+  const [selectedPlayers, setSelectedPlayers] = useState<number>(2);
 
   async function handleLogin() {
     if (!password) {
@@ -63,6 +73,10 @@ export default function GamePage() {
             setIsAuthenticated(true);
             setPlayerName(result.playerName || "Běžec");
             
+            if (result.teamId) {
+                setPlayerTeamId(result.teamId);
+            }
+
             const activeCheck = await checkActiveQuest(password);
             
             if (activeCheck.hasActive && activeCheck.code) {
@@ -92,12 +106,17 @@ export default function GamePage() {
     setErrorMessage("");
 
     try {
-      const result = await verifyManualCheckpoint(password, manualCode.trim());
+      const result = await verifyManualCheckpoint(password, manualCode.trim(), selectedPlayers);
       
       if (result.success && result.checkpoint) {
-        // Simulujeme stejný flow jako u GPS
+        setNearestCheckpoint(result.checkpoint as CheckpointResult);
         setActiveQuestCode(result.checkpoint.code);
-        setViewMode("quest");
+        
+        if(result.checkpoint.playersRequired > 1) {
+            setViewMode("multiplayer_auth");
+        } else {
+            setViewMode("quest"); // Rovnou quest, nevyžaduje víc hráčů
+        }
       } else {
         setErrorMessage(result.message || "Neplatný kód checkpointu.");
       }
@@ -136,9 +155,9 @@ export default function GamePage() {
           reject({
             type: "ACCURACY_TIMEOUT",
             bestAccuracy: bestAccuracy,
-            required: CHECKPOINT_RADIUS_METERS
+            required: config!.CHECKPOINT_RADIUS_METERS
           });
-        }, GPS_TIMEOUT_MS);
+        }, config!.GPS_TIMEOUT_MS);
 
         watchId = navigator.geolocation.watchPosition(
           (pos) => {
@@ -148,7 +167,7 @@ export default function GamePage() {
             }
             setAccuracyMeters(currentAccuracy); 
 
-            if (currentAccuracy <= CHECKPOINT_RADIUS_METERS) {
+            if (currentAccuracy <= config!.CHECKPOINT_RADIUS_METERS) {
               cleanup();
               resolve(pos);
             }
@@ -160,7 +179,7 @@ export default function GamePage() {
           {
             enableHighAccuracy: true,
             maximumAge: 0,
-            timeout: GPS_TIMEOUT_MS
+            timeout: config!.GPS_TIMEOUT_MS
           }
         );
       });
@@ -168,7 +187,7 @@ export default function GamePage() {
       const { latitude, longitude, accuracy } = position.coords;
       setAccuracyMeters(accuracy);
 
-      const result = await findNearestCheckpoint(password, latitude, longitude, accuracy);
+      const result = await findNearestCheckpoint(password, latitude, longitude, accuracy, selectedPlayers);
 
       if (!result.success) {
         setState("error");
@@ -184,10 +203,15 @@ export default function GamePage() {
 
       if (result.withinRadius && result.checkpoint) {
         setState("found");
-        setNearestCheckpoint(result.checkpoint);
+        setNearestCheckpoint(result.checkpoint as CheckpointResult);
         setTimeout(() => {
             setActiveQuestCode(result.checkpoint.code);
-            setViewMode("quest");
+            
+            if(result.checkpoint.playersRequired > 1) {
+                setViewMode("multiplayer_auth");
+            } else {
+                setViewMode("quest"); 
+            }
         }, 3000); 
       } else if (result.checkpoint) {
         setState("not_in_range");
@@ -209,7 +233,7 @@ export default function GamePage() {
           <>
             Nebylo možné dostatečně přesně zaměřit polohu.<br />
             Aktuální přesnost: <strong>{actualText} metrů</strong><br />
-            Požadované minimum: <strong>{CHECKPOINT_RADIUS_METERS} metrů</strong>.
+            Požadované minimum: <strong>{config!.CHECKPOINT_RADIUS_METERS} metrů</strong>.
           </>
         );
         return;
@@ -245,7 +269,7 @@ return (
 
         <div className="relative z-10 w-full max-w-2xl flex flex-col items-center text-center gap-8">
           
-          {viewMode !== "quest" && viewMode !== "manual" && (
+          {viewMode !== "quest" && viewMode !== "manual" && viewMode !== "multiplayer_auth" && (
             <div>
               <h2 className="text-purple">Načíst checkpoint</h2>
               <p className="text-gray-light text-lg">
@@ -254,6 +278,28 @@ return (
                   : "Pro pokračování se prosím identifikuj"}
               </p>
             </div>
+          )}
+
+          {viewMode === "multiplayer_auth" && nearestCheckpoint && (
+              <div className="animate-in fade-in zoom-in-95 duration-500 w-full flex justify-center">
+                 <MultiplayerAuth 
+                    locationName={nearestCheckpoint.name}
+                    requiredPlayers={nearestCheckpoint.playersRequired}
+                    initiatorPassword={password}
+                    initiatorName={playerName}
+                    teamId={playerTeamId!}
+                    config={config!}
+                    onVerified={(passwords: string[]) => {
+                        setMultiplayerPasswords(passwords); // Saved for CheckpointForm context if needed
+                        setViewMode("quest");
+                    }}
+                    onCancel={() => {
+                        setNearestCheckpoint(null);
+                        setState("idle");
+                        setViewMode("gps");
+                    }}
+                 />
+              </div>
           )}
 
           {viewMode === "manual" && (
@@ -272,11 +318,20 @@ return (
                  <CheckpointForm 
                      initialCode={activeQuestCode} 
                      savedPassword={password} 
+                     multiplayerPasswords={multiplayerPasswords.length > 0 ? multiplayerPasswords : undefined}
+                     config={config!}
+                     onQuestExpired={() => {
+                         setActiveQuestCode(null);
+                         setNearestCheckpoint(null);
+                         setMultiplayerPasswords([]);
+                         setState("idle");
+                         setViewMode("gps");
+                     }}
                  />
              </div>
           )}
 
-          {viewMode !== "quest" && (
+          {viewMode !== "quest" && viewMode !== "multiplayer_auth" && (
              <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-sm border-2 border-pink-50">
                
                {/* 1. BLOK: PŘIHLÁŠENÍ */}
@@ -325,26 +380,39 @@ return (
                      </div>
 
                      {state === "idle" && (
-                       <div>
+                       <div className="flex flex-col gap-4 w-full">
+                         <div className="flex flex-col items-start gap-2 text-left w-full">
+                           <label className="text-sm font-bold text-gray-dark ml-1">Společný úkol pro:</label>
+                           <div className="flex gap-2 w-full mt-1 mb-2">
+                             {[2, 3, 4, 5].map(num => (
+                               <button 
+                                 key={num}
+                                 onClick={() => setSelectedPlayers(num)}
+                                 className={`flex-1 py-3 rounded-xl font-bold transition-all ${selectedPlayers === num ? 'bg-pink text-white border-2 border-pink shadow-md transform scale-105' : 'bg-gray-50 text-dark-gray border-2 border-purple-25 hover:border-pink hover:text-pink'}`}
+                               >
+                                 {num} hráči
+                               </button>
+                             ))}
+                           </div>
+                         </div>
                          <button
                            onClick={handleLoadCheckpoint}
                            className="w-full bg-purple text-white py-4 px-6 rounded-2xl font-bold text-lg hover:bg-purple-75 transition-all transform hover:scale-105 active:scale-95"
                          >
                            Načíst checkpoint
                          </button>
-                         <br />
-                         <p className="text-sm text-purple mt-4">Pro maximální přesnost se ujisti, že nejsi uvnitř budovy.</p>
+                         <p className="text-sm text-purple mt-2">Pro maximální přesnost se ujisti, že nejsi uvnitř budovy.</p>
                        </div>
                      )}
 
                      {state === "loading" && (
                         <div className="flex flex-col items-center gap-4 w-full max-w-xs mx-auto">
                            <p className="text-gray-dark text-lg font-medium animate-pulse">
-                              {accuracyMeters > 0 && accuracyMeters <= CHECKPOINT_RADIUS_METERS ? "Poloha zaměřena!" : "Zpřesňuji polohu..."}
+                              {accuracyMeters > 0 && accuracyMeters <= config!.CHECKPOINT_RADIUS_METERS ? "Poloha zaměřena!" : "Zpřesňuji polohu..."}
                            </p>
                            <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden relative shadow-inner">
-                             <div className={`h-full ${accuracyMeters <= CHECKPOINT_RADIUS_METERS ? "bg-green-500" : "bg-pink"} transition-colors duration-300 ease-out origin-left`}
-                                  style={{ animation: `fillBar ${GPS_TIMEOUT_MS}ms linear forwards` }} />
+                             <div className={`h-full ${accuracyMeters <= config!.CHECKPOINT_RADIUS_METERS ? "bg-green-500" : "bg-pink"} transition-colors duration-300 ease-out origin-left`}
+                                  style={{ animation: `fillBar ${config!.GPS_TIMEOUT_MS}ms linear forwards` }} />
                            </div>
                            <p className="text-xl tabular-nums">± {accuracyMeters > 0 ? Math.round(accuracyMeters) : "?"} m</p>
                            <style jsx>{`@keyframes fillBar { from { width: 0%; } to { width: 100%; } }`}</style>
@@ -391,6 +459,21 @@ return (
                {/* 3. BLOK: MANUÁLNÍ ZADÁNÍ KÓDU (Tento blok musel jít ven z GPS bloku!) */}
                {isAuthenticated && viewMode === "manual" && (
                    <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                       <div className="flex flex-col items-start gap-2 text-left w-full mb-2">
+                           <label className="text-sm font-bold text-gray-dark ml-1">Společný úkol pro:</label>
+                           <div className="flex gap-2 w-full mt-1">
+                             {[2, 3, 4, 5].map(num => (
+                               <button 
+                                 key={num}
+                                 onClick={() => setSelectedPlayers(num)}
+                                 className={`flex-1 py-3 rounded-xl font-bold transition-all ${selectedPlayers === num ? 'bg-pink text-white border-2 border-pink shadow-md transform scale-105' : 'bg-gray-50 text-dark-gray border-2 border-purple-25 hover:border-pink hover:text-pink'}`}
+                               >
+                                 {num} hráči
+                               </button>
+                             ))}
+                           </div>
+                       </div>
+                   
                        <div className="flex flex-col items-start gap-2">
                            <label className="text-sm font-bold text-gray-dark ml-1">Kód checkpointu:</label>
                            <input 

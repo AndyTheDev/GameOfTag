@@ -1,12 +1,12 @@
-import { 
-  pgTable, 
-  text, 
-  integer, 
-  timestamp, 
-  boolean, 
-  uniqueIndex, 
-  time, 
-  date 
+import {
+  pgTable,
+  text,
+  integer,
+  timestamp,
+  boolean,
+  uniqueIndex,
+  time,
+  date
 } from 'drizzle-orm/pg-core';
 
 // --- ČÍSELNÍKY ---
@@ -41,7 +41,25 @@ export const logTypes = pgTable('log_type', {
 
 export const questStatuses = pgTable('quest_status', {
   idQuestStatus: integer('id_quest_status').primaryKey().generatedByDefaultAsIdentity(),
-  name: text('name').notNull(), 
+  name: text('name').notNull(),
+});
+
+// --- Konfigurační tabulka ---
+export const configuration = pgTable('configuration', {
+  idConfiguration: integer('id_configuration').primaryKey().generatedByDefaultAsIdentity(),
+  name: text('name').notNull(),
+  value: integer('value').notNull(),
+  description: text('description').notNull(),
+  lastRunAt: timestamp('last_run_at')
+});
+
+// --- CRON Logs tabulka ---
+export const systemLogs = pgTable('system_logs', {
+  id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+  level: text('level').notNull(),
+  message: text('message').notNull(),
+  details: text('details'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 // --- HLAVNÍ TABULKY ---
@@ -51,6 +69,7 @@ export const quests = pgTable('quests', {
   name: text('name').notNull(),
   description: text('description').notNull(),
   questTypeId: integer('quest_type').notNull().references(() => questTypes.idQuestType),
+  playersRequired: integer('players_required').notNull().default(1),
   timeLimit: integer('time_limit').notNull(),
 });
 

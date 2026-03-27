@@ -10,12 +10,12 @@ console.log(`Checking game state every ${INTERVAL_MS / 1000} seconds...`);
 async function tick() {
   try {
     const result = await processGameTimeouts();
-    
+
     if (result.success && result.logsCreated && result.logsCreated > 0) {
       console.log(`[${new Date().toISOString()}] Action: ${result.logsCreated} logs created.`);
     }
     // Pokud se nic nestalo, mlčíme, abychom nespamovali konzoli
-    
+
   } catch (error) {
     console.error(`[${new Date().toISOString()}] WORKER ERROR:`, error);
   }

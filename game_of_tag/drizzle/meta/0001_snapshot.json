@@ -1,0 +1,886 @@
+{
+  "id": "23933186-6066-43b6-b98c-21d320e2a61b",
+  "prevId": "cc702ea7-9b1b-48d1-ae06-343f32e01503",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.game_session": {
+      "name": "game_session",
+      "schema": "",
+      "columns": {
+        "id_game_session": {
+          "name": "id_game_session",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "game_session_id_game_session_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "time": {
+          "name": "time",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "duration": {
+          "name": "duration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.location": {
+      "name": "location",
+      "schema": "",
+      "columns": {
+        "id_location": {
+          "name": "id_location",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "location_id_location_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type_id": {
+          "name": "type_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gps": {
+          "name": "gps",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "completed": {
+          "name": "completed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "location_type_id_quest_type_id_quest_type_fk": {
+          "name": "location_type_id_quest_type_id_quest_type_fk",
+          "tableFrom": "location",
+          "tableTo": "quest_type",
+          "columnsFrom": [
+            "type_id"
+          ],
+          "columnsTo": [
+            "id_quest_type"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "location_team_id_team_id_team_fk": {
+          "name": "location_team_id_team_id_team_fk",
+          "tableFrom": "location",
+          "tableTo": "team",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id_team"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.log_type": {
+      "name": "log_type",
+      "schema": "",
+      "columns": {
+        "id_log_type": {
+          "name": "id_log_type",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "log_type_id_log_type_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.log": {
+      "name": "log",
+      "schema": "",
+      "columns": {
+        "id_log": {
+          "name": "id_log",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "log_id_log_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "game_id": {
+          "name": "game_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "log_time": {
+          "name": "log_time",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "log_type": {
+          "name": "log_type",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location_id": {
+          "name": "location_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quest_id": {
+          "name": "quest_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quest_status": {
+          "name": "quest_status",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "caught_player_id": {
+          "name": "caught_player_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "log_game_id_game_session_id_game_session_fk": {
+          "name": "log_game_id_game_session_id_game_session_fk",
+          "tableFrom": "log",
+          "tableTo": "game_session",
+          "columnsFrom": [
+            "game_id"
+          ],
+          "columnsTo": [
+            "id_game_session"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "log_log_type_log_type_id_log_type_fk": {
+          "name": "log_log_type_log_type_id_log_type_fk",
+          "tableFrom": "log",
+          "tableTo": "log_type",
+          "columnsFrom": [
+            "log_type"
+          ],
+          "columnsTo": [
+            "id_log_type"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "log_player_id_player_id_player_fk": {
+          "name": "log_player_id_player_id_player_fk",
+          "tableFrom": "log",
+          "tableTo": "player",
+          "columnsFrom": [
+            "player_id"
+          ],
+          "columnsTo": [
+            "id_player"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "log_location_id_location_id_location_fk": {
+          "name": "log_location_id_location_id_location_fk",
+          "tableFrom": "log",
+          "tableTo": "location",
+          "columnsFrom": [
+            "location_id"
+          ],
+          "columnsTo": [
+            "id_location"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "log_quest_id_quests_id_quest_fk": {
+          "name": "log_quest_id_quests_id_quest_fk",
+          "tableFrom": "log",
+          "tableTo": "quests",
+          "columnsFrom": [
+            "quest_id"
+          ],
+          "columnsTo": [
+            "id_quest"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "log_quest_status_quest_status_id_quest_status_fk": {
+          "name": "log_quest_status_quest_status_id_quest_status_fk",
+          "tableFrom": "log",
+          "tableTo": "quest_status",
+          "columnsFrom": [
+            "quest_status"
+          ],
+          "columnsTo": [
+            "id_quest_status"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "log_caught_player_id_player_id_player_fk": {
+          "name": "log_caught_player_id_player_id_player_fk",
+          "tableFrom": "log",
+          "tableTo": "player",
+          "columnsFrom": [
+            "caught_player_id"
+          ],
+          "columnsTo": [
+            "id_player"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.player_progress": {
+      "name": "player_progress",
+      "schema": "",
+      "columns": {
+        "id_progress": {
+          "name": "id_progress",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "player_progress_id_progress_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location_id": {
+          "name": "location_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "player_location_unique": {
+          "name": "player_location_unique",
+          "columns": [
+            {
+              "expression": "player_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "location_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "player_progress_player_id_player_id_player_fk": {
+          "name": "player_progress_player_id_player_id_player_fk",
+          "tableFrom": "player_progress",
+          "tableTo": "player",
+          "columnsFrom": [
+            "player_id"
+          ],
+          "columnsTo": [
+            "id_player"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "player_progress_location_id_location_id_location_fk": {
+          "name": "player_progress_location_id_location_id_location_fk",
+          "tableFrom": "player_progress",
+          "tableTo": "location",
+          "columnsFrom": [
+            "location_id"
+          ],
+          "columnsTo": [
+            "id_location"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.player_role": {
+      "name": "player_role",
+      "schema": "",
+      "columns": {
+        "id_player_role": {
+          "name": "id_player_role",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "player_role_id_player_role_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.player": {
+      "name": "player",
+      "schema": "",
+      "columns": {
+        "id_player": {
+          "name": "id_player",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "player_id_player_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "play_name": {
+          "name": "play_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pass": {
+          "name": "pass",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "privilege_level": {
+          "name": "privilege_level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quest_lock": {
+          "name": "quest_lock",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "quest_lock_endtime": {
+          "name": "quest_lock_endtime",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "role_id": {
+          "name": "role_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "points": {
+          "name": "points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "bubble_burst_time": {
+          "name": "bubble_burst_time",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "runner_shield_time": {
+          "name": "runner_shield_time",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quest_end_time": {
+          "name": "quest_end_time",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "player_team_id_team_id_team_fk": {
+          "name": "player_team_id_team_id_team_fk",
+          "tableFrom": "player",
+          "tableTo": "team",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id_team"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "player_privilege_level_privilege_level_id_privilege_level_fk": {
+          "name": "player_privilege_level_privilege_level_id_privilege_level_fk",
+          "tableFrom": "player",
+          "tableTo": "privilege_level",
+          "columnsFrom": [
+            "privilege_level"
+          ],
+          "columnsTo": [
+            "id_privilege_level"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "player_role_id_player_role_id_player_role_fk": {
+          "name": "player_role_id_player_role_id_player_role_fk",
+          "tableFrom": "player",
+          "tableTo": "player_role",
+          "columnsFrom": [
+            "role_id"
+          ],
+          "columnsTo": [
+            "id_player_role"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "player_pass_unique": {
+          "name": "player_pass_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "pass"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.privilege_level": {
+      "name": "privilege_level",
+      "schema": "",
+      "columns": {
+        "id_privilege_level": {
+          "name": "id_privilege_level",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "privilege_level_id_privilege_level_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.quest_status": {
+      "name": "quest_status",
+      "schema": "",
+      "columns": {
+        "id_quest_status": {
+          "name": "id_quest_status",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "quest_status_id_quest_status_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.quest_type": {
+      "name": "quest_type",
+      "schema": "",
+      "columns": {
+        "id_quest_type": {
+          "name": "id_quest_type",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "quest_type_id_quest_type_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.quests": {
+      "name": "quests",
+      "schema": "",
+      "columns": {
+        "id_quest": {
+          "name": "id_quest",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "quests_id_quest_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quest_type": {
+          "name": "quest_type",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "players_required": {
+          "name": "players_required",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "time_limit": {
+          "name": "time_limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "quests_quest_type_quest_type_id_quest_type_fk": {
+          "name": "quests_quest_type_quest_type_id_quest_type_fk",
+          "tableFrom": "quests",
+          "tableTo": "quest_type",
+          "columnsFrom": [
+            "quest_type"
+          ],
+          "columnsTo": [
+            "id_quest_type"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.team": {
+      "name": "team",
+      "schema": "",
+      "columns": {
+        "id_team": {
+          "name": "id_team",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "team_id_team_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "points": {
+          "name": "points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "map": {
+          "name": "map",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "life360": {
+          "name": "life360",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
