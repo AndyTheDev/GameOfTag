@@ -54,6 +54,7 @@ type QuestInput = {
   description: string;
   questTypeId: number;
   timeLimit: number;
+  playersRequired: number;
 };
 
 // --- AUTH ---
@@ -317,7 +318,8 @@ export async function saveQuest(data: QuestInput) {
       name: data.name,
       description: data.description,
       questTypeId: Number(data.questTypeId),
-      timeLimit: Number(data.timeLimit)
+      timeLimit: Number(data.timeLimit),
+      playersRequired: Number(data.playersRequired) || 1
     };
 
     if (data.id) {
@@ -430,5 +432,42 @@ export async function triggerCronRestart() {
     return { success: true, message: "CRON úspěšně spuštěn." };
   } catch (e) {
     return handleServerError("Chyba při ručním spuštění CRONu.", e);
+  }
+}
+
+// --- RESET STAVŮ HRÁČE ---
+
+export async function resetPlayerInvisibility(playerId: number) {
+  const session = await requireAdminSession();
+  if (!session.ok) return { success: false, message: "Neautorizováno" };
+
+  try {
+    await db.update(players)
+      .set({ bubbleBurstTime: null })
+      .where(eq(players.idPlayer, playerId));
+
+    logInfo(`Admin resetoval neviditelnost hráči ID ${playerId}`);
+    return { success: true };
+  } catch (e) {
+    return handleServerError("Nelze resetovat neviditelnost.", e);
+  }
+}
+
+export async function resetPlayerLock(playerId: number) {
+  const session = await requireAdminSession();
+  if (!session.ok) return { success: false, message: "Neautorizováno" };
+
+  try {
+    await db.update(players)
+      .set({ 
+        questLock: false,
+        questLockEndtime: null 
+      })
+      .where(eq(players.idPlayer, playerId));
+
+    logInfo(`Admin resetoval lock/trest hráči ID ${playerId}`);
+    return { success: true };
+  } catch (e) {
+    return handleServerError("Nelze resetovat zastavení/trest.", e);
   }
 }

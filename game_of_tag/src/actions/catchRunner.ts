@@ -2,7 +2,7 @@
 
 import { db } from '@/src/db';
 import { players, logs, gameSessions, teams } from '@/src/db/schema';
-import { eq, and, gt, desc, sql } from 'drizzle-orm';
+import { eq, and, gt, desc, sql, inArray } from 'drizzle-orm';
 import {
   LOG_TYPE_BUBBLE,
   LOG_TYPE_HUNTER_TIMEOUT,
@@ -126,8 +126,62 @@ export async function catchRunnerAction(slug: string, hunterPassword: string) {
 
       // B.1 Nalezení a zrušení případného skupinového questu
       // Pokud má běžec aktivní questEndTime, najdeme všechny jeho spoluhráče s TÍMTÉŽ questEndTime a zrušíme jim ho bez trestu
+      // if (runner.questEndTime && runner.questEndTime > now) {
+      //   // A.1 Najdeme poslední START log běžce, abychom zjistili lokaci a úkol
+      //   const [lastStart] = await tx.select()
+      //     .from(logs)
+      //     .where(
+      //       and(
+      //         eq(logs.playerId, runner.idPlayer),
+      //         eq(logs.logTypeId, LOG_TYPE_START)
+      //       )
+      //     )
+      //     .orderBy(desc(logs.logTime))
+      //     .limit(1);
+
+      //   const locationId = lastStart?.locationId || null;
+      //   const questId = lastStart?.questId || null;
+
+      //   // A.2 Načteme ID všech hráčů z týmu, kteří mají stejný questEndTime (skupina)
+      //   const groupToCancel = await tx.select({ idPlayer: players.idPlayer })
+      //     .from(players)
+      //     .where(
+      //       and(
+      //         eq(players.teamId, runner.teamId!),
+      //         eq(players.questEndTime, runner.questEndTime)
+      //       )
+      //     );
+
+      //   // 3 Zrušení questEndTime v DB pro celou skupinu
+      //   await tx.update(players)
+      //     .set({ questEndTime: null })
+      //     .where(
+      //       and(
+      //         eq(players.teamId, runner.teamId!),
+      //         eq(players.questEndTime, runner.questEndTime)
+      //       )
+      //     );
+
+      //   // 4. Zapisování zrušení úkolu do logů pro VŠECHNY (včetně chyceného)
+      //   // Tím se uvolní lokace v loadLocation.ts (pokud tam přidáme kontrolu na LOG_TYPE_QUEST_CANCELLED)
+      //   for (const member of groupToCancel) {
+      //     await tx.insert(logs).values({
+      //       gameId: activeGame.idGameSession,
+      //       logTypeId: LOG_TYPE_QUEST_CANCELLED,
+      //       playerId: member.idPlayer,
+      //       locationId: locationId,
+      //       questId: questId,
+      //       logTime: now
+      //     });
+      //   }
+      // }
+
       if (runner.questEndTime && runner.questEndTime > now) {
-        // A.1 Najdeme poslední START log běžce, abychom zjistili lokaci a úkol
+        if (!runner.teamId) {
+          throw new Error('Běžec nemá přiřazený tým, nelze zrušit týmový úkol.');
+        }
+
+        // A.1 Najdeme poslední START log běžce
         const [lastStart] = await tx.select()
           .from(logs)
           .where(
@@ -139,40 +193,43 @@ export async function catchRunnerAction(slug: string, hunterPassword: string) {
           .orderBy(desc(logs.logTime))
           .limit(1);
 
-        const locationId = lastStart?.locationId || null;
-        const questId = lastStart?.questId || null;
+        const locationId = lastStart?.locationId ?? null;
+        const questId = lastStart?.questId ?? null;
 
-        // A.2 Načteme ID všech hráčů z týmu, kteří mají stejný questEndTime (skupina)
+        // A.2 Najdeme všechny hráče v týmu, kteří mají momentálně aktivní úkol
         const groupToCancel = await tx.select({ idPlayer: players.idPlayer })
           .from(players)
           .where(
             and(
-              eq(players.teamId, runner.teamId!),
-              eq(players.questEndTime, runner.questEndTime)
+              eq(players.teamId, runner.teamId),
+              gt(players.questEndTime, now) // Nahrazeno: tolerujeme jakýkoliv aktivní úkol v rámci týmu
             )
           );
 
-        // 3 Zrušení questEndTime v DB pro celou skupinu
-        await tx.update(players)
-          .set({ questEndTime: null })
-          .where(
-            and(
-              eq(players.teamId, runner.teamId!),
-              eq(players.questEndTime, runner.questEndTime)
-            )
-          );
+        if (groupToCancel.length > 0) {
+          // Extrakt samotných IDček pro bezpečný inArray update
+          const playerIds = groupToCancel.map(p => p.idPlayer);
 
-        // 4. Zapisování zrušení úkolu do logů pro VŠECHNY (včetně chyceného)
-        // Tím se uvolní lokace v loadLocation.ts (pokud tam přidáme kontrolu na LOG_TYPE_QUEST_CANCELLED)
-        for (const member of groupToCancel) {
-          await tx.insert(logs).values({
-            gameId: activeGame.idGameSession,
-            logTypeId: LOG_TYPE_QUEST_CANCELLED,
-            playerId: member.idPlayer,
-            locationId: locationId,
-            questId: questId,
-            logTime: now
-          });
+          // 3. Zrušení questEndTime v DB pro celou skupinu najednou
+          await tx.update(players)
+            .set({ questEndTime: null })
+            .where(
+              and( // Drizzle import `inArray` si budeš muset případně přidat nahoře!
+                inArray(players.idPlayer, playerIds)
+              )
+            );
+
+          // 4. Zapisování logů
+          for (const member of groupToCancel) {
+            await tx.insert(logs).values({
+              gameId: activeGame.idGameSession,
+              logTypeId: LOG_TYPE_QUEST_CANCELLED,
+              playerId: member.idPlayer,
+              locationId: locationId,
+              questId: questId,
+              logTime: now
+            });
+          }
         }
       }
 

@@ -6,7 +6,7 @@ import {
   getPlayers, savePlayer, getCheckpoints, saveCheckpoint,
   getAdminMetadata, getPlayerStatus,
   getQuests, saveQuest, saveTeam, deleteTeam, getPlayerLogs,
-  getCronStatus, triggerCronRestart
+  getCronStatus, triggerCronRestart, resetPlayerInvisibility, resetPlayerLock
 } from "../../src/actions/admin";
 import { getDetailedGameConfig, saveGameConfig } from "../../src/actions/adminConfig";
 import {
@@ -172,6 +172,7 @@ export default function AdminPage() {
   const [statusExpandedId, setStatusExpandedId] = useState<number | null>(null);
   const [cronStatus, setCronStatus] = useState<{ lastRun: number, isAlive: boolean, diff: number } | null>(null);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+  const [playerResetStates, setPlayerResetStates] = useState<Record<string, 'loading' | 'success' | 'error' | null>>({});
 
   // Filters
   const [logFilter, setLogFilter] = useState<number | "all">("all");
@@ -308,6 +309,34 @@ export default function AdminPage() {
     }
   };
 
+  const handleResetInvisibility = async (id: number) => {
+    const key = `${id}-invisibility`;
+    setPlayerResetStates(prev => ({ ...prev, [key]: 'loading' }));
+    const res = await resetPlayerInvisibility(id);
+    if (res.success) {
+      setPlayerResetStates(prev => ({ ...prev, [key]: 'success' }));
+      loadAllData(true);
+      setTimeout(() => setPlayerResetStates(prev => ({ ...prev, [key]: null })), 3000);
+    } else {
+      setPlayerResetStates(prev => ({ ...prev, [key]: 'error' }));
+      alert("Chyba: " + (res as any).message);
+    }
+  };
+
+  const handleResetLock = async (id: number, type: 'stop' | 'penalty') => {
+    const key = `${id}-${type}`;
+    setPlayerResetStates(prev => ({ ...prev, [key]: 'loading' }));
+    const res = await resetPlayerLock(id);
+    if (res.success) {
+      setPlayerResetStates(prev => ({ ...prev, [key]: 'success' }));
+      loadAllData(true);
+      setTimeout(() => setPlayerResetStates(prev => ({ ...prev, [key]: null })), 3000);
+    } else {
+      setPlayerResetStates(prev => ({ ...prev, [key]: 'error' }));
+      alert("Chyba: " + (res as any).message);
+    }
+  };
+
   // CHECKPOINTS
   const startEditCheckpoint = (cp: any) => {
     setEditingId(cp.idLocation);
@@ -348,7 +377,8 @@ export default function AdminPage() {
       name: quest.name,
       description: quest.description,
       questTypeId: quest.questTypeId,
-      timeLimit: quest.timeLimit
+      timeLimit: quest.timeLimit,
+      playersRequired: quest.playersRequired || 1
     });
   };
 
@@ -358,7 +388,8 @@ export default function AdminPage() {
       name: "",
       description: "",
       questTypeId: meta?.types?.[0]?.idQuestType || 1,
-      timeLimit: 360
+      timeLimit: 360,
+      playersRequired: 1
     });
   };
 
@@ -367,8 +398,9 @@ export default function AdminPage() {
     // Zajistíme, že čísla jsou opravdu čísla. Pokud je to NaN, použijeme fallback (např. 1 nebo 0).
     const sanitizedForm = {
       ...editForm,
-      questTypeId: Number(editForm.questTypeId) || 1, // Pokud NaN, nastaví 1
-      timeLimit: Number(editForm.timeLimit) || 0      // Pokud NaN, nastaví 0
+      questTypeId: Number(editForm.questTypeId) || 1,
+      timeLimit: Number(editForm.timeLimit) || 0,
+      playersRequired: Number(editForm.playersRequired) || 1
     };
 
     // 2. POTÉ: Logika pro ID (tvůj požadavek)
@@ -538,7 +570,7 @@ export default function AdminPage() {
         <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-8 backdrop-blur-sm bg-black/20 p-6 rounded-2xl border border-white/5">
           <div>
             <h1 className="text-3xl font-black text-white italic tracking-tighter">
-              GAME OF <span className="text-transparent bg-clip-text bg-linear-to-r from-purple to- pr-4">TAG</span>
+              GAME OF <span className="text-transparent bg-clip-text bg-linear-to-r from-pink to-purple pr-4">TAG</span>
             </h1>
             <p className="text-xs text-slate-400 uppercase tracking-widest mt-1">Live Control Panel</p>
           </div>
@@ -802,7 +834,6 @@ export default function AdminPage() {
                       )}
                     </div>
                   </div>
-                  {/* --- KONEC NOVÉ SEKCE --- */}
                 </div>
               </div>
             )}
@@ -1113,7 +1144,69 @@ export default function AdminPage() {
                                 </SelectField>
                               </div>
                             </div>
-                            <div className="flex justify-end">
+                            <div className="flex flex-wrap justify-between items-center gap-4 mt-8 pt-6 border-t border-white/5">
+                              <div className="flex flex-wrap gap-2">
+                                <button
+                                  onClick={() => handleResetInvisibility(p.idPlayer)}
+                                  disabled={playerResetStates[`${p.idPlayer}-invisibility`] === 'loading'}
+                                  className={`px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all transform active:scale-95 flex items-center gap-2 ${playerResetStates[`${p.idPlayer}-invisibility`] === 'success'
+                                    ? "bg-emerald-500 text-white"
+                                    : "bg-linear-to-r from-blue-600 to-cyan-600 text-white hover:shadow-[0_0_15px_rgba(37,99,235,0.4)]"
+                                    }`}
+                                  title="Odstraní běžci neviditelnost a bude tak moct plnit úkoly"
+                                >
+                                  {playerResetStates[`${p.idPlayer}-invisibility`] === 'loading' ? (
+                                    <>
+                                      <span className="w-2 h-2 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                                      Aktualizace...
+                                    </>
+                                  ) : playerResetStates[`${p.idPlayer}-invisibility`] === 'success' ? (
+                                    "Aktualizováno ✓"
+                                  ) : (
+                                    "Odstranit neviditelnost"
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => handleResetLock(p.idPlayer, 'stop')}
+                                  disabled={playerResetStates[`${p.idPlayer}-stop`] === 'loading'}
+                                  className={`px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all transform active:scale-95 flex items-center gap-2 ${playerResetStates[`${p.idPlayer}-stop`] === 'success'
+                                    ? "bg-emerald-500 text-white"
+                                    : "bg-linear-to-r from-blue-600 to-indigo-600 text-white hover:shadow-[0_0_15px_rgba(37,99,235,0.4)]"
+                                    }`}
+                                  title="Odstraní jak běžci, tak lovci zastavení po cyhcení - lovec tak může lovit a běžec se může pohybovat s neviditelností"
+                                >
+                                  {playerResetStates[`${p.idPlayer}-stop`] === 'loading' ? (
+                                    <>
+                                      <span className="w-2 h-2 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                                      Aktualizace...
+                                    </>
+                                  ) : playerResetStates[`${p.idPlayer}-stop`] === 'success' ? (
+                                    "Aktualizováno ✓"
+                                  ) : (
+                                    "Odstranit zastavení"
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => handleResetLock(p.idPlayer, 'penalty')}
+                                  disabled={playerResetStates[`${p.idPlayer}-penalty`] === 'loading'}
+                                  className={`px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all transform active:scale-95 flex items-center gap-2 ${playerResetStates[`${p.idPlayer}-penalty`] === 'success'
+                                    ? "bg-emerald-500 text-white"
+                                    : "bg-linear-to-r from-blue-600 to-violet-600 text-white hover:shadow-[0_0_15px_rgba(37,99,235,0.4)]"
+                                    }`}
+                                  title="Odstraní běžci trest za nesplnění úkolu - může se tak pohybovat a plnit úkoly"
+                                >
+                                  {playerResetStates[`${p.idPlayer}-penalty`] === 'loading' ? (
+                                    <>
+                                      <span className="w-2 h-2 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                                      Aktualizace...
+                                    </>
+                                  ) : playerResetStates[`${p.idPlayer}-penalty`] === 'success' ? (
+                                    "Aktualizováno ✓"
+                                  ) : (
+                                    "Odstranit trest"
+                                  )}
+                                </button>
+                              </div>
                               <ActionButton onClick={submitPlayer}>Uložit změny</ActionButton>
                             </div>
                           </div>
@@ -1278,14 +1371,18 @@ export default function AdminPage() {
                   <div className="mb-8 bg-slate-800/50 backdrop-blur border border-purple/30 p-6 rounded-2xl shadow-[0_0_30px_rgba(168,85,247,0.1)]">
                     <h3 className="text-purple-400 mb-6 font-bold uppercase tracking-widest text-sm border-b border-white/5 pb-2">Nový Úkol</h3>
                     <div className="grid grid-cols-1 gap-6 mb-6">
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                           <label className="text-xs text-slate-500 uppercase mb-1 block">Název</label>
                           <InputField value={editForm.name} onChange={(e: any) => handleEditChange('name', e.target.value)} />
                         </div>
                         <div>
-                          <label className="text-xs text-slate-500 uppercase mb-1 block">Časový limit (sekundy)</label>
+                          <label className="text-xs text-slate-500 uppercase mb-1 block">Časový limit (s)</label>
                           <InputField type="number" value={editForm.timeLimit} onChange={(e: any) => handleEditChange('timeLimit', e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="text-xs text-slate-500 uppercase mb-1 block">Potřební hráči</label>
+                          <InputField type="number" value={editForm.playersRequired} onChange={(e: any) => handleEditChange('playersRequired', e.target.value)} />
                         </div>
                       </div>
 
@@ -1333,7 +1430,7 @@ export default function AdminPage() {
                               </div>
                               <p className="text-slate-400 text-sm mt-2 line-clamp-1">{q.description}</p>
                               <div className="text-xs text-slate-600 mt-2">
-                                Limit: {q.timeLimit}s
+                                Limit: {q.timeLimit}s | Potřební hráči: {q.playersRequired || 1}
                               </div>
                             </div>
                             <ActionButton onClick={() => editingId === q.idQuest ? setEditingId(null) : startEditQuest(q)} variant="secondary">
@@ -1345,14 +1442,18 @@ export default function AdminPage() {
                           {editingId === q.idQuest && (
                             <div className="p-6 border-t border-white/5 bg-slate-900/50">
                               <div className="grid grid-cols-1 gap-6 mb-6">
-                                <div className="grid grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                   <div>
                                     <label className="text-xs text-slate-500 uppercase mb-1 block">Název</label>
                                     <InputField value={editForm.name} onChange={(e: any) => handleEditChange('name', e.target.value)} />
                                   </div>
                                   <div>
-                                    <label className="text-xs text-slate-500 uppercase mb-1 block">Časový limit (sekundy)</label>
+                                    <label className="text-xs text-slate-500 uppercase mb-1 block">Časový limit (s)</label>
                                     <InputField type="number" value={editForm.timeLimit} onChange={(e: any) => handleEditChange('timeLimit', e.target.value)} />
+                                  </div>
+                                  <div>
+                                    <label className="text-xs text-slate-500 uppercase mb-1 block">Potřební hráči</label>
+                                    <InputField type="number" value={editForm.playersRequired} onChange={(e: any) => handleEditChange('playersRequired', e.target.value)} />
                                   </div>
                                 </div>
 
