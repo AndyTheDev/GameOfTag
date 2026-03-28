@@ -13,7 +13,6 @@ import {
 } from '@/src/constants';
 import { getGameConfig } from '@/src/actions/adminConfig';
 import { parsePlayerIdFromSlug, validateSlug } from '@/src/lib/slug';
-import { getPragueDate } from '../lib/time';
 
 export async function catchRunnerAction(slug: string, hunterPassword: string) {
 
@@ -28,11 +27,22 @@ export async function catchRunnerAction(slug: string, hunterPassword: string) {
   try {
     return await db.transaction(async (tx) => {
       const config = await getGameConfig();
-      const now = getPragueDate();
+      const now = new Date();
 
       // 2. Načtení dat (Běžec, Lovec, Aktivní Session)
       const [runner] = await tx.select().from(players).where(eq(players.idPlayer, runnerId));
       const [hunter] = await tx.select().from(players).where(eq(players.pass, hunterPassword));
+      const [lastCatch] = await tx.select()
+        .from(logs)
+        .where(
+          and(
+            eq(logs.playerId, hunter.idPlayer),
+            eq(logs.logTypeId, LOG_TYPE_CATCH),
+            eq(logs.caughtPlayerId, runner.idPlayer)
+          )
+        )
+        .orderBy(desc(logs.logTime))
+        .limit(1);
 
       // Získáme poslední aktivní hru pro logování
       const [activeGame] = await tx.select()
@@ -80,17 +90,20 @@ export async function catchRunnerAction(slug: string, hunterPassword: string) {
         };
       }
 
-      // Je běžec chráněný (quest_lock)?
-      if (runner.questLock && runner.questLockEndtime && runner.questLockEndtime > now) {
-        return { success: false, message: 'Tento běžec má stále aktivní ochranu po předchozím chycení.' };
+      // Je běžec neviditelný?
+      if (runner.bubbleBurstTime && runner.bubbleBurstTime > now) {
+        return { success: false, message: 'Tento běžec je stále neviditelný a nelze ho ještě chytit!' };
       }
 
-
+      // Chytil lovec někdy už tohoto běžce?
+      if (lastCatch) {
+        return { success: false, message: 'Tohoto běžce už jsi jednou chytil. Nemůžeš ho chytit podruhé!' };
+      }
 
       // --- EXEKUCE (Vše OK) ---
 
       // A. Updaty Lovec
-      const hunterLockEnd = getPragueDate(now.getTime() + config.RUNNER_SHIELD_TIME * 1000);
+      const hunterLockEnd = new Date(now.getTime() + config.RUNNER_SHIELD_TIME * 1000);
       await tx.update(players)
         .set({
           points: (hunter.points || 0) + config.POINTS_CATCH,
@@ -108,8 +121,8 @@ export async function catchRunnerAction(slug: string, hunterPassword: string) {
       }
 
       // B. Updaty Běžec
-      const runnerShieldEnd = getPragueDate(now.getTime() + config.RUNNER_SHIELD_TIME * 1000);
-      const runnerBubbleEnd = getPragueDate(now.getTime() + config.RUNNER_BUBBLE_TIME * 1000);
+      const runnerShieldEnd = new Date(now.getTime() + config.RUNNER_SHIELD_TIME * 1000);
+      const runnerBubbleEnd = new Date(now.getTime() + config.RUNNER_BUBBLE_TIME * 1000);
 
       // B.1 Nalezení a zrušení případného skupinového questu
       // Pokud má běžec aktivní questEndTime, najdeme všechny jeho spoluhráče s TÍMTÉŽ questEndTime a zrušíme jim ho bez trestu
@@ -139,7 +152,7 @@ export async function catchRunnerAction(slug: string, hunterPassword: string) {
             )
           );
 
-        // A.3 Zrušení questEndTime v DB pro celou skupinu
+        // 3 Zrušení questEndTime v DB pro celou skupinu
         await tx.update(players)
           .set({ questEndTime: null })
           .where(
@@ -149,7 +162,7 @@ export async function catchRunnerAction(slug: string, hunterPassword: string) {
             )
           );
 
-        // A.4 Zapisování zrušení úkolu do logů pro VŠECHNY (včetně chyceného)
+        // 4. Zapisování zrušení úkolu do logů pro VŠECHNY (včetně chyceného)
         // Tím se uvolní lokace v loadLocation.ts (pokud tam přidáme kontrolu na LOG_TYPE_QUEST_CANCELLED)
         for (const member of groupToCancel) {
           await tx.insert(logs).values({
