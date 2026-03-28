@@ -407,7 +407,7 @@ export async function getCronStatus() {
     const diff = lastRun > 0 ? now - lastRun : 999;
 
     // Považujeme za "mrtvé", pokud neběžel déle než 30 sekund (běží každých 5s)
-    const isAlive = lastRun > 0 && diff < 10;
+    const isAlive = lastRun > 0 && diff < 20;
 
     return {
       success: true,

@@ -25,7 +25,7 @@ async function main() {
 
     // 2. Hlavní entity (odkazují na týmy, číselníky...)
     // Pozor: Players se musí smazat před týmy a rolemi
-    await tx.delete(schema.players); 
+    await tx.delete(schema.players);
     await tx.delete(schema.locations);
     await tx.delete(schema.quests);
 
@@ -37,6 +37,7 @@ async function main() {
     await tx.delete(schema.questStatuses);
     await tx.delete(schema.questTypes);
     await tx.delete(schema.logTypes);
+    await tx.delete(schema.systemLogs);
 
     console.log('✨ Databáze je prázdná.');
 
@@ -58,7 +59,7 @@ async function main() {
     if (d.quests?.length) await tx.insert(schema.quests).values(d.quests);
     if (d.locations?.length) await tx.insert(schema.locations).values(d.locations);
     if (d.players?.length) await tx.insert(schema.players).values(d.players);
-    
+
     // Poznámka: Odstranil jsem .onConflictDoNothing(), protože teď vkládáme do čisté DB.
     // Pokud by v dumpu byly duplicity, chceme, aby to zařvalo chybou.
   });
