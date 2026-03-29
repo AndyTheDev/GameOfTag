@@ -213,11 +213,7 @@ export async function catchRunnerAction(slug: string, hunterPassword: string) {
           // 3. Zrušení questEndTime v DB pro celou skupinu najednou
           await tx.update(players)
             .set({ questEndTime: null })
-            .where(
-              and( // Drizzle import `inArray` si budeš muset případně přidat nahoře!
-                inArray(players.idPlayer, playerIds)
-              )
-            );
+            .where(inArray(players.idPlayer, playerIds)); // Odstraněno and()
 
           // 4. Zapisování logů
           for (const member of groupToCancel) {
@@ -273,6 +269,8 @@ export async function catchRunnerAction(slug: string, hunterPassword: string) {
 
   } catch (error) {
     console.error('Catch Error:', error);
-    return { success: false, message: 'Nastala interní chyba při zpracování.' };
+    // Vytáhneme reálnou chybovou hlášku
+    const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
+    return { success: false, message: `Interní chyba DB: ${errorMessage}` };
   }
 }

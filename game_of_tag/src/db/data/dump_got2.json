@@ -1,0 +1,2067 @@
+{
+    "gameSessions": [
+        {
+            "idGameSession": 1,
+            "date": "2026-02-09",
+            "time": "20:50:32.426556",
+            "duration": 10800
+        }
+    ],
+    "logTypes": [
+        {
+            "idLogType": 1,
+            "name": "Úkol spuštěn"
+        },
+        {
+            "idLogType": 2,
+            "name": "Vypršel čas na úkol"
+        },
+        {
+            "idLogType": 3,
+            "name": "Úkol splněn"
+        },
+        {
+            "idLogType": 4,
+            "name": "Může opět plnit úkoly"
+        },
+        {
+            "idLogType": 5,
+            "name": "Nepřesná GPS"
+        },
+        {
+            "idLogType": 6,
+            "name": "Chycení hráče"
+        },
+        {
+            "idLogType": 7,
+            "name": "Běžec spouští bublinu"
+        },
+        {
+            "idLogType": 8,
+            "name": "Běžec si vypíná bublinu"
+        },
+        {
+            "idLogType": 9,
+            "name": "Lovec nesmí lovit"
+        },
+        {
+            "idLogType": 10,
+            "name": "Lovec může opět lovit"
+        }
+    ],
+    "privilegeLevels": [
+        {
+            "idPrivilegeLevel": 1,
+            "name": "admin"
+        },
+        {
+            "idPrivilegeLevel": 2,
+            "name": "player"
+        }
+    ],
+    "questStatuses": [
+        {
+            "idQuestStatus": 1,
+            "name": "Started"
+        },
+        {
+            "idQuestStatus": 2,
+            "name": "Finished"
+        },
+        {
+            "idQuestStatus": 3,
+            "name": "Failed"
+        }
+    ],
+    "questTypes": [
+        {
+            "idQuestType": 1,
+            "name": "City"
+        },
+        {
+            "idQuestType": 2,
+            "name": "Nature"
+        },
+        {
+            "idQuestType": 3,
+            "name": "Mixed"
+        }
+    ],
+    "teams": [
+        {
+            "idTeam": 3,
+            "name": "Blue",
+            "points": 0,
+            "map": "https://mapy.com/s/lukezebere",
+            "life360": "BIK-ENA"
+        },
+        {
+            "idTeam": 2,
+            "name": "Red",
+            "points": 0,
+            "map": "https://mapy.com/s/gujovugesu",
+            "life360": "XCM-NAV"
+        },
+        {
+            "idTeam": 4,
+            "name": "Yellow",
+            "points": 0,
+            "map": "https://mapy.com/s/foperature",
+            "life360": "HOB-AYC"
+        },
+        {
+            "idTeam": 1,
+            "name": "Green",
+            "points": 0,
+            "map": "https://mapy.com/s/mebapujano",
+            "life360": "BYK-ZOJ"
+        }
+    ],
+    "quests": [
+        {
+            "idQuest": 22,
+            "name": "Zlaté z nebe",
+            "description": "Kup si dvě drobné sladkosti a jednu daruj úplně cizímu člověku jen tak \"pro lepší den\". Zároveň se ho zeptej alespoň na jednu otázku.\nDůkaz: Video interakce",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 23,
+            "name": "Sportovní komentátor",
+            "description": "Stoupni si k přechodu a 1 minutu nahlas komentuj lidi přecházející ulici, jako by to byl finálový závod v atletice.\nDůkaz: Videozáznam komentáře.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 1,
+            "name": "Průvodce",
+            "description": "Najdi  2 turisty nebo cizince. Cizím jazykem mu doporuč jednu restauraci nebo památku, která je blízko, a vysvětli mu cestu, kudy se tam dostane. Důkaz: Nahrávka zvuku nebo video, jak mu to vysvětluješ.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 2,
+            "name": "Lovec čísel",
+            "description": "Lovec čísel: Najdi a vyfoť tři tramvaje nebo autobusy, které mají v čísle linky číslici \"2\" (třeba 2, 12, 22, 26...). Může se jednat o stejnou linku, ale jiný autobus / tramvaj.\nDůkaz: 3 fotky různých vozidel MHD.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 24,
+            "name": "Asi jsem zabloudil...",
+            "description": "Zastav někoho a zeptej se na cestu na místo, které je přímo před tebou a je jasně vidět (např. obrovský kostel nebo nákupní centrum).\nDůkaz: Video nebo audio interakce.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 4,
+            "name": "Quick maths!",
+            "description": "Podívej se kolem sebe na auta a najdi 10 aut, která mají v SPZce (značce) číslo 2. U každého auto sečti všechna čísla na té značce a výsledek řekni na video.\nDůkaz: Video se záběrem na značku auta a tvůj výpočet nahlas.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 5,
+            "name": "Lovec vody",
+            "description": "Jdi do jakýchkoliv 2 restaurací, kaváren nebo barů a popros obsluhu o sklenici vody z kohoutku zadarmo. Musíš ji dostat zadarmo do skla, ne do vlastní lahve. Důkaz: Selfie, jak si připíjíš tou vodou.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 6,
+            "name": "Caretaker",
+            "description": "Oslov 3 různé lidi a řekni každému z nich hezký a upřímný kompliment navázaný otázkou (třeba: „Máte skvělý kabát. Kde jste ho koupil/a?“). Minimálně vyslechni jejich odpověď.\nDůkaz: Nahrávka zvuku nebo video rozhovorů (mobil v kapse či ruce).",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 7,
+            "name": "Kámen, nůžky, papír",
+            "description": "Zastavuj cizí lidi a hraj s nimi Kámen, nůžky, papír. Musíš vyhrát 2x v řadě (při prohře se řada nuluje). S jedním člověkem hraj jen jednou.\nDůkaz: Video, kde je vidět hra s cizími lidmi.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 8,
+            "name": "Zprávy o počasí",
+            "description": "Zahraj si na moderátora počasí. Náhodnému kolemjdoucímu dej mobil a nech ho natočit 2-minutové video, kde budeš popisovat počasí, co mají lidé na sobě a jak fouká vítr (nesmíš zmínit, že jde o výzvu). Celou dobu musíš mluvit.\nDůkaz: Minutové vtipné video.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 9,
+            "name": "Mistr kvízu",
+            "description": "Ptej se lidí na názor: „Pizza s ananasem – ano, nebo ne?“ Musíš získat alespoň 3 stejné odpovědi v řadě (předem si urči, jestli chceš \"ANO\" nebo \"NE\").\nDůkaz: Nahrávka zvuku/video.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 10,
+            "name": "Vysoká pětka",
+            "description": "Postav se na rušné místo a zvedni ruku k \"high-five\". Musíš získat 10 \"plácnutí\" od náhodných kolemjdoucích, aniž bys promluvil.\nDůkaz: Videozáznam všech 10 plácnutí.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 11,
+            "name": "Pouliční socha",
+            "description": "Vyber si frekventované místo a na 3 minuty úplně ztuhni jako živá socha. Nesmíš se pohnout.\nDůkaz: Zrychlené (timelapse) nebo celé 3min video.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 12,
+            "name": "Módní policie",
+            "description": "Najdi někoho, kdo má na sobě něco velmi stylového, a popros ho, jestli si ho můžeš vyfotit jako inspiraci pro svůj šatník. Důkaz: Fotka outfitu (se souhlasem) a tvůj nadšený komentář na videu.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 13,
+            "name": "Ztracený v čase",
+            "description": "Zastav 3 cizí lidi a zeptej se, jaký je rok. Až ti odpoví, tvař se nesmírně ulehčeně, vykřikni „Funguje to!“ a rychle odejdi.\nDůkaz: Videozáznam tvé reakce a odpovědi kolemjdoucího.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 14,
+            "name": "Zpívaná objednávka",
+            "description": "Jdi do fastfoodu nebo ke stánku a celou svou objednávku (třeba \"jeden párek v rohlíku\"), spolu s pozdravem, zazpívej jako v opeře.\nDůkaz: Videozáznam objednávání.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 15,
+            "name": "Neviditelný pes",
+            "description": "Jdi po ulici s neviditelným psem na vodítku. Napomínej ho, ať netahá, a jednou se zastav a popros někoho, jestli by ti ho na vteřinu nepodržel, než si zavážeš tkaničku.\nDůkaz: Video interakce s \"držitelem vodítka\".",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 16,
+            "name": "Gratulace!",
+            "description": "Najdi skupinku lidí a začni jim nadšeně tleskat a gratulovat k \"velkému úspěchu\", aniž bys řekl k jakému. \nDůkaz: Video / Audio reakce skupiny.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 17,
+            "name": "Taneční horečka",
+            "description": "Zapni si v nákupním centru hudbu do sluchátek a na 30 sekund začni tancovat uprostřed chodby, jako by se nikdo nedíval. Pokud nemáš slucháta, zpívej si při tom svou oblíbenou písničku,\nDůkaz: Video tvého tance (pokud tancuješ bez sluchátek, musí být slyšet tvůj zpěv)",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 18,
+            "name": "Stín",
+            "description": "Najdi někoho, kdo kráčí stejným směrem, a na 20 metrů přesně kopíruj jeho styl chůze (stínuj ho v bezpečné vzdálenosti).\nDůkaz: Video, kde je vidět originál i tvůj stín.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 19,
+            "name": "Lovec autogramů",
+            "description": "Oslov náhodného člověka a s velkým nadšením se ho zeptej, jestli je to \"ten slavný (vymysli si jméno)\" a zda by ti dal autogram na ruk nebo se s tebou nevyfotil. Důkaz: Video žádosti a fotka podpisu na kůži nebo s danou osobou.\n",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 20,
+            "name": "Recitátor",
+            "description": "Nastup do MHD a nahlas a procítěně zarecituj krátkou básničku (třeba Skákal pes). Poté se ukloň a na příští zastávce vystup.\nDůkaz: Video recitace.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 21,
+            "name": "Odpověď, nebo úsměv?",
+            "description": "Zastavuj lidi a dej jim hádanku (můžeš si ji najít na internetu). Pokud ji neuhodnou, musí se na tebe usmát do kamery. Alespoň 2 lidé jí musí uhodnout.\n Důkaz: Video s hádankou a výsledným úsměvem.",
+            "questTypeId": 1,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 25,
+            "name": "Schody šampióna",
+            "description": "Najdi schody (aspoň 10 schodů). Vyskákej je 2x po levé noze, 2x po pravé a 2x snožmo. Nakonec je 5x celé vyběhni nahoru a dolů.\nDůkaz: Video celého cvičení.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 26,
+            "name": "Tarzanův sprint",
+            "description": "Najdi v parku nebo lese mírný kopec (alespoň 15 metrů). Vyběhni ho na plný plyn 5x za sebou. Po každém výběhu musíš nahoře hlasitě zařvat jako Tarzan.\nDůkaz: Video všech 5 výběhů se zařváním.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 27,
+            "name": "Architekt rovnováhy",
+            "description": "Najdi 10 různě velkých kamenů a postav z nich \"mužíka\" (věž), která bude vysoká alespoň 30 cm a nespadne.\nDůkaz: Fotka hotové věže s tvou rukou pro měřítko.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 28,
+            "name": "Bylinkář amatér",
+            "description": "Najdi v přírodě 5 různých druhů rostlin (ne stromů). Na video každou ukaž a zkus si tipnout nebo najít její název.\nDůkaz: Video tvých 5 rostlin.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 29,
+            "name": "Neviditelná židle",
+            "description": "Najdi osamělý strom v parku, zeď nebo lampu a opři se o ni zády v pozici, jako bys seděl na židli (stehna musí mít co nejvíc vodorovně). Vydrž takto alespoň 2 minuty.\nDůkaz: Video (zrychlené) tvé výdrže.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 30,
+            "name": "Zvířecí stopař",
+            "description": "Najdi a vyfoť 3 různé důkazy o přítomnosti zvířat (nora, hnízdo, peříčko, ohlodaná šiška, stopa v blátě).\nDůkaz: 3 fotky těchto nálezů.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 31,
+            "name": "Přírodní posilovna",
+            "description": "Najdi pevnou větev a udělej na ní 5 shybů, nebo se dohromady alepoň 30 sekund udrž v zavěšení. Poté udělej 20 kliků nebo dřepů.\nDůkaz: Video tvého fyzického výkonu.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 32,
+            "name": "Bosá chůze",
+            "description": "Sundej si boty a ponožky a ujdi v kuse 200 metrů po přírodním povrchu (tráva, jehličí, hlína).\nDůkaz: Video",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 39,
+            "name": "Sběratel",
+            "description": "Najdi 3 nejdivnější věci, které do přírody nepatří (odpadky), odnes je do nejbližšího koše.\nDůkaz: Fotka tvých \"trofejí\" v přírodě a video, jak je házíš do koše.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 42,
+            "name": "Average Symetrie enjoyer",
+            "description": "Najdi alespoň 3 věci, které jsou jo nejvíce symetrické (např. list, květ, pavučina).\nDůkaz: 3 detailní fotky.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 33,
+            "name": "Land Art",
+            "description": "Vytvoř z klacků, listů a kamínků na zemi nápis \"YES MAN\" nebo své jméno. Musí to být velké alespoň 1 metr.\nDůkaz: Fotka tvého díla z výšky.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 34,
+            "name": "Napaden stínem",
+            "description": "Najdi prázdnou louku, mýtinu nebo prostranství a 2 minuty v kuse prováděj intenzivní stínový boj proti neviditelnému nepříteli.\nDůkaz: Video tvého \"zápasu\".",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 35,
+            "name": "Poděkování matce přírodě",
+            "description": "Vyber si ten největší strom v okolí, obejmi ho a 1 minutu mu nahlas děkuj za kyslík, stín a cokoliv dalšího, co tě napadně a je reálné. Buď kreativní v děkování! Důkaz: Video tvého monologu u stromu.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 36,
+            "name": "Průzkumník terénu",
+            "description": "Najdi nejvyšší bod v tvém okolí (kopec, vyhlídka) a natoč z něj 360° panoramatické video s komentářem, co všechno vidíš.\nDůkaz: Video s komentářem.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 37,
+            "name": "Skokan",
+            "description": "Označ si čáru a zkus snožmo skočit co nejdál. Máš 5 pokusů na to, abys překonal svou vlastní výšku (odhadem).\nDůkaz: Video tvého nejdelšího skoku.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 40,
+            "name": "Mistr zenu",
+            "description": "Sedni si v tichu na pařez, kámen nebo trávník a alespoň 4 minuty jen pozoruj okolí bez koukání do mobilu, aniž by jsi vstal nebo se otočil. Pohyb tělem na místě je dovolený (ruce, nohy, hlava, ...). Nesmíš při tom vůbec promluvit!\nDůkaz: Video tvé \"meditace\" nebo timelapse.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 38,
+            "name": "Hlas divočiny",
+            "description": "Nauč se věrohodně napodobit zvuk 3 různých zvířat (např. vlk, sova, divoké prase). Můžeš trénovat nebo si najít inspiraci na internetu.\nDůkaz: Video, kde zvuky předvádíš.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 41,
+            "name": "Překážková dráha",
+            "description": "Vytvoř si krátkou překážkovou dráhu (přeskočit kmen, podlézt větev, oběhnout strom nebo lampu, ...) z alespoň 5 překážek a proběhni ji 3x v co nejlepším čase. Buď kreativní!\nDůkaz: Video, kde ukazuješ své překážky + tvé nejrychlejší kolo.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 43,
+            "name": "Žabák",
+            "description": "Udělej 30 poctivých žabáků (dřep s výskokem) v měkkém terénu.\nDůkaz: Videozáznam všech opakování.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 44,
+            "name": "Mistr kamufláže ",
+            "description": "Najdi si místo a zkus se \"schovat\" tak, aby tě na fotce nebylo na první pohled vidět (využij stromy, keře, terén).\nDůkaz: Fotka tvé kamufláže. Pokud na ní nejsi rozpoznat, zakroužkuj se.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 45,
+            "name": "Na život a na smrt",
+            "description": "Na volném prostranství minutu v kuse předstírej naprosto vyčerpávající přetahovanou lanem s neviditelným soupeřem. Zapři se, zapoj celé tělo, padej do kolen a klidně přidej hlasité zvukové efekty námahy.\nDůkaz: Video tvého urputného boje.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 46,
+            "name": "Motivační kouč",
+            "description": "Vyber si libovolný keř, pařez nebo zvadlou květinu a alespoň minutu nahlas s maximální energií a přesvědčením přednášej motivační řeč o tom, jak letos musí zabrat a stát se tím / tou nejlepším v celém okolí. Používej dramatická gesta a burcuj k výkonu. Důkaz: Video tvého zapáleného proslovu.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 47,
+            "name": "David Attenborough z Wishe",
+            "description": "Objev v trávě naprosto obyčejnou věc (pomalého brouka, spadlý list, louži) a převtěl se do role Davida Attenborougha, známého komentátora přírodních dokumentů. Šeptej, abys objekt „nevyplašil“, a s napětím v hlase detailně popiš tento fascinující přírodní úkaz.\nDůkaz: Alespoň minutové video tvé napínavé reportáže.",
+            "questTypeId": 2,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 48,
+            "name": "Výdrž na jedné noze",
+            "description": "Stůj na jedné noze alespoň 90 sekund v kuse. Pokud se dotkneš druhou nohou země, začni od nuly! Nesmíš se ničeho přidržovat.\nDůkaz: Video celého úkolu.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 49,
+            "name": "Červená horečka",
+            "description": "Najdi a vyfoť 10 různých červených věcí (auto, značka, bota, kytka...). Každá věc musí být jiného druhu, nemůžeš vyfotit 10 aut.\nDůkaz: 10 fotek v galerii.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 50,
+            "name": "Abeceda naruby",
+            "description": "Nauč se celou abecedu pozpátku (od Ž do A) a natoč se, jak ji říkáš zpaměti bez chyby. Musí být vidět tvůj obličej.\nDůkaz: Video recitace (nesmíš číst!).",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 51,
+            "name": "Pes, přítel člověka",
+            "description": "Najdi někoho, kdo venčí psa, zeptej se na jméno a vyfoť si společnou fotku se psem.\nDůkaz: Fotka se psem.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 52,
+            "name": "Pán prstenů",
+            "description": "Najdi 6 různých kulatých věcí větších než tvá hlava (kolo, značka, kanál...), každou jiného druhu, nemůžeš vyfotit 6 značek, 6 kol, atp.\nDůkaz: 6 fotek různých kulatých věcí.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 53,
+            "name": "Zaseknutý v matrixu",
+            "description": "Přejdi přes přechod pro chodce (nebo jiný veřejný prostor) extrémně pomalu, jako bys byl ve zpomaleném záběru. Musí ti to trvat aspoň 1 minutu. Důkaz: Video tvé \"slow-mo\" chůze.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 54,
+            "name": "Veřejné čtení",
+            "description": "Sedni si na lavičku a 2 minuty nahlas předčítej z jakékoli knihy (nebo článku v mobilu), jako bys četl pohádku dětem.\nDůkaz: Videozáznam čtení.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 55,
+            "name": "Obchodník",
+            "description": "Obstarej si nějaký drobný předmět (nesmí se jednat o kamínky, listy, větve, peříčka atp.) a zkus ho s někým na ulici vyměnit za jakoukoli jinou drobnost.\nDůkaz: Fotka \"před\" a \"po\" s novým předmětem.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 56,
+            "name": "Zpátky do minulosti",
+            "description": "Najdi budovu nebo objekt, na kterém je uveden letopočet (třeba na fasádě). Vyfoť ho a na video řekni jednu historickou událost, která se v tom roce stala.\nDůkaz: Fotka letopočtu a video s faktem / událostí.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 57,
+            "name": "Mim v parku: ",
+            "description": "Najdi si veřejný prostor a předstírej, že jsi zavřený v neviditelné skleněné krabici. Hmatej po stěnách alespoň 30 sekund.\nDůkaz: Video tvého mimického výstupu.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 58,
+            "name": "Sběratel odrazů: ",
+            "description": "Vyfoť svůj odraz v 5 různých netradičních plochách (výloha, kaluž,...). Buď kreativní!\nDůkaz: 5 selfie odrazů.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 59,
+            "name": "Mistr origami",
+            "description": "Slož z kusu papíru (třeba z letáku) jednoduchou lodičku nebo vlaštovku a polož ji na nějaké viditelné místo jako \"dárek pro nálezce\".\nDůkaz: Video skládání a fotka umístěného výtvoru.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 60,
+            "name": "Schody s příběhem",
+            "description": "Najdi schody a na každém schodu udělej jiný pohyb (dřep, výskok, otočka). Musí jich být aspoň 15 za sebou a pohyby se nesmí opakovat\nDůkaz: Video tvé kreativní cesty nahoru.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 61,
+            "name": "Gratuluji, přírodo!",
+            "description": "Najdi krásný strom nebo výhled a 30 sekund mu hlasitě tleskej a provolávej \"Bravo!\".\nDůkaz: Video tvého aplausu.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 62,
+            "name": "Dvojčata v akci",
+            "description": "Najdi dva lidi, kteří mají na sobě stejnou barvu trička, kalhot nebo jiného kusu oblečení, a vyfoť se s nimi tak, aby byli oba v pozadí (nebo je popros o společnou fotku).\nDůkaz: Fotky s \"barevnými dvojčaty\".",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 63,
+            "name": "Ministr dopravy",
+            "description": "Zastav se u silnice a odhadni barvu příštího auta, které projede. Musíš se trefit alespoň 3x.\nDůkaz: Video tvých tipů a projíždějících aut.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 64,
+            "name": "Pozdrav světu",
+            "description": "Zamávej do 3 různých bezpečnostních kamer, které uvidíš (na budovách, v obchodech, kdekoliv).\nDůkaz: Video, jak k nim přistoupíš a zamáváš.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 65,
+            "name": "Detektiv",
+            "description": "Najdi venku 5 slov začínajících na první písmeno tvého jména (na cedulích, SPZ, reklamách, ...).\nDůkaz: 5 fotek těchto slov.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 66,
+            "name": "O krok zpět",
+            "description": "Ujdi 100 metrů na bezpečném místě (chodník v parku) čistě chůzí pozpátku.\nDůkaz: Video tvé cesty.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 67,
+            "name": "Dirigent z Wishe",
+            "description": " Gemini said\n\nStoupni si k silnici nebo na frekventovanější stezku, vezmi si do ruky propisku nebo klacík jako taktovku a 2 minuty s obrovským nasazením a emocemi „diriguj“ projíždějící auta, cyklisty nebo chodce.\nDůkaz: Minutové video tvého koncertu.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 68,
+            "name": "Městský paparazzi",
+            "description": "\nNajdi naprosto nezajímavý objekt (obyčejný patník, kanál, značku, ...) a chovej se k němu jako ke světové celebritě. Využij blesk, klekej si, hledej nejlepší úhly a nadšeně objekt foť, obzvlášť když někdo prochází kolem. Nafoť takto 3 fotky a k tomu nahraj alespoň 30 sekundový rozhovor s tímto předmětem\nDůkaz: Koláž 3 dramatických fotek objektu a audio/video rozhovoru.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        },
+        {
+            "idQuest": 69,
+            "name": "Degustace v přímém přenosu",
+            "description": "Zastav se na třech různých místech, která jsou podle tebe speciální (pod vysokým stromem, u vchodu do metra, ...). Vždy se hluboce nadechni a nahlas ohodnoť „buket“ a „texturu“ místního vzduchu, jako bys ochutnával nejdražší víno (např. „Cítím tóny asfaltu s lehkým dozvukem ranní vlhkosti“). Takto hodnoť každé místo alespoň 30 sekund.\nDůkaz: Video tvých tří degustačních recenzí.",
+            "questTypeId": 3,
+            "timeLimit": 360
+        }
+    ],
+    "locations": [
+        {
+            "idLocation": 72,
+            "name": "RED15",
+            "typeId": 3,
+            "teamId": 2,
+            "gps": "50.0670072N, 14.3716589E",
+            "completed": false
+        },
+        {
+            "idLocation": 73,
+            "name": "GRE16",
+            "typeId": 3,
+            "teamId": 1,
+            "gps": "50.0576325N, 14.3764750E",
+            "completed": false
+        },
+        {
+            "idLocation": 74,
+            "name": "RED16",
+            "typeId": 3,
+            "teamId": 2,
+            "gps": "50.0563539N, 14.3665256E",
+            "completed": false
+        },
+        {
+            "idLocation": 75,
+            "name": "YEL16",
+            "typeId": 3,
+            "teamId": 4,
+            "gps": "50.0527947N, 14.3676342E",
+            "completed": false
+        },
+        {
+            "idLocation": 76,
+            "name": "BLU16",
+            "typeId": 3,
+            "teamId": 3,
+            "gps": "50.0569997N, 14.3818772E",
+            "completed": false
+        },
+        {
+            "idLocation": 13,
+            "name": "GRN1",
+            "typeId": 2,
+            "teamId": 1,
+            "gps": "50.0800536N, 14.4009708E",
+            "completed": false
+        },
+        {
+            "idLocation": 14,
+            "name": "RED1",
+            "typeId": 2,
+            "teamId": 2,
+            "gps": "50.0789783N, 14.3980897E",
+            "completed": false
+        },
+        {
+            "idLocation": 15,
+            "name": "YEL1",
+            "typeId": 2,
+            "teamId": 4,
+            "gps": "50.0831125N, 14.4006206E",
+            "completed": false
+        },
+        {
+            "idLocation": 16,
+            "name": "BLU1",
+            "typeId": 2,
+            "teamId": 3,
+            "gps": "50.0834500N, 14.3982500E",
+            "completed": false
+        },
+        {
+            "idLocation": 17,
+            "name": "GRN2",
+            "typeId": 1,
+            "teamId": 1,
+            "gps": "50.0873681N, 14.3979589E",
+            "completed": false
+        },
+        {
+            "idLocation": 18,
+            "name": "YEL2",
+            "typeId": 1,
+            "teamId": 4,
+            "gps": "50.0888003N, 14.3943381E",
+            "completed": false
+        },
+        {
+            "idLocation": 19,
+            "name": "RED2",
+            "typeId": 1,
+            "teamId": 2,
+            "gps": "50.0887031N, 14.3969822E",
+            "completed": false
+        },
+        {
+            "idLocation": 20,
+            "name": "BLU2",
+            "typeId": 1,
+            "teamId": 3,
+            "gps": "50.0894858N, 14.3979417E",
+            "completed": false
+        },
+        {
+            "idLocation": 21,
+            "name": "RED3",
+            "typeId": 3,
+            "teamId": 2,
+            "gps": "50.0939669N, 14.4140992E",
+            "completed": false
+        },
+        {
+            "idLocation": 22,
+            "name": "BLU3",
+            "typeId": 3,
+            "teamId": 3,
+            "gps": "50.0959525N, 14.4154131E",
+            "completed": false
+        },
+        {
+            "idLocation": 23,
+            "name": "YEL3",
+            "typeId": 3,
+            "teamId": 4,
+            "gps": "50.0975172N, 14.4189758E",
+            "completed": false
+        },
+        {
+            "idLocation": 24,
+            "name": "GRE3",
+            "typeId": 3,
+            "teamId": 1,
+            "gps": "50.0953600N, 14.4214000E",
+            "completed": false
+        },
+        {
+            "idLocation": 25,
+            "name": "YEL4",
+            "typeId": 2,
+            "teamId": 4,
+            "gps": "50.1052753N, 14.4272950E",
+            "completed": false
+        },
+        {
+            "idLocation": 26,
+            "name": "GRE4",
+            "typeId": 2,
+            "teamId": 1,
+            "gps": "50.1061264N, 14.4195325E",
+            "completed": false
+        },
+        {
+            "idLocation": 27,
+            "name": "RED4",
+            "typeId": 2,
+            "teamId": 2,
+            "gps": "50.1065842N, 14.4139925E",
+            "completed": false
+        },
+        {
+            "idLocation": 28,
+            "name": "BLU4",
+            "typeId": 2,
+            "teamId": 3,
+            "gps": "50.1091419N, 14.4199483E",
+            "completed": false
+        },
+        {
+            "idLocation": 29,
+            "name": "YEL5",
+            "typeId": 1,
+            "teamId": 4,
+            "gps": "50.0715256N, 14.4020925E",
+            "completed": false
+        },
+        {
+            "idLocation": 30,
+            "name": "RED5",
+            "typeId": 1,
+            "teamId": 2,
+            "gps": "50.0721417N, 14.4041497E",
+            "completed": false
+        },
+        {
+            "idLocation": 31,
+            "name": "GRE5",
+            "typeId": 1,
+            "teamId": 1,
+            "gps": "50.0667619N, 14.4009500E",
+            "completed": false
+        },
+        {
+            "idLocation": 32,
+            "name": "BLU5",
+            "typeId": 1,
+            "teamId": 3,
+            "gps": "50.0678361N, 14.4036600E",
+            "completed": false
+        },
+        {
+            "idLocation": 33,
+            "name": "RED6",
+            "typeId": 3,
+            "teamId": 2,
+            "gps": "50.0882131N, 14.4456569E",
+            "completed": false
+        },
+        {
+            "idLocation": 34,
+            "name": "BLU6",
+            "typeId": 3,
+            "teamId": 3,
+            "gps": "50.0887808N, 14.4480386E",
+            "completed": false
+        },
+        {
+            "idLocation": 35,
+            "name": "YEL6",
+            "typeId": 3,
+            "teamId": 4,
+            "gps": "50.0876769N, 14.4479778E",
+            "completed": false
+        },
+        {
+            "idLocation": 36,
+            "name": "GRE6",
+            "typeId": 3,
+            "teamId": 1,
+            "gps": "50.0876769N, 14.4479778E",
+            "completed": false
+        },
+        {
+            "idLocation": 37,
+            "name": "GRE7",
+            "typeId": 1,
+            "teamId": 1,
+            "gps": "50.0826514N, 14.4602836E",
+            "completed": false
+        },
+        {
+            "idLocation": 38,
+            "name": "BLU7",
+            "typeId": 1,
+            "teamId": 3,
+            "gps": "50.0783194N, 14.4606322E",
+            "completed": false
+        },
+        {
+            "idLocation": 39,
+            "name": "RED7",
+            "typeId": 1,
+            "teamId": 2,
+            "gps": "50.0777283N, 14.4669303E",
+            "completed": false
+        },
+        {
+            "idLocation": 40,
+            "name": "YEL7",
+            "typeId": 1,
+            "teamId": 4,
+            "gps": "50.0840517N, 14.4677958E",
+            "completed": false
+        },
+        {
+            "idLocation": 41,
+            "name": "RED8",
+            "typeId": 2,
+            "teamId": 2,
+            "gps": "50.0699267N, 14.4434633E",
+            "completed": false
+        },
+        {
+            "idLocation": 42,
+            "name": "YEL8",
+            "typeId": 2,
+            "teamId": 4,
+            "gps": "50.0698156N, 14.4476931E",
+            "completed": false
+        },
+        {
+            "idLocation": 43,
+            "name": "BLU8",
+            "typeId": 2,
+            "teamId": 3,
+            "gps": "50.0673244N, 14.4429375E",
+            "completed": false
+        },
+        {
+            "idLocation": 44,
+            "name": "GRE8",
+            "typeId": 2,
+            "teamId": 1,
+            "gps": "50.0682428N, 14.4484622E",
+            "completed": false
+        },
+        {
+            "idLocation": 45,
+            "name": "YEL9",
+            "typeId": 3,
+            "teamId": 4,
+            "gps": "50.0580006N, 14.4312894E",
+            "completed": false
+        },
+        {
+            "idLocation": 46,
+            "name": "GRE9",
+            "typeId": 3,
+            "teamId": 1,
+            "gps": "50.0565319N, 14.4353947E",
+            "completed": false
+        },
+        {
+            "idLocation": 47,
+            "name": "RED9",
+            "typeId": 3,
+            "teamId": 2,
+            "gps": "50.0529317N, 14.4325325E",
+            "completed": false
+        },
+        {
+            "idLocation": 48,
+            "name": "BLU9",
+            "typeId": 3,
+            "teamId": 3,
+            "gps": "50.0531428N, 14.4378594E",
+            "completed": false
+        },
+        {
+            "idLocation": 49,
+            "name": "RED10",
+            "typeId": 3,
+            "teamId": 2,
+            "gps": "50.0663233N, 14.4167103E",
+            "completed": false
+        },
+        {
+            "idLocation": 50,
+            "name": "BLU10",
+            "typeId": 3,
+            "teamId": 3,
+            "gps": "50.0651403N, 14.4211142E",
+            "completed": false
+        },
+        {
+            "idLocation": 51,
+            "name": "GRE10",
+            "typeId": 3,
+            "teamId": 1,
+            "gps": "50.0632794N, 14.4184011E",
+            "completed": false
+        },
+        {
+            "idLocation": 52,
+            "name": "YEL10",
+            "typeId": 3,
+            "teamId": 4,
+            "gps": "50.0622211N, 14.4212450E",
+            "completed": false
+        },
+        {
+            "idLocation": 53,
+            "name": "GRE11",
+            "typeId": 1,
+            "teamId": 1,
+            "gps": "50.0958897N, 14.4516764E",
+            "completed": false
+        },
+        {
+            "idLocation": 54,
+            "name": "BLU11",
+            "typeId": 1,
+            "teamId": 3,
+            "gps": "50.0928264N, 14.4521469E",
+            "completed": false
+        },
+        {
+            "idLocation": 55,
+            "name": "RED11",
+            "typeId": 1,
+            "teamId": 2,
+            "gps": "50.0948894N, 14.4555992E",
+            "completed": false
+        },
+        {
+            "idLocation": 56,
+            "name": "YEL11",
+            "typeId": 1,
+            "teamId": 4,
+            "gps": "50.0961361N, 14.4580992E",
+            "completed": false
+        },
+        {
+            "idLocation": 57,
+            "name": "BLU12",
+            "typeId": 1,
+            "teamId": 3,
+            "gps": "50.1055297N, 14.3892658E",
+            "completed": false
+        },
+        {
+            "idLocation": 58,
+            "name": "GRE12",
+            "typeId": 1,
+            "teamId": 1,
+            "gps": "50.1022931N, 14.3878094E",
+            "completed": false
+        },
+        {
+            "idLocation": 59,
+            "name": "YEL12",
+            "typeId": 1,
+            "teamId": 4,
+            "gps": "50.1014608N, 14.3921022E",
+            "completed": false
+        },
+        {
+            "idLocation": 60,
+            "name": "RED12",
+            "typeId": 1,
+            "teamId": 2,
+            "gps": "50.1046294N, 14.3922511E",
+            "completed": false
+        },
+        {
+            "idLocation": 61,
+            "name": "RED13",
+            "typeId": 1,
+            "teamId": 2,
+            "gps": "50.1042094N, 14.4888939E",
+            "completed": false
+        },
+        {
+            "idLocation": 62,
+            "name": "GRE13",
+            "typeId": 1,
+            "teamId": 1,
+            "gps": "50.1072497N, 14.4882061E",
+            "completed": false
+        },
+        {
+            "idLocation": 63,
+            "name": "YEL13",
+            "typeId": 1,
+            "teamId": 4,
+            "gps": "50.1057781N, 14.4939950E",
+            "completed": false
+        },
+        {
+            "idLocation": 64,
+            "name": "BLU13",
+            "typeId": 1,
+            "teamId": 3,
+            "gps": "50.1086039N, 14.4953822E",
+            "completed": false
+        },
+        {
+            "idLocation": 65,
+            "name": "YEL14",
+            "typeId": 2,
+            "teamId": 4,
+            "gps": "50.0784817N, 14.3545778E",
+            "completed": false
+        },
+        {
+            "idLocation": 66,
+            "name": "RED14",
+            "typeId": 2,
+            "teamId": 2,
+            "gps": "50.0794728N, 14.3580664E",
+            "completed": false
+        },
+        {
+            "idLocation": 67,
+            "name": "GRE14",
+            "typeId": 2,
+            "teamId": 1,
+            "gps": "50.0781067N, 14.3625603E",
+            "completed": false
+        },
+        {
+            "idLocation": 68,
+            "name": "BLU14",
+            "typeId": 2,
+            "teamId": 3,
+            "gps": "50.0797011N, 14.3642950E",
+            "completed": false
+        },
+        {
+            "idLocation": 69,
+            "name": "YEL15",
+            "typeId": 3,
+            "teamId": 4,
+            "gps": "50.0695667N, 14.3669017E",
+            "completed": false
+        },
+        {
+            "idLocation": 70,
+            "name": "BLU15",
+            "typeId": 3,
+            "teamId": 3,
+            "gps": "50.0671339N, 14.3619294E",
+            "completed": false
+        },
+        {
+            "idLocation": 71,
+            "name": "GRE15",
+            "typeId": 3,
+            "teamId": 1,
+            "gps": "50.0661722N, 14.3668389E",
+            "completed": false
+        },
+        {
+            "idLocation": 77,
+            "name": "GRE17",
+            "typeId": 3,
+            "teamId": 1,
+            "gps": "50.0823628N, 14.4428364E",
+            "completed": false
+        },
+        {
+            "idLocation": 78,
+            "name": "RED17",
+            "typeId": 3,
+            "teamId": 2,
+            "gps": "50.0794503N, 14.4379600E",
+            "completed": false
+        },
+        {
+            "idLocation": 79,
+            "name": "BLU17",
+            "typeId": 3,
+            "teamId": 3,
+            "gps": "50.0806567N, 14.4435558E",
+            "completed": false
+        },
+        {
+            "idLocation": 80,
+            "name": "YEL17",
+            "typeId": 3,
+            "teamId": 4,
+            "gps": "50.0786781N, 14.4423747E",
+            "completed": false
+        },
+        {
+            "idLocation": 81,
+            "name": "RED18",
+            "typeId": 3,
+            "teamId": 2,
+            "gps": "50.0921403N, 14.3621436E",
+            "completed": false
+        },
+        {
+            "idLocation": 82,
+            "name": "YEL18",
+            "typeId": 3,
+            "teamId": 4,
+            "gps": "50.0907206N, 14.3638356E",
+            "completed": false
+        },
+        {
+            "idLocation": 83,
+            "name": "GRE18",
+            "typeId": 3,
+            "teamId": 1,
+            "gps": "50.0918392N, 14.3697492E",
+            "completed": false
+        },
+        {
+            "idLocation": 84,
+            "name": "BLU18",
+            "typeId": 3,
+            "teamId": 3,
+            "gps": "50.0934839N, 14.3683942E",
+            "completed": false
+        },
+        {
+            "idLocation": 85,
+            "name": "GRE19",
+            "typeId": 1,
+            "teamId": 1,
+            "gps": "50.0354514N, 14.3869503E",
+            "completed": false
+        },
+        {
+            "idLocation": 86,
+            "name": "RED19",
+            "typeId": 1,
+            "teamId": 2,
+            "gps": "50.0378964N, 14.3903414E",
+            "completed": false
+        },
+        {
+            "idLocation": 87,
+            "name": "BLU19",
+            "typeId": 1,
+            "teamId": 3,
+            "gps": "50.0376361N, 14.3843328E",
+            "completed": false
+        },
+        {
+            "idLocation": 88,
+            "name": "YEL19",
+            "typeId": 1,
+            "teamId": 4,
+            "gps": "50.0352206N, 14.3813653E",
+            "completed": false
+        },
+        {
+            "idLocation": 89,
+            "name": "RED20",
+            "typeId": 2,
+            "teamId": 2,
+            "gps": "50.0333153N, 14.4192256E",
+            "completed": false
+        },
+        {
+            "idLocation": 90,
+            "name": "YEL20",
+            "typeId": 2,
+            "teamId": 4,
+            "gps": "50.0332256N, 14.4136456E",
+            "completed": false
+        },
+        {
+            "idLocation": 91,
+            "name": "GRE20",
+            "typeId": 2,
+            "teamId": 1,
+            "gps": "50.0347400N, 14.4243900E",
+            "completed": false
+        },
+        {
+            "idLocation": 92,
+            "name": "BLU20",
+            "typeId": 2,
+            "teamId": 3,
+            "gps": "50.0332656N, 14.4232711E",
+            "completed": false
+        },
+        {
+            "idLocation": 93,
+            "name": "RED21",
+            "typeId": 2,
+            "teamId": 2,
+            "gps": "50.0334181N, 14.4577592E",
+            "completed": false
+        },
+        {
+            "idLocation": 94,
+            "name": "GRE21",
+            "typeId": 2,
+            "teamId": 1,
+            "gps": "50.0349553N, 14.4670081E",
+            "completed": false
+        },
+        {
+            "idLocation": 95,
+            "name": "YEL21",
+            "typeId": 2,
+            "teamId": 4,
+            "gps": "50.0380133N, 14.4670650E",
+            "completed": false
+        },
+        {
+            "idLocation": 96,
+            "name": "BLU21",
+            "typeId": 2,
+            "teamId": 3,
+            "gps": "50.0370986N, 14.4735703E",
+            "completed": false
+        },
+        {
+            "idLocation": 97,
+            "name": "GRE22",
+            "typeId": 3,
+            "teamId": 1,
+            "gps": "50.0565072N, 14.4704192E",
+            "completed": false
+        },
+        {
+            "idLocation": 98,
+            "name": "BLU22",
+            "typeId": 3,
+            "teamId": 3,
+            "gps": "50.0572458N, 14.4732650E",
+            "completed": false
+        },
+        {
+            "idLocation": 99,
+            "name": "RED22",
+            "typeId": 3,
+            "teamId": 2,
+            "gps": "50.0577150N, 14.4674219E",
+            "completed": false
+        },
+        {
+            "idLocation": 100,
+            "name": "YEL22",
+            "typeId": 3,
+            "teamId": 4,
+            "gps": "50.0606536N, 14.4694242E",
+            "completed": false
+        },
+        {
+            "idLocation": 101,
+            "name": "RED23",
+            "typeId": 2,
+            "teamId": 2,
+            "gps": "50.1181292N, 14.4503286E",
+            "completed": false
+        },
+        {
+            "idLocation": 102,
+            "name": "BLU23",
+            "typeId": 2,
+            "teamId": 3,
+            "gps": "50.1157381N, 14.4490931E",
+            "completed": false
+        },
+        {
+            "idLocation": 103,
+            "name": "YEL23",
+            "typeId": 2,
+            "teamId": 4,
+            "gps": "50.1206758N, 14.4502831E",
+            "completed": false
+        },
+        {
+            "idLocation": 104,
+            "name": "GRE23",
+            "typeId": 2,
+            "teamId": 1,
+            "gps": "50.1169594N, 14.4536733E",
+            "completed": false
+        },
+        {
+            "idLocation": 105,
+            "name": "YEL24",
+            "typeId": 3,
+            "teamId": 4,
+            "gps": "50.0839000N, 14.4827000E",
+            "completed": false
+        },
+        {
+            "idLocation": 106,
+            "name": "BLU24",
+            "typeId": 3,
+            "teamId": 3,
+            "gps": "50.0830003N, 14.4851678E",
+            "completed": false
+        },
+        {
+            "idLocation": 107,
+            "name": "RED24",
+            "typeId": 3,
+            "teamId": 2,
+            "gps": "50.0803056N, 14.4817575E",
+            "completed": false
+        },
+        {
+            "idLocation": 108,
+            "name": "GRE24",
+            "typeId": 3,
+            "teamId": 1,
+            "gps": "50.0809442N, 14.4859094E",
+            "completed": false
+        },
+        {
+            "idLocation": 109,
+            "name": "RED25",
+            "typeId": 2,
+            "teamId": 2,
+            "gps": "50.1067308N, 14.3767553E",
+            "completed": false
+        },
+        {
+            "idLocation": 110,
+            "name": "YEL25",
+            "typeId": 2,
+            "teamId": 4,
+            "gps": "50.1080008N, 14.3734406E",
+            "completed": false
+        },
+        {
+            "idLocation": 111,
+            "name": "GRE25",
+            "typeId": 2,
+            "teamId": 1,
+            "gps": "50.1100297N, 14.3762978E",
+            "completed": false
+        },
+        {
+            "idLocation": 112,
+            "name": "BLU25",
+            "typeId": 2,
+            "teamId": 3,
+            "gps": "50.1121825N, 14.3798475E",
+            "completed": false
+        },
+        {
+            "idLocation": 113,
+            "name": "RED26",
+            "typeId": 1,
+            "teamId": 2,
+            "gps": "50.0794533N, 14.4987133E",
+            "completed": false
+        },
+        {
+            "idLocation": 114,
+            "name": "BLU26",
+            "typeId": 1,
+            "teamId": 3,
+            "gps": "50.0755383N, 14.5001836E",
+            "completed": false
+        },
+        {
+            "idLocation": 115,
+            "name": "YEL26",
+            "typeId": 1,
+            "teamId": 4,
+            "gps": "50.0790600N, 14.5058300E",
+            "completed": false
+        },
+        {
+            "idLocation": 116,
+            "name": "GRE26",
+            "typeId": 1,
+            "teamId": 1,
+            "gps": "50.0830164N, 14.5062850E",
+            "completed": false
+        },
+        {
+            "idLocation": 117,
+            "name": "GRE27",
+            "typeId": 1,
+            "teamId": 1,
+            "gps": "50.0596150N, 14.4949911E",
+            "completed": false
+        },
+        {
+            "idLocation": 118,
+            "name": "BLU27",
+            "typeId": 1,
+            "teamId": 3,
+            "gps": "50.0565761N, 14.4941117E",
+            "completed": false
+        },
+        {
+            "idLocation": 119,
+            "name": "YEL27",
+            "typeId": 1,
+            "teamId": 4,
+            "gps": "50.0555650N, 14.4975917E",
+            "completed": false
+        },
+        {
+            "idLocation": 120,
+            "name": "RED27",
+            "typeId": 1,
+            "teamId": 2,
+            "gps": "50.0570894N, 14.5009583E",
+            "completed": false
+        },
+        {
+            "idLocation": 121,
+            "name": "YEL28",
+            "typeId": 2,
+            "teamId": 4,
+            "gps": "50.0964169N, 14.5010586E",
+            "completed": false
+        },
+        {
+            "idLocation": 122,
+            "name": "BLU28",
+            "typeId": 2,
+            "teamId": 3,
+            "gps": "50.0942486N, 14.4983133E",
+            "completed": false
+        },
+        {
+            "idLocation": 123,
+            "name": "GRE28",
+            "typeId": 2,
+            "teamId": 1,
+            "gps": "50.0931078N, 14.5090181E",
+            "completed": false
+        },
+        {
+            "idLocation": 124,
+            "name": "RED28",
+            "typeId": 2,
+            "teamId": 2,
+            "gps": "50.0965161N, 14.5120986E",
+            "completed": false
+        },
+        {
+            "idLocation": 125,
+            "name": "YEL29",
+            "typeId": 1,
+            "teamId": 4,
+            "gps": "50.0776319N, 14.4130617E",
+            "completed": false
+        },
+        {
+            "idLocation": 126,
+            "name": "BLU29",
+            "typeId": 1,
+            "teamId": 3,
+            "gps": "50.0833072N, 14.4099097E",
+            "completed": false
+        },
+        {
+            "idLocation": 127,
+            "name": "GRE29",
+            "typeId": 1,
+            "teamId": 1,
+            "gps": "50.0798942N, 14.4126225E",
+            "completed": false
+        },
+        {
+            "idLocation": 128,
+            "name": "RED29",
+            "typeId": 1,
+            "teamId": 2,
+            "gps": "50.0784214N, 14.4157656E",
+            "completed": false
+        },
+        {
+            "idLocation": 129,
+            "name": "BLU30",
+            "typeId": 3,
+            "teamId": 3,
+            "gps": "50.0730492N, 14.4736531E",
+            "completed": false
+        },
+        {
+            "idLocation": 130,
+            "name": "YEL30",
+            "typeId": 3,
+            "teamId": 4,
+            "gps": "50.0712956N, 14.4759872E",
+            "completed": false
+        },
+        {
+            "idLocation": 131,
+            "name": "GRE30",
+            "typeId": 3,
+            "teamId": 1,
+            "gps": "50.0727967N, 14.4804225E",
+            "completed": false
+        },
+        {
+            "idLocation": 132,
+            "name": "RED30",
+            "typeId": 3,
+            "teamId": 2,
+            "gps": "50.0700350N, 14.4815744E",
+            "completed": false
+        }
+    ],
+    "players": [
+        {
+            "idPlayer": 3,
+            "name": "Kuba",
+            "playName": "Kuba",
+            "pass": "958575",
+            "teamId": 2,
+            "privilegeLevel": 1,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 2,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 17,
+            "name": "Matteo Brattoli",
+            "playName": "Matteo B",
+            "pass": "503697",
+            "teamId": 1,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 4,
+            "name": "Timotej Beňo",
+            "playName": "Timotej B",
+            "pass": "392841",
+            "teamId": 3,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 2,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 2,
+            "name": "Ivo",
+            "playName": "Ivo",
+            "pass": "845424",
+            "teamId": 1,
+            "privilegeLevel": 1,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 2,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 1,
+            "name": "Andy",
+            "playName": "Andy",
+            "pass": "741741",
+            "teamId": 4,
+            "privilegeLevel": 1,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 18,
+            "name": "Matej Bednář ",
+            "playName": "Matej B",
+            "pass": "826140",
+            "teamId": 3,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 19,
+            "name": "Alex Wojdyla",
+            "playName": "Alex W",
+            "pass": "937425",
+            "teamId": 4,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 20,
+            "name": "Ondřej Hrodek ",
+            "playName": "Ondřej H",
+            "pass": "160584",
+            "teamId": 3,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 28,
+            "name": "Veronika Hynková",
+            "playName": "Veronika H",
+            "pass": "239851",
+            "teamId": 3,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 21,
+            "name": "František Vrbík",
+            "playName": "František V",
+            "pass": "472913",
+            "teamId": 4,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 27,
+            "name": "Lucie Vlasáková ",
+            "playName": "Lucie V",
+            "pass": "416930",
+            "teamId": 3,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 22,
+            "name": "David Gvinjilia ",
+            "playName": "David G",
+            "pass": "685032",
+            "teamId": 4,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 26,
+            "name": "Martin Peřina ",
+            "playName": "Martin P",
+            "pass": "705248",
+            "teamId": 2,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 23,
+            "name": "Adrian Schram",
+            "playName": "Adrian S",
+            "pass": "319476",
+            "teamId": 4,
+            "privilegeLevel": 1,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 25,
+            "name": "Patrik Stropnický",
+            "playName": "Patrik S",
+            "pass": "891367",
+            "teamId": 1,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 29,
+            "name": "Tomáš Procházka ",
+            "playName": "Tomáš P",
+            "pass": "584712",
+            "teamId": 1,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 30,
+            "name": "Jakub John",
+            "playName": "Jakub J",
+            "pass": "962043",
+            "teamId": 4,
+            "privilegeLevel": 1,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 31,
+            "name": "Mario Ander",
+            "playName": "Mario A",
+            "pass": "107359",
+            "teamId": 3,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 9,
+            "name": "Adam Černý ",
+            "playName": "Adam Č",
+            "pass": "258147",
+            "teamId": 2,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 24,
+            "name": "Matěj Záluský ",
+            "playName": "Matěj Z",
+            "pass": "524109",
+            "teamId": 2,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 41,
+            "name": "Lucie Šafaříková",
+            "playName": "Lucie Š",
+            "pass": "393644",
+            "teamId": 1,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 42,
+            "name": "Marie Karčová",
+            "playName": "Marie K",
+            "pass": "114579",
+            "teamId": 2,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 5,
+            "name": "Jiří Nešpor ",
+            "playName": "Jiří N",
+            "pass": "850217",
+            "teamId": 2,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 6,
+            "name": "Hana Chládková",
+            "playName": "Hana Ch",
+            "pass": "147630",
+            "teamId": 2,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 7,
+            "name": "Hana Maňáková",
+            "playName": "Hana M",
+            "pass": "629485",
+            "teamId": 1,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 8,
+            "name": "Veronika Zerzánová",
+            "playName": "Veronika Z",
+            "pass": "710392",
+            "teamId": 1,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 10,
+            "name": "Radim Sobotka",
+            "playName": "Radim S",
+            "pass": "536029",
+            "teamId": 1,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 11,
+            "name": "Lukáš Klimeš",
+            "playName": "Lukáš K",
+            "pass": "904713",
+            "teamId": 3,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 12,
+            "name": "Klára Počtová ",
+            "playName": "Klára P",
+            "pass": "482561",
+            "teamId": 4,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 13,
+            "name": "Dominik Majera",
+            "playName": "Dominik M",
+            "pass": "175904",
+            "teamId": 4,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 14,
+            "name": "Sabina Černá",
+            "playName": "Sabina Č",
+            "pass": "364289",
+            "teamId": 1,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 15,
+            "name": "Jaromír Šašek ",
+            "playName": "Jaromír Š",
+            "pass": "791052",
+            "teamId": 2,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        },
+        {
+            "idPlayer": 16,
+            "name": "Klára Čechová ",
+            "playName": "Klára Č",
+            "pass": "248316",
+            "teamId": 2,
+            "privilegeLevel": 2,
+            "questLock": false,
+            "questLockEndtime": null,
+            "roleId": 1,
+            "points": 0,
+            "bubbleBurstTime": null,
+            "runnerShieldTime": null,
+            "questEndTime": null
+        }
+    ],
+    "playerRoles": [
+        {
+            "idPlayerRole": 1,
+            "name": "Běžec"
+        },
+        {
+            "idPlayerRole": 2,
+            "name": "Lovec"
+        }
+    ]
+}
