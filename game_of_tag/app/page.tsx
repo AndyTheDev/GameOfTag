@@ -33,7 +33,7 @@ export default function Home() {
           <div className="pb-6 flex flex-col justify-start items-start">
             <div className="px-4 py-1 bg-purple-75 rounded-2xl inline-flex justify-start items-center gap-2">
               <div className="inline-flex flex-col justify-start items-center">
-                <p className='text-white text-sm'>Další kolo už <b>29.3.2026!</b></p>
+                <p className='text-white text-sm'>Další kolo už <b>11.6.2026</b> večer!</p>
               </div>
             </div>
           </div>
@@ -48,7 +48,7 @@ export default function Home() {
 
           <div className="max-w-[580px] mt-6 pt-4 pb-10 flex flex-col justify-start items-start">
             <div className="max-w-[580px] px-5 flex flex-col justify-start items-center">
-              <p className='text-center justify-center text-dark-gray text-lg'>Přijď si zahrát hru, která propojuje strategii, sport a spolupráci do komplexního eventu plného adrenalinu a zážitků!</p>
+              <p className='text-center justify-center text-dark-gray text-lg'>Sestav tým a přijď si zahrát hru, která propojuje strategii, sport a spolupráci do komplexního eventu plného adrenalinu a zážitků!</p>
             </div>
           </div>
 
@@ -57,7 +57,7 @@ export default function Home() {
               variant='purple'
               size='large'
               text='Chci se účastnit!'
-              route='https://docs.google.com/forms/d/e/1FAIpQLSc9JZH9DBY3m2dlzUHuyqGw6E_Dx66SkM3513GfEMWOWR5WsQ/viewform?usp=header'
+              route='https://forms.gle/Eja8nuwLJxpHP6yf6'
             />
           </div>
         </div>
@@ -176,14 +176,14 @@ export default function Home() {
 
             <InfoCard
               title="Hromadný start běžců"
-              text="Jako první startují hráči v roli běžce. Po uplynutí 10 minut startují zbylí hráči, lovci, a vyrážejí chytat běžce."
+              text="Jako první startují hráči v roli běžce. Po uplynutí 5 minut startují zbylí hráči, lovci, a vyrážejí chytat běžce."
               icon={<h4 className='text-pink'>2</h4>}
               variant="dark"
             />
 
             <InfoCard
               title="Zisk bodů pro tým"
-              text="V roli běžce musíš procházet checkpointy, ve kterých plníš časově omezené úkoly. Při nesplnění musíš 5 minut čekat, než se pokusíš splnit úkol znova nebo poběžíš na jiný checkpoint."
+              text="V roli běžce musíš procházet checkpointy, kde plníš ve 2 až 5 lidech časově omezené úkoly. Při nesplnění musíte všichni 5 minut čekat, než se pokusíte splnit úkol znova nebo poběžíte na jiný checkpoint."
               icon={<h4 className='text-pink'>3</h4>}
               variant="dark"
             />
@@ -197,14 +197,14 @@ export default function Home() {
 
             <InfoCard
               title="Chytání běžců"
-              text="Běžce chytíš tím, že se ho dotkneš, nebo ho zřetelně vyfotíš. Tím také získáš bod pro svůj tým! Musíš poté zůstat 5 minut na místě, zatímco chycený běžec může pokračovat, ale nemůže 15 minut sbírat checkpointy!"
+              text="Běžce chytíš tím, že se ho dotkneš, nebo ho zřetelně vyfotíš. Tím také získáš bod pro svůj tým! Oba poté můžete pokračovat ve hře, ale běžec nesmí 10 minut plnit žádné úkoly."
               icon={<h4 className='text-pink'>5</h4>}
               variant="dark"
             />
 
             <InfoCard
               title="Vítězství...?"
-              text="Vítězí tým, který nasbírá nejvíce bodů během celé hry, která trvá 3 hodiny."
+              text="Vítězí tým, který nasbírá nejvíce bodů během celé hry, která trvá 2 hodiny."
               icon={<h4 className='text-pink'>6</h4>}
               variant="dark"
             />
@@ -224,7 +224,7 @@ export default function Home() {
               variant='white'
               size='large'
               text='Chci se účastnit!'
-              route='https://docs.google.com/forms/d/e/1FAIpQLSc9JZH9DBY3m2dlzUHuyqGw6E_Dx66SkM3513GfEMWOWR5WsQ/viewform?usp=header'
+              route='https://forms.gle/Eja8nuwLJxpHP6yf6'
             />
           </div>
         </div>
