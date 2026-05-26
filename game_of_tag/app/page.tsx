@@ -33,7 +33,7 @@ export default function Home() {
           <div className="pb-6 flex flex-col justify-start items-start">
             <div className="px-4 py-1 bg-purple-75 rounded-2xl inline-flex justify-start items-center gap-2">
               <div className="inline-flex flex-col justify-start items-center">
-                <p className='text-white text-sm'>Další kolo už ve <b>čtvrtek 11.6.2026 večer!</b></p>
+                <p className='text-white text-sm'>Další kolo už ve <b>čtvrtek 25.6.2026 večer!</b></p>
               </div>
             </div>
           </div>
@@ -219,7 +219,7 @@ export default function Home() {
       >
         <div className="inline-flex flex-col justify-start items-start">
           <div className="w-full flex flex-col justify-start items-center gap-6">
-            <h3 className="text-center justify-center text-white">Přidej se k třetímu kolu Game of Tag!</h3>
+            <h3 className="text-center justify-center text-white">Přidej se ke čtvrtému kolu Game of Tag!</h3>
             <Button
               variant='white'
               size='large'
